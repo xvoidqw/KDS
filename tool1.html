@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="uk" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Панель Таймерів із Клавіатурою та Пам'яттю</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'media',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 min-h-full transition-colors duration-300">
+
+    <div class="max-w-6xl mx-auto px-4 py-8">
+        <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 pb-6 border-b border-slate-200 dark:border-slate-800">
+            <div>
+                <h1 class="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-indigo-500 to-purple-600 bg-clip-text text-transparent">
+                    Менеджер Таймерів
+                </h1>
+                <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                    Таймери зберігаються і враховують час навіть після закриття сторінки
+                </p>
+            </div>
+            
+            <div class="flex items-center gap-3 w-full sm:w-auto flex-wrap sm:flex-nowrap">
+                <!-- Кастомний вибір глобального звуку -->
+                <div class="relative flex-1 sm:flex-initial">
+                    <button onclick="toggleSoundDropdown(event)" id="sound-dropdown-btn" class="w-full sm:w-auto flex items-center justify-between gap-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-4 py-2.5 rounded-xl shadow-sm text-sm font-medium hover:border-indigo-500 dark:hover:border-indigo-500 transition-colors">
+                        <span class="text-xs font-semibold text-slate-400 uppercase">Звук:</span>
+                        <span id="current-sound-label" class="text-slate-800 dark:text-slate-200">Digital Alarm</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+
+                    <!-- Випадаюче меню -->
+                    <div id="sound-dropdown-menu" class="hidden absolute right-0 mt-2 w-48 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl z-50 py-2">
+                        <button onclick="selectSound('digital', 'Digital Alarm')" class="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">Digital Alarm</button>
+                        <button onclick="selectSound('chime', 'Gentle Chime')" class="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">Gentle Chime</button>
+                        <button onclick="selectSound('beeps', 'Rapid Beeps')" class="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">Rapid Beeps</button>
+                        <button onclick="selectSound('bell', 'Marimba Bell')" class="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">Marimba Bell</button>
+                    </div>
+                </div>
+
+                <button onclick="openModal()" class="px-5 py-3 bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white font-medium rounded-xl shadow-lg shadow-indigo-500/25 transition-all duration-200 flex items-center justify-center gap-2 shrink-0 flex-1 sm:flex-initial">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                    </svg>
+                    Новий таймер
+                </button>
+            </div>
+        </header>
+
+        <div id="empty-state" class="hidden flex-col items-center justify-center py-16 text-center border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-3xl bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm">
+            <div class="w-16 h-16 mb-4 rounded-2xl bg-indigo-50 dark:bg-indigo-950/50 text-indigo-500 flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+            <h3 class="text-lg font-semibold text-slate-700 dark:text-slate-300">Немає активних таймерів</h3>
+            <p class="text-sm text-slate-500 dark:text-slate-400 max-w-sm mt-1 mb-4">
+                Натисніть кнопку "Новий таймер", щоб встановити відлік за допомогою спеціальної клавіатури.
+            </p>
+            <button onclick="openModal()" class="px-4 py-2 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-xl text-sm font-medium transition-colors">
+                Створити таймер
+            </button>
+        </div>
+
+        <div id="timers-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Таймери генеруються динамічно JS -->
+        </div>
+    </div>
+
+    <div id="timer-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm opacity-0 transition-opacity duration-200">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 max-w-sm w-full shadow-2xl transform scale-95 transition-transform duration-200" id="modal-card">
+            <div class="flex justify-between items-center mb-5">
+                <h2 class="text-xl font-bold text-slate-900 dark:text-white">Новий таймер</h2>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+
+            <form id="create-timer-form" onsubmit="handleCreateTimer(event)" class="space-y-4">
+                <!-- Назва -->
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Назва</label>
+                    <input type="text" id="timer-label" placeholder="Наприклад: Перерва, Вправа..." class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none text-sm transition-all">
+                </div>
+
+                <!-- Екран введення часу (формат ГГ:ХХ:СС) -->
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Тривалість (макс 23:59:59)</label>
+                    <div id="time-input-display" class="w-full text-center py-3 px-4 rounded-xl border-2 border-indigo-500 bg-indigo-50/50 dark:bg-indigo-950/30 font-mono text-2xl font-bold text-indigo-600 dark:text-indigo-400 tracking-wider">
+                        00:05:00
+                    </div>
+                </div>
+
+                <!-- Спеціальна клавіатура 3 в ширину, 4 у висоту -->
+                <div class="grid grid-cols-3 gap-2 pt-1">
+                    <button type="button" onclick="appendKey('1')" class="py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 text-slate-800 dark:text-slate-200 font-mono font-bold rounded-xl transition-all text-lg shadow-sm">1</button>
+                    <button type="button" onclick="appendKey('2')" class="py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 text-slate-800 dark:text-slate-200 font-mono font-bold rounded-xl transition-all text-lg shadow-sm">2</button>
+                    <button type="button" onclick="appendKey('3')" class="py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 text-slate-800 dark:text-slate-200 font-mono font-bold rounded-xl transition-all text-lg shadow-sm">3</button>
+                    
+                    <button type="button" onclick="appendKey('4')" class="py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 text-slate-800 dark:text-slate-200 font-mono font-bold rounded-xl transition-all text-lg shadow-sm">4</button>
+                    <button type="button" onclick="appendKey('5')" class="py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 text-slate-800 dark:text-slate-200 font-mono font-bold rounded-xl transition-all text-lg shadow-sm">5</button>
+                    <button type="button" onclick="appendKey('6')" class="py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 text-slate-800 dark:text-slate-200 font-mono font-bold rounded-xl transition-all text-lg shadow-sm">6</button>
+                    
+                    <button type="button" onclick="appendKey('7')" class="py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 text-slate-800 dark:text-slate-200 font-mono font-bold rounded-xl transition-all text-lg shadow-sm">7</button>
+                    <button type="button" onclick="appendKey('8')" class="py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 text-slate-800 dark:text-slate-200 font-mono font-bold rounded-xl transition-all text-lg shadow-sm">8</button>
+                    <button type="button" onclick="appendKey('9')" class="py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 text-slate-800 dark:text-slate-200 font-mono font-bold rounded-xl transition-all text-lg shadow-sm">9</button>
+                    
+                    <button type="button" onclick="appendKey('00')" class="py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 text-slate-800 dark:text-slate-200 font-mono font-bold rounded-xl transition-all text-lg shadow-sm">00</button>
+                    <button type="button" onclick="appendKey('0')" class="py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 text-slate-800 dark:text-slate-200 font-mono font-bold rounded-xl transition-all text-lg shadow-sm">0</button>
+                    <button type="button" onclick="backspaceKey()" class="py-3 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/40 active:scale-95 text-rose-600 dark:text-rose-400 font-bold rounded-xl transition-all flex items-center justify-center shadow-sm" title="Стерти">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M3 12l6.414-6.414a2 2 0 011.414-.586H19a2 2 0 012 2v12a2 2 0 01-2 2h-8.172a2 2 0 01-1.414-.586L3 12z"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Дії модального вікна -->
+                <div class="flex gap-3 pt-2">
+                    <button type="button" onclick="closeModal()" class="flex-1 py-3 px-4 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl font-medium text-slate-700 dark:text-slate-300 transition-colors text-sm">
+                        Скасувати
+                    </button>
+                    <button type="submit" class="flex-1 py-3 px-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-medium shadow-lg shadow-indigo-500/25 transition-all text-sm">
+                        Створити
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        let audioCtx = null;
+        let globalSoundType = localStorage.getItem('global_sound_type') || 'digital';
+        let continuousAlarmInterval = null;
+        let timers = [];
+        let rawDigits = "000500"; 
+        const MAX_SECONDS = (23 * 3600) + (59 * 60) + 59;
+
+        // Оновити мітку звуку при завантаженні
+        const soundLabels = {
+            'digital': 'Digital Alarm',
+            'chime': 'Gentle Chime',
+            'beeps': 'Rapid Beeps',
+            'bell': 'Marimba Bell'
+        };
+        document.getElementById('current-sound-label').innerText = soundLabels[globalSoundType] || 'Digital Alarm';
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new AudioContext();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function toggleSoundDropdown(e) {
+            e.stopPropagation();
+            const menu = document.getElementById('sound-dropdown-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        function selectSound(type, label) {
+            globalSoundType = type;
+            localStorage.setItem('global_sound_type', type);
+            document.getElementById('current-sound-label').innerText = label;
+            document.getElementById('sound-dropdown-menu').classList.add('hidden');
+            playToneSound(type, 'normal');
+        }
+
+        window.addEventListener('click', () => {
+            const menu = document.getElementById('sound-dropdown-menu');
+            if (menu && !menu.classList.contains('hidden')) {
+                menu.classList.add('hidden');
+            }
+        });
+
+        function playToneSound(type, mode = 'normal') {
+            initAudio();
+            const now = audioCtx.currentTime;
+
+            if (mode === 'warning') {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(440, now);
+                gain.gain.setValueAtTime(0.08, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(now);
+                osc.stop(now + 0.3);
+                return;
+            }
+
+            if (type === 'digital') {
+                for (let i = 0; i < 2; i++) {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(880, now + i * 0.12);
+                    gain.gain.setValueAtTime(0.1, now + i * 0.12);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.12 + 0.08);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(now + i * 0.12);
+                    osc.stop(now + i * 0.12 + 0.08);
+                }
+            } else if (type === 'chime') {
+                [523.25, 659.25].forEach((freq, idx) => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, now + idx * 0.1);
+                    gain.gain.setValueAtTime(0.12, now + idx * 0.1);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.1 + 0.5);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(now + idx * 0.1);
+                    osc.stop(now + idx * 0.1 + 0.5);
+                });
+            } else if (type === 'beeps') {
+                for (let i = 0; i < 3; i++) {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(1100, now + i * 0.08);
+                    gain.gain.setValueAtTime(0.1, now + i * 0.08);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.08 + 0.04);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(now + i * 0.08);
+                    osc.stop(now + i * 0.08 + 0.04);
+                }
+            } else if (type === 'bell') {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(587.33, now);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.9);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(now);
+                osc.stop(now + 0.9);
+            }
+        }
+
+        function startContinuousAlarm() {
+            if (continuousAlarmInterval) return;
+            playToneSound(globalSoundType, 'normal');
+            continuousAlarmInterval = setInterval(() => {
+                playToneSound(globalSoundType, 'normal');
+            }, 1200);
+        }
+
+        function stopContinuousAlarm() {
+            if (continuousAlarmInterval) {
+                clearInterval(continuousAlarmInterval);
+                continuousAlarmInterval = null;
+            }
+        }
+
+        // --- РОБОТА З LOCALSTORAGE ТА ОБЧИСЛЕННЯМ ЧАСУ ПОЗА СТОРІНКОЮ ---
+        function saveTimers() {
+            const dataToSave = timers.map(t => ({
+                id: t.id,
+                label: t.label,
+                initialSeconds: t.initialSeconds,
+                remainingSeconds: t.remainingSeconds,
+                isRunning: t.isRunning,
+                isFinished: t.isFinished,
+                lastActiveTimestamp: t.isRunning ? Date.now() : null
+            }));
+            localStorage.setItem('saved_timers_v2', JSON.stringify(dataToSave));
+        }
+
+        function loadTimers() {
+            const raw = localStorage.getItem('saved_timers_v2');
+            if (!raw) return;
+            try {
+                const loaded = JSON.parse(raw);
+                const now = Date.now();
+                timers = loaded.map(t => {
+                    let rem = t.remainingSeconds;
+                    let running = t.isRunning;
+                    let finished = t.isFinished;
+
+                    if (running && t.lastActiveTimestamp) {
+                        const elapsedSeconds = Math.floor((now - t.lastActiveTimestamp) / 1000);
+                        if (elapsedSeconds > 0) {
+                            if (rem > elapsedSeconds) {
+                                rem -= elapsedSeconds;
+                            } else {
+                                rem = 0;
+                                running = false;
+                                finished = true;
+                            }
+                        }
+                    }
+                    return {
+                        id: t.id,
+                        label: t.label,
+                        initialSeconds: t.initialSeconds,
+                        remainingSeconds: rem,
+                        isRunning: running,
+                        isFinished: finished
+                    };
+                });
+            } catch(e) {
+                console.error("Поשка завантаження таймерів", e);
+            }
+        }
+
+        function openModal() {
+            initAudio();
+            rawDigits = "000500";
+            updateModalDisplay();
+            const modal = document.getElementById('timer-modal');
+            const card = document.getElementById('modal-card');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                card.classList.remove('scale-95');
+                card.classList.add('scale-100');
+            }, 10);
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('timer-modal');
+            const card = document.getElementById('modal-card');
+            modal.classList.add('opacity-0');
+            card.classList.remove('scale-100');
+            card.classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.remove('flex');
+                modal.classList.add('hidden');
+            }, 200);
+        }
+
+        function appendKey(char) {
+            rawDigits = (rawDigits + char).slice(-6);
+            updateModalDisplay();
+        }
+
+        function backspaceKey() {
+            rawDigits = ("0" + rawDigits.slice(0, -1)).slice(-6);
+            updateModalDisplay();
+        }
+
+        function updateModalDisplay() {
+            const h = rawDigits.slice(0, 2);
+            const m = rawDigits.slice(2, 4);
+            const s = rawDigits.slice(4, 6);
+            document.getElementById('time-input-display').innerText = `${h}:${m}:${s}`;
+        }
+
+        function getParsedSeconds() {
+            const h = parseInt(rawDigits.slice(0, 2), 10) || 0;
+            const m = parseInt(rawDigits.slice(2, 4), 10) || 0;
+            const s = parseInt(rawDigits.slice(4, 6), 10) || 0;
+            let total = (h * 3600) + (m * 60) + s;
+            if (total > MAX_SECONDS) total = MAX_SECONDS;
+            return total;
+        }
+
+        function handleCreateTimer(e) {
+            e.preventDefault();
+            const totalSec = getParsedSeconds();
+            if (totalSec <= 0) return;
+
+            const labelInput = document.getElementById('timer-label').value.trim();
+            const label = labelInput || `Таймер ${timers.length + 1}`;
+
+            const newTimer = {
+                id: Date.now(),
+                label: label,
+                initialSeconds: totalSec,
+                remainingSeconds: totalSec,
+                isRunning: false,
+                isFinished: false
+            };
+
+            timers.push(newTimer);
+            closeModal();
+            saveTimers();
+            renderTimers();
+            toggleTimer(newTimer.id); // Автоматичний старт нового таймера
+
+            document.getElementById('timer-label').value = '';
+        }
+
+        function toggleTimer(id) {
+            const timer = timers.find(t => t.id === id);
+            if (!timer) return;
+
+            if (timer.isFinished) {
+                stopContinuousAlarm();
+                timer.isFinished = false;
+                timer.remainingSeconds = timer.initialSeconds;
+                saveTimers();
+                renderTimers();
+                return;
+            }
+
+            timer.isRunning = !timer.isRunning;
+            saveTimers();
+            renderTimers();
+        }
+
+        function addMinute(id) {
+            const timer = timers.find(t => t.id === id);
+            if (timer) {
+                timer.remainingSeconds = Math.min(timer.remainingSeconds + 60, MAX_SECONDS);
+                saveTimers();
+                updateDisplay(timer);
+            }
+        }
+
+        function resetTimer(id) {
+            const timer = timers.find(t => t.id === id);
+            if (timer) {
+                timer.isRunning = false;
+                timer.isFinished = false;
+                timer.remainingSeconds = timer.initialSeconds;
+                stopContinuousAlarm();
+                saveTimers();
+                renderTimers();
+            }
+        }
+
+        function removeTimer(id) {
+            timers = timers.filter(t => t.id !== id);
+            stopContinuousAlarm();
+            saveTimers();
+            renderTimers();
+        }
+
+        function formatTime(totalSeconds) {
+            const h = Math.floor(totalSeconds / 3600);
+            const m = Math.floor((totalSeconds % 3600) / 60);
+            const s = totalSeconds % 60;
+
+            const pad = num => String(num).padStart(2, '0');
+
+            if (h > 0) {
+                return `${pad(h)}:${pad(m)}:${pad(s)}`;
+            }
+            return `${pad(m)}:${pad(s)}`;
+        }
+
+        function updateDisplay(timer) {
+            const displayEl = document.getElementById(`time-display-${timer.id}`);
+            const progressEl = document.getElementById(`progress-${timer.id}`);
+            if (displayEl) {
+                displayEl.innerText = formatTime(timer.remainingSeconds);
+            }
+            if (progressEl) {
+                const percent = Math.max(0, (timer.remainingSeconds / timer.initialSeconds) * 100);
+                progressEl.style.width = `${percent}%`;
+            }
+        }
+
+        function renderTimers() {
+            const container = document.getElementById('timers-container');
+            const emptyState = document.getElementById('empty-state');
+
+            if (timers.length === 0) {
+                container.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                emptyState.classList.add('flex');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+            emptyState.classList.remove('flex');
+
+            container.innerHTML = timers.map(timer => {
+                const isFinished = timer.isFinished;
+                const isWarning = timer.remainingSeconds > 0 && timer.remainingSeconds <= 5 && timer.isRunning;
+                const percent = Math.max(0, (timer.remainingSeconds / timer.initialSeconds) * 100);
+
+                let cardBorderClass = "border-slate-200 dark:border-slate-800";
+                if (isFinished) cardBorderClass = "border-rose-500 animate-pulse shadow-rose-500/10";
+                else if (isWarning) cardBorderClass = "border-amber-400";
+
+                return `
+                    <div class="bg-white dark:bg-slate-900 border ${cardBorderClass} rounded-3xl p-6 shadow-xl flex flex-col justify-between relative overflow-hidden transition-all duration-300 hover:shadow-2xl">
+                        <div class="absolute top-0 left-0 right-0 h-1.5 bg-slate-100 dark:bg-slate-800">
+                            <div id="progress-${timer.id}" class="h-full ${isFinished ? 'bg-rose-500' : (isWarning ? 'bg-amber-400' : 'bg-indigo-500')} transition-all duration-500" style="width: ${percent}%"></div>
+                        </div>
+
+                        <div class="flex justify-between items-start mb-4 pt-1">
+                            <div>
+                                <h3 class="font-bold text-slate-800 dark:text-slate-100 text-lg truncate max-w-[190px]" title="${timer.label}">
+                                    ${timer.label}
+                                </h3>
+                                <span class="text-xs text-slate-400 font-medium">
+                                    ${isFinished ? '⚠️ Час вичерпано!' : (isWarning ? '⚡ Залишилось менше 5с' : (timer.isRunning ? 'Активний таймер' : 'Пауза'))}
+                                </span>
+                            </div>
+                            <button onclick="removeTimer(${timer.id})" class="text-slate-400 hover:text-rose-500 p-1 rounded-lg transition-colors" title="Видалити">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <div class="text-center py-4">
+                            <span id="time-display-${timer.id}" class="text-5xl font-mono font-bold tracking-tight ${isFinished ? 'text-rose-500 animate-bounce' : (isWarning ? 'text-amber-500' : 'text-slate-900 dark:text-white')}">
+                                ${formatTime(timer.remainingSeconds)}
+                            </span>
+                        </div>
+
+                        <div class="grid grid-cols-3 gap-2 mt-2">
+                            <button onclick="toggleTimer(${timer.id})" class="col-span-1 py-2.5 px-3 ${isFinished ? 'bg-rose-600 hover:bg-rose-500 animate-pulse' : (timer.isRunning ? 'bg-amber-500 hover:bg-amber-400' : 'bg-emerald-600 hover:bg-emerald-500')} text-white font-medium text-sm rounded-xl transition-colors shadow-sm flex items-center justify-center gap-1">
+                                ${isFinished ? 'Зупинити' : (timer.isRunning ? 'Пауза' : 'Старт')}
+                            </button>
+                            <button onclick="addMinute(${timer.id})" class="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-medium text-sm rounded-xl transition-colors flex items-center justify-center" title="Додати 1 хвилину">
+                                +1 хв
+                            </button>
+                            <button onclick="resetTimer(${timer.id})" class="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-medium text-sm rounded-xl transition-colors flex items-center justify-center">
+                                Скинути
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // --- ГОЛОВНИЙ ЦИКЛ ОДНОГО СЕКУНДНОГО ІНТЕРВАЛУ ---
+        setInterval(() => {
+            let hasChanges = false;
+            let anyFinished = false;
+
+            timers.forEach(timer => {
+                if (timer.isRunning && timer.remainingSeconds > 0) {
+                    timer.remainingSeconds--;
+                    hasChanges = true;
+
+                    if (timer.remainingSeconds > 0 && timer.remainingSeconds <= 5) {
+                        playToneSound(globalSoundType, 'warning');
+                    }
+
+                    if (timer.remainingSeconds <= 0) {
+                        timer.isRunning = false;
+                        timer.isFinished = true;
+                        anyFinished = true;
+                    }
+                    updateDisplay(timer);
+                }
+                if (timer.isFinished) {
+                    anyFinished = true;
+                }
+            });
+
+            if (anyFinished) {
+                startContinuousAlarm();
+            } else {
+                stopContinuousAlarm();
+            }
+
+            if (hasChanges) {
+                saveTimers();
+            }
+        }, 1000);
+
+        // Початкове завантаження з пам'яті
+        loadTimers();
+        renderTimers();
+        if (timers.some(t => t.isFinished)) {
+            startContinuousAlarm();
+        }
+    </script>
+</body>
+</html>
