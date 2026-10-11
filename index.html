@@ -162,12 +162,21 @@
             <div onclick="function openTool(filename, index) {
     isToolOpen = true;
     activeToolIndex = index;
-    const toolTitle = translations[currentLang].toolNames[index]; // <--- тут береться назва
+    
+    // Беремо актуальну назву інструмента для поточної мови напряму з масиву
+    const currentToolNames = translations[currentLang].toolNames || translations['uk'].toolNames;
+    const toolTitle = currentToolNames[index] || "Інструмент";
     
     document.getElementById('tool-title').innerText = toolTitle;
     document.getElementById('tool-filename').innerText = filename;
     document.getElementById('tool-iframe').src = filename;
-    // ... решта коду
+
+    menu.classList.remove('menu-visible');
+    menu.classList.add('menu-hidden');
+
+    toolContainer.classList.remove('tool-hidden');
+    toolContainer.classList.add('tool-visible');
+}
 }" class="bg-white dark:bg-slate-800/60 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700/80 rounded-2xl p-5 sm:p-6 transition duration-200 cursor-pointer flex flex-col justify-between h-32 sm:h-44 shadow-sm group">
                 <div class="flex justify-between items-start">
                     <div class="p-2.5 sm:p-3 bg-blue-500/10 text-blue-500 dark:text-blue-400 rounded-xl group-hover:scale-110 transition">
@@ -185,12 +194,21 @@
             <div onclick="function openTool(filename, index) {
     isToolOpen = true;
     activeToolIndex = index;
-    const toolTitle = translations[currentLang].toolNames[index]; // <--- тут береться назва
+    
+    // Беремо актуальну назву інструмента для поточної мови напряму з масиву
+    const currentToolNames = translations[currentLang].toolNames || translations['uk'].toolNames;
+    const toolTitle = currentToolNames[index] || "Інструмент";
     
     document.getElementById('tool-title').innerText = toolTitle;
     document.getElementById('tool-filename').innerText = filename;
     document.getElementById('tool-iframe').src = filename;
-    // ... решта коду
+
+    menu.classList.remove('menu-visible');
+    menu.classList.add('menu-hidden');
+
+    toolContainer.classList.remove('tool-hidden');
+    toolContainer.classList.add('tool-visible');
+}
 }" class="bg-white dark:bg-slate-800/60 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700/80 rounded-2xl p-5 sm:p-6 transition duration-200 cursor-pointer flex flex-col justify-between h-32 sm:h-44 shadow-sm group">
                 <div class="flex justify-between items-start">
                     <div class="p-2.5 sm:p-3 bg-emerald-500/10 text-emerald-500 dark:text-emerald-400 rounded-xl group-hover:scale-110 transition">
@@ -208,12 +226,21 @@
             <div onclick="function openTool(filename, index) {
     isToolOpen = true;
     activeToolIndex = index;
-    const toolTitle = translations[currentLang].toolNames[index]; // <--- тут береться назва
+    
+    // Беремо актуальну назву інструмента для поточної мови напряму з масиву
+    const currentToolNames = translations[currentLang].toolNames || translations['uk'].toolNames;
+    const toolTitle = currentToolNames[index] || "Інструмент";
     
     document.getElementById('tool-title').innerText = toolTitle;
     document.getElementById('tool-filename').innerText = filename;
     document.getElementById('tool-iframe').src = filename;
-    // ... решта коду
+
+    menu.classList.remove('menu-visible');
+    menu.classList.add('menu-hidden');
+
+    toolContainer.classList.remove('tool-hidden');
+    toolContainer.classList.add('tool-visible');
+}
 }" class="bg-white dark:bg-slate-800/60 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700/80 rounded-2xl p-5 sm:p-6 transition duration-200 cursor-pointer flex flex-col justify-between h-32 sm:h-44 shadow-sm group">
                 <div class="flex justify-between items-start">
                     <div class="p-2.5 sm:p-3 bg-amber-500/10 text-amber-500 dark:text-amber-400 rounded-xl group-hover:scale-110 transition">
@@ -231,12 +258,21 @@
             <div onclick="function openTool(filename, index) {
     isToolOpen = true;
     activeToolIndex = index;
-    const toolTitle = translations[currentLang].toolNames[index]; // <--- тут береться назва
+    
+    // Беремо актуальну назву інструмента для поточної мови напряму з масиву
+    const currentToolNames = translations[currentLang].toolNames || translations['uk'].toolNames;
+    const toolTitle = currentToolNames[index] || "Інструмент";
     
     document.getElementById('tool-title').innerText = toolTitle;
     document.getElementById('tool-filename').innerText = filename;
     document.getElementById('tool-iframe').src = filename;
-    // ... решта коду
+
+    menu.classList.remove('menu-visible');
+    menu.classList.add('menu-hidden');
+
+    toolContainer.classList.remove('tool-hidden');
+    toolContainer.classList.add('tool-visible');
+}
 }" class="bg-white dark:bg-slate-800/60 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700/80 rounded-2xl p-5 sm:p-6 transition duration-200 cursor-pointer flex flex-col justify-between h-32 sm:h-44 shadow-sm group sm:col-span-1 lg:col-span-1 lg:col-start-1">
                 <div class="flex justify-between items-start">
                     <div class="p-2.5 sm:p-3 bg-purple-500/10 text-purple-500 dark:text-purple-400 rounded-xl group-hover:scale-110 transition">
@@ -254,12 +290,21 @@
             <div onclick="function openTool(filename, index) {
     isToolOpen = true;
     activeToolIndex = index;
-    const toolTitle = translations[currentLang].toolNames[index]; // <--- тут береться назва
+    
+    // Беремо актуальну назву інструмента для поточної мови напряму з масиву
+    const currentToolNames = translations[currentLang].toolNames || translations['uk'].toolNames;
+    const toolTitle = currentToolNames[index] || "Інструмент";
     
     document.getElementById('tool-title').innerText = toolTitle;
     document.getElementById('tool-filename').innerText = filename;
     document.getElementById('tool-iframe').src = filename;
-    // ... решта коду
+
+    menu.classList.remove('menu-visible');
+    menu.classList.add('menu-hidden');
+
+    toolContainer.classList.remove('tool-hidden');
+    toolContainer.classList.add('tool-visible');
+}
 }" class="bg-white dark:bg-slate-800/60 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700/80 rounded-2xl p-5 sm:p-6 transition duration-200 cursor-pointer flex flex-col justify-between h-32 sm:h-44 shadow-sm group sm:col-span-1 lg:col-span-1">
                 <div class="flex justify-between items-start">
                     <div class="p-2.5 sm:p-3 bg-rose-500/10 text-rose-500 dark:text-rose-400 rounded-xl group-hover:scale-110 transition">
