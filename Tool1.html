@@ -3,13 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Панель Таймерів із Клавіатурою та Пам'яттю</title>
+    <title>Таймер</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             darkMode: 'media',
             theme: {
                 extend: {
+                    colors: {
+                        darkbg: '#0f182b'
+                    },
                     fontFamily: {
                         sans: ['Inter', 'sans-serif'],
                         mono: ['JetBrains Mono', 'monospace']
@@ -24,32 +27,59 @@
         .font-mono { font-family: 'JetBrains Mono', monospace; }
     </style>
 </head>
-<body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 min-h-full transition-colors duration-300">
+<body class="bg-slate-50 dark:bg-[--dark-bg] text-slate-800 dark:text-slate-100 min-h-full transition-colors duration-300" style="--dark-bg: #0f182b;">
 
     <div class="max-w-6xl mx-auto px-4 py-8">
         <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 pb-6 border-b border-slate-200 dark:border-slate-800">
             <div>
-                <h1 class="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-indigo-500 to-purple-600 bg-clip-text text-transparent">
-                    Менеджер Таймерів
+                <h1 class="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-indigo-500 to-purple-600 bg-clip-text text-transparent" id="app-title">
+                    Таймер
                 </h1>
-                <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                <p class="text-sm text-slate-500 dark:text-slate-400 mt-1" id="app-subtitle">
                     Таймери зберігаються і враховують час навіть після закриття сторінки
                 </p>
             </div>
             
             <div class="flex items-center gap-3 w-full sm:w-auto flex-wrap sm:flex-nowrap">
+                <!-- Кастомний вибір мови -->
+                <div class="relative flex-1 sm:flex-initial">
+                    <button onclick="toggleLangDropdown(event)" id="lang-dropdown-btn" class="w-full sm:w-auto flex items-center justify-between gap-2 bg-white dark:bg-[#162238] border border-slate-200 dark:border-slate-800 px-3.5 py-2.5 rounded-xl shadow-sm text-sm font-medium hover:border-indigo-500 dark:hover:border-indigo-500 transition-colors">
+                        <span class="text-xs font-semibold text-slate-400 uppercase" id="lang-label-title">Мова:</span>
+                        <span id="current-lang-label" class="text-slate-800 dark:text-slate-200 font-medium">Українська</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+
+                    <!-- Випадаюче меню мов -->
+                    <div id="lang-dropdown-menu" class="hidden absolute right-0 mt-2 w-44 bg-white dark:bg-[#162238] border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl z-50 py-2 max-h-64 overflow-y-auto">
+                        <button onclick="selectLanguage('uk', 'Українська')" class="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">Українська</button>
+                        <button onclick="selectLanguage('en', 'English')" class="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">English</button>
+                        <button onclick="selectLanguage('es', 'Español')" class="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">Español</button>
+                        <button onclick="selectLanguage('de', 'Deutsch')" class="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">Deutsch</button>
+                        <button onclick="selectLanguage('fr', 'Français')" class="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">Français</button>
+                        <button onclick="selectLanguage('it', 'Italiano')" class="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">Italiano</button>
+                        <button onclick="selectLanguage('pl', 'Polski')" class="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">Polski</button>
+                        <button onclick="selectLanguage('pt', 'Português')" class="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">Português</button>
+                        <button onclick="selectLanguage('tr', 'Türkçe')" class="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">Türkçe</button>
+                        <button onclick="selectLanguage('ja', '日本語')" class="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">日本語</button>
+                        <button onclick="selectLanguage('zh', '中文')" class="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">中文</button>
+                        <button onclick="selectLanguage('ko', '한국어')" class="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">한국어</button>
+                    </div>
+                </div>
+
                 <!-- Кастомний вибір глобального звуку -->
                 <div class="relative flex-1 sm:flex-initial">
-                    <button onclick="toggleSoundDropdown(event)" id="sound-dropdown-btn" class="w-full sm:w-auto flex items-center justify-between gap-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-4 py-2.5 rounded-xl shadow-sm text-sm font-medium hover:border-indigo-500 dark:hover:border-indigo-500 transition-colors">
-                        <span class="text-xs font-semibold text-slate-400 uppercase">Звук:</span>
+                    <button onclick="toggleSoundDropdown(event)" id="sound-dropdown-btn" class="w-full sm:w-auto flex items-center justify-between gap-2 bg-white dark:bg-[#162238] border border-slate-200 dark:border-slate-800 px-3.5 py-2.5 rounded-xl shadow-sm text-sm font-medium hover:border-indigo-500 dark:hover:border-indigo-500 transition-colors">
+                        <span class="text-xs font-semibold text-slate-400 uppercase" id="sound-label-title">Звук:</span>
                         <span id="current-sound-label" class="text-slate-800 dark:text-slate-200">Digital Alarm</span>
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                         </svg>
                     </button>
 
-                    <!-- Випадаюче меню -->
-                    <div id="sound-dropdown-menu" class="hidden absolute right-0 mt-2 w-48 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl z-50 py-2">
+                    <!-- Випадаюче меню звуків -->
+                    <div id="sound-dropdown-menu" class="hidden absolute right-0 mt-2 w-48 bg-white dark:bg-[#162238] border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl z-50 py-2">
                         <button onclick="selectSound('digital', 'Digital Alarm')" class="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">Digital Alarm</button>
                         <button onclick="selectSound('chime', 'Gentle Chime')" class="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">Gentle Chime</button>
                         <button onclick="selectSound('beeps', 'Rapid Beeps')" class="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">Rapid Beeps</button>
@@ -61,22 +91,22 @@
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                     </svg>
-                    Новий таймер
+                    <span id="btn-new-timer">Новий таймер</span>
                 </button>
             </div>
         </header>
 
-        <div id="empty-state" class="hidden flex-col items-center justify-center py-16 text-center border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-3xl bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm">
+        <div id="empty-state" class="hidden flex-col items-center justify-center py-16 text-center border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-3xl bg-white/50 dark:bg-[#162238]/50 backdrop-blur-sm">
             <div class="w-16 h-16 mb-4 rounded-2xl bg-indigo-50 dark:bg-indigo-950/50 text-indigo-500 flex items-center justify-center">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
             </div>
-            <h3 class="text-lg font-semibold text-slate-700 dark:text-slate-300">Немає активних таймерів</h3>
-            <p class="text-sm text-slate-500 dark:text-slate-400 max-w-sm mt-1 mb-4">
+            <h3 class="text-lg font-semibold text-slate-700 dark:text-slate-300" id="empty-title">Немає активних таймерів</h3>
+            <p class="text-sm text-slate-500 dark:text-slate-400 max-w-sm mt-1 mb-4" id="empty-desc">
                 Натисніть кнопку "Новий таймер", щоб встановити відлік за допомогою спеціальної клавіатури.
             </p>
-            <button onclick="openModal()" class="px-4 py-2 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-xl text-sm font-medium transition-colors">
+            <button onclick="openModal()" class="px-4 py-2 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-xl text-sm font-medium transition-colors" id="btn-create-empty">
                 Створити таймер
             </button>
         </div>
@@ -87,9 +117,9 @@
     </div>
 
     <div id="timer-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm opacity-0 transition-opacity duration-200">
-        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 max-w-sm w-full shadow-2xl transform scale-95 transition-transform duration-200" id="modal-card">
+        <div class="bg-white dark:bg-[#162238] border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 max-w-sm w-full shadow-2xl transform scale-95 transition-transform duration-200" id="modal-card">
             <div class="flex justify-between items-center mb-5">
-                <h2 class="text-xl font-bold text-slate-900 dark:text-white">Новий таймер</h2>
+                <h2 class="text-xl font-bold text-slate-900 dark:text-white" id="modal-title">Новий таймер</h2>
                 <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-lg">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -100,47 +130,46 @@
             <form id="create-timer-form" onsubmit="handleCreateTimer(event)" class="space-y-4">
                 <!-- Назва -->
                 <div>
-                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Назва</label>
-                    <input type="text" id="timer-label" placeholder="Наприклад: Перерва, Вправа..." class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none text-sm transition-all">
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5" id="label-name-title">Назва</label>
+                    <input type="text" id="timer-label" placeholder="Перерва, Вправа..." class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#0f182b] text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none text-sm transition-all">
                 </div>
 
-                <!-- Екран введення часу (формат ГГ:ХХ:СС) -->
+                <!-- Екран введення часу -->
                 <div>
-                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Тривалість (макс 23:59:59)</label>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5" id="label-duration-title">Тривалість (макс 23:59:59)</label>
                     <div id="time-input-display" class="w-full text-center py-3 px-4 rounded-xl border-2 border-indigo-500 bg-indigo-50/50 dark:bg-indigo-950/30 font-mono text-2xl font-bold text-indigo-600 dark:text-indigo-400 tracking-wider">
                         00:05:00
                     </div>
                 </div>
 
-                <!-- Спеціальна клавіатура 3 в ширину, 4 у висоту -->
+                <!-- Клавіатура -->
                 <div class="grid grid-cols-3 gap-2 pt-1">
-                    <button type="button" onclick="appendKey('1')" class="py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 text-slate-800 dark:text-slate-200 font-mono font-bold rounded-xl transition-all text-lg shadow-sm">1</button>
-                    <button type="button" onclick="appendKey('2')" class="py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 text-slate-800 dark:text-slate-200 font-mono font-bold rounded-xl transition-all text-lg shadow-sm">2</button>
-                    <button type="button" onclick="appendKey('3')" class="py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 text-slate-800 dark:text-slate-200 font-mono font-bold rounded-xl transition-all text-lg shadow-sm">3</button>
+                    <button type="button" onclick="appendKey('1')" class="py-3 bg-slate-100 dark:bg-[#0f182b] hover:bg-slate-200 dark:hover:bg-slate-800 active:scale-95 text-slate-800 dark:text-slate-200 font-mono font-bold rounded-xl transition-all text-lg shadow-sm">1</button>
+                    <button type="button" onclick="appendKey('2')" class="py-3 bg-slate-100 dark:bg-[#0f182b] hover:bg-slate-200 dark:hover:bg-slate-800 active:scale-95 text-slate-800 dark:text-slate-200 font-mono font-bold rounded-xl transition-all text-lg shadow-sm">2</button>
+                    <button type="button" onclick="appendKey('3')" class="py-3 bg-slate-100 dark:bg-[#0f182b] hover:bg-slate-200 dark:hover:bg-slate-800 active:scale-95 text-slate-800 dark:text-slate-200 font-mono font-bold rounded-xl transition-all text-lg shadow-sm">3</button>
                     
-                    <button type="button" onclick="appendKey('4')" class="py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 text-slate-800 dark:text-slate-200 font-mono font-bold rounded-xl transition-all text-lg shadow-sm">4</button>
-                    <button type="button" onclick="appendKey('5')" class="py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 text-slate-800 dark:text-slate-200 font-mono font-bold rounded-xl transition-all text-lg shadow-sm">5</button>
-                    <button type="button" onclick="appendKey('6')" class="py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 text-slate-800 dark:text-slate-200 font-mono font-bold rounded-xl transition-all text-lg shadow-sm">6</button>
+                    <button type="button" onclick="appendKey('4')" class="py-3 bg-slate-100 dark:bg-[#0f182b] hover:bg-slate-200 dark:hover:bg-slate-800 active:scale-95 text-slate-800 dark:text-slate-200 font-mono font-bold rounded-xl transition-all text-lg shadow-sm">4</button>
+                    <button type="button" onclick="appendKey('5')" class="py-3 bg-slate-100 dark:bg-[#0f182b] hover:bg-slate-200 dark:hover:bg-slate-800 active:scale-95 text-slate-800 dark:text-slate-200 font-mono font-bold rounded-xl transition-all text-lg shadow-sm">5</button>
+                    <button type="button" onclick="appendKey('6')" class="py-3 bg-slate-100 dark:bg-[#0f182b] hover:bg-slate-200 dark:hover:bg-slate-800 active:scale-95 text-slate-800 dark:text-slate-200 font-mono font-bold rounded-xl transition-all text-lg shadow-sm">6</button>
                     
-                    <button type="button" onclick="appendKey('7')" class="py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 text-slate-800 dark:text-slate-200 font-mono font-bold rounded-xl transition-all text-lg shadow-sm">7</button>
-                    <button type="button" onclick="appendKey('8')" class="py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 text-slate-800 dark:text-slate-200 font-mono font-bold rounded-xl transition-all text-lg shadow-sm">8</button>
-                    <button type="button" onclick="appendKey('9')" class="py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 text-slate-800 dark:text-slate-200 font-mono font-bold rounded-xl transition-all text-lg shadow-sm">9</button>
+                    <button type="button" onclick="appendKey('7')" class="py-3 bg-slate-100 dark:bg-[#0f182b] hover:bg-slate-200 dark:hover:bg-slate-800 active:scale-95 text-slate-800 dark:text-slate-200 font-mono font-bold rounded-xl transition-all text-lg shadow-sm">7</button>
+                    <button type="button" onclick="appendKey('8')" class="py-3 bg-slate-100 dark:bg-[#0f182b] hover:bg-slate-200 dark:hover:bg-slate-800 active:scale-95 text-slate-800 dark:text-slate-200 font-mono font-bold rounded-xl transition-all text-lg shadow-sm">8</button>
+                    <button type="button" onclick="appendKey('9')" class="py-3 bg-slate-100 dark:bg-[#0f182b] hover:bg-slate-200 dark:hover:bg-slate-800 active:scale-95 text-slate-800 dark:text-slate-200 font-mono font-bold rounded-xl transition-all text-lg shadow-sm">9</button>
                     
-                    <button type="button" onclick="appendKey('00')" class="py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 text-slate-800 dark:text-slate-200 font-mono font-bold rounded-xl transition-all text-lg shadow-sm">00</button>
-                    <button type="button" onclick="appendKey('0')" class="py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 text-slate-800 dark:text-slate-200 font-mono font-bold rounded-xl transition-all text-lg shadow-sm">0</button>
-                    <button type="button" onclick="backspaceKey()" class="py-3 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/40 active:scale-95 text-rose-600 dark:text-rose-400 font-bold rounded-xl transition-all flex items-center justify-center shadow-sm" title="Стерти">
+                    <button type="button" onclick="appendKey('00')" class="py-3 bg-slate-100 dark:bg-[#0f182b] hover:bg-slate-200 dark:hover:bg-slate-800 active:scale-95 text-slate-800 dark:text-slate-200 font-mono font-bold rounded-xl transition-all text-lg shadow-sm">00</button>
+                    <button type="button" onclick="appendKey('0')" class="py-3 bg-slate-100 dark:bg-[#0f182b] hover:bg-slate-200 dark:hover:bg-slate-800 active:scale-95 text-slate-800 dark:text-slate-200 font-mono font-bold rounded-xl transition-all text-lg shadow-sm">0</button>
+                    <button type="button" onclick="backspaceKey()" class="py-3 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/40 active:scale-95 text-rose-600 dark:text-rose-400 font-bold rounded-xl transition-all flex items-center justify-center shadow-sm">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M3 12l6.414-6.414a2 2 0 011.414-.586H19a2 2 0 012 2v12a2 2 0 01-2 2h-8.172a2 2 0 01-1.414-.586L3 12z"/>
                         </svg>
                     </button>
                 </div>
 
-                <!-- Дії модального вікна -->
                 <div class="flex gap-3 pt-2">
-                    <button type="button" onclick="closeModal()" class="flex-1 py-3 px-4 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl font-medium text-slate-700 dark:text-slate-300 transition-colors text-sm">
+                    <button type="button" onclick="closeModal()" class="flex-1 py-3 px-4 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl font-medium text-slate-700 dark:text-slate-300 transition-colors text-sm" id="btn-cancel">
                         Скасувати
                     </button>
-                    <button type="submit" class="flex-1 py-3 px-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-medium shadow-lg shadow-indigo-500/25 transition-all text-sm">
+                    <button type="submit" class="flex-1 py-3 px-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-medium shadow-lg shadow-indigo-500/25 transition-all text-sm" id="btn-create">
                         Створити
                     </button>
                 </div>
@@ -149,6 +178,322 @@
     </div>
 
     <script>
+        const translations = {
+            uk: {
+                appTitle: 'Таймер',
+                appSubtitle: 'Таймери зберігаються і враховують час навіть після закриття сторінки',
+                langLabel: 'Мова:',
+                soundLabel: 'Звук:',
+                newTimer: 'Новий таймер',
+                emptyTitle: 'Немає активних таймерів',
+                emptyDesc: 'Натисніть кнопку "Новий таймер", щоб встановити відлік за допомогою спеціальної клавіатури.',
+                createEmpty: 'Створити таймер',
+                modalTitle: 'Новий таймер',
+                nameTitle: 'Назва',
+                namePlaceholder: 'Перерва, Вправа...',
+                durationTitle: 'Тривалість (макс 23:59:59)',
+                cancel: 'Скасувати',
+                create: 'Створити',
+                defaultTimerName: 'Таймер',
+                statusFinished: '⚠️ Час вичерпано!',
+                statusWarning: '⚡ Залишилось менше 5с',
+                statusRunning: 'Активний таймер',
+                statusPause: 'Пауза',
+                btnStop: 'Зупинити',
+                btnPause: 'Пауза',
+                btnStart: 'Старт',
+                btnAddMin: '+1 хв',
+                btnReset: 'Скинути'
+            },
+            en: {
+                appTitle: 'Timer',
+                appSubtitle: 'Timers are saved and track time even after closing the page',
+                langLabel: 'Language:',
+                soundLabel: 'Sound:',
+                newTimer: 'New Timer',
+                emptyTitle: 'No active timers',
+                emptyDesc: 'Click "New Timer" to set a countdown using the custom keypad.',
+                createEmpty: 'Create Timer',
+                modalTitle: 'New Timer',
+                nameTitle: 'Title',
+                namePlaceholder: 'Break, Exercise...',
+                durationTitle: 'Duration (max 23:59:59)',
+                cancel: 'Cancel',
+                create: 'Create',
+                defaultTimerName: 'Timer',
+                statusFinished: '⚠️ Time is up!',
+                statusWarning: '⚡ Less than 5s left',
+                statusRunning: 'Active timer',
+                statusPause: 'Paused',
+                btnStop: 'Stop',
+                btnPause: 'Pause',
+                btnStart: 'Start',
+                btnAddMin: '+1 min',
+                btnReset: 'Reset'
+            },
+            es: {
+                appTitle: 'Temporizador',
+                appSubtitle: 'Los temporizadores se guardan incluso al cerrar la página',
+                langLabel: 'Idioma:',
+                soundLabel: 'Sonido:',
+                newTimer: 'Nuevo temporizador',
+                emptyTitle: 'Sin temporizadores activos',
+                emptyDesc: 'Haz clic en "Nuevo temporizador" para configurar uno.',
+                createEmpty: 'Crear temporizador',
+                modalTitle: 'Nuevo temporizador',
+                nameTitle: 'Nombre',
+                namePlaceholder: 'Descanso, Ejercicio...',
+                durationTitle: 'Duración (máx 23:59:59)',
+                cancel: 'Cancelar',
+                create: 'Crear',
+                defaultTimerName: 'Temporizador',
+                statusFinished: '⚠️ ¡Tiempo agotado!',
+                statusWarning: '⚡ Quedan menos de 5s',
+                statusRunning: 'Activo',
+                statusPause: 'Pausado',
+                btnStop: 'Detener',
+                btnPause: 'Pausar',
+                btnStart: 'Iniciar',
+                btnAddMin: '+1 min',
+                btnReset: 'Reiniciar'
+            },
+            de: {
+                appTitle: 'Timer',
+                appSubtitle: 'Timer werden gespeichert und laufen nach dem Schließen weiter',
+                langLabel: 'Sprache:',
+                soundLabel: 'Ton:',
+                newTimer: 'Neuer Timer',
+                emptyTitle: 'Keine aktiven Timer',
+                emptyDesc: 'Klicken Sie auf "Neuer Timer", um einen neuen einzustellen.',
+                createEmpty: 'Timer erstellen',
+                modalTitle: 'Neuer Timer',
+                nameTitle: 'Name',
+                namePlaceholder: 'Pause, Übung...',
+                durationTitle: 'Dauer (max. 23:59:59)',
+                cancel: 'Abbrechen',
+                create: 'Erstellen',
+                defaultTimerName: 'Timer',
+                statusFinished: '⚠️ Zeit abgelaufen!',
+                statusWarning: '⚡ Weniger als 5 Sek.',
+                statusRunning: 'Aktiv',
+                statusPause: 'Pausiert',
+                btnStop: 'Stopp',
+                btnPause: 'Pause',
+                btnStart: 'Start',
+                btnAddMin: '+1 Min.',
+                btnReset: 'Zurücksetzen'
+            },
+            fr: {
+                appTitle: 'Minuteur',
+                appSubtitle: 'Les minuteurs sont enregistrés même après la fermeture',
+                langLabel: 'Langue :',
+                soundLabel: 'Son :',
+                newTimer: 'Nouveau minuteur',
+                emptyTitle: 'Aucun minuteur actif',
+                emptyDesc: 'Cliquez sur "Nouveau minuteur" pour régler un décompte.',
+                createEmpty: 'Créer un minuteur',
+                modalTitle: 'Nouveau minuteur',
+                nameTitle: 'Nom',
+                namePlaceholder: 'Pause, Exercice...',
+                durationTitle: 'Durée (max 23:59:59)',
+                cancel: 'Annuler',
+                create: 'Créer',
+                defaultTimerName: 'Minuteur',
+                statusFinished: '⚠️ Temps écoulé !',
+                statusWarning: '⚡ Moins de 5s restantes',
+                statusRunning: 'Actif',
+                statusPause: 'En pause',
+                btnStop: 'Arrêter',
+                btnPause: 'Pause',
+                btnStart: 'Démarrer',
+                btnAddMin: '+1 min',
+                btnReset: 'Réinitialiser'
+            },
+            it: {
+                appTitle: 'Timer',
+                appSubtitle: 'I timer vengono salvati anche dopo la chiusura della pagina',
+                langLabel: 'Lingua:',
+                soundLabel: 'Suono:',
+                newTimer: 'Nuovo timer',
+                emptyTitle: 'Nessun timer attivo',
+                emptyDesc: 'Clicca su "Nuovo timer" per impostare un conto alla rovescia.',
+                createEmpty: 'Crea timer',
+                modalTitle: 'Nuovo timer',
+                nameTitle: 'Nome',
+                namePlaceholder: 'Pausa, Esercizio...',
+                durationTitle: 'Durata (max 23:59:59)',
+                cancel: 'Annulla',
+                create: 'Crea',
+                defaultTimerName: 'Timer',
+                statusFinished: '⚠️ Tempo scaduto!',
+                statusWarning: '⚡ Meno di 5 secondi',
+                statusRunning: 'Attivo',
+                statusPause: 'In pausa',
+                btnStop: 'Stop',
+                btnPause: 'Pausa',
+                btnStart: 'Avvia',
+                btnAddMin: '+1 min',
+                btnReset: 'Azzera'
+            },
+            pl: {
+                appTitle: 'Minutnik',
+                appSubtitle: 'Minutniki są zapisywane i działają po zamknięciu strony',
+                langLabel: 'Język:',
+                soundLabel: 'Dźwięk:',
+                newTimer: 'Nowy minutnik',
+                emptyTitle: 'Brak aktywnych minutników',
+                emptyDesc: 'Kliknij "Nowy minutnik", aby ustawić odliczanie.',
+                createEmpty: 'Utwórz minutnik',
+                modalTitle: 'Nowy minutnik',
+                nameTitle: 'Nazwa',
+                namePlaceholder: 'Przerwa, Ćwiczenie...',
+                durationTitle: 'Czas (maks. 23:59:59)',
+                cancel: 'Anuluj',
+                create: 'Utwórz',
+                defaultTimerName: 'Minutnik',
+                statusFinished: '⚠️ Czas upłynął!',
+                statusWarning: '⚡ Mniej niż 5 s',
+                statusRunning: 'Aktywny',
+                statusPause: 'Pauza',
+                btnStop: 'Zatrzymaj',
+                btnPause: 'Pauza',
+                btnStart: 'Start',
+                btnAddMin: '+1 min',
+                btnReset: 'Reset'
+            },
+            pt: {
+                appTitle: 'Temporizador',
+                appSubtitle: 'Os temporizadores são salvos mesmo após fechar a página',
+                langLabel: 'Idioma:',
+                soundLabel: 'Som:',
+                newTimer: 'Novo temporizador',
+                emptyTitle: 'Nenhum temporizador ativo',
+                emptyDesc: 'Clique em "Novo temporizador" para iniciar uma contagem.',
+                createEmpty: 'Criar temporizador',
+                modalTitle: 'Novo temporizador',
+                nameTitle: 'Nome',
+                namePlaceholder: 'Pausa, Exercício...',
+                durationTitle: 'Duração (máx. 23:59:59)',
+                cancel: 'Cancelar',
+                create: 'Criar',
+                defaultTimerName: 'Temporizador',
+                statusFinished: '⚠️ O tempo acabou!',
+                statusWarning: '⚡ Menos de 5s restantes',
+                statusRunning: 'Ativo',
+                statusPause: 'Pausado',
+                btnStop: 'Parar',
+                btnPause: 'Pausar',
+                btnStart: 'Iniciar',
+                btnAddMin: '+1 min',
+                btnReset: 'Redefinir'
+            },
+            tr: {
+                appTitle: 'Zamanlayıcı',
+                appSubtitle: 'Zamanlayıcılar sayfa kapatılsa bile kaydedilir',
+                langLabel: 'Dil:',
+                soundLabel: 'Ses:',
+                newTimer: 'Yeni Zamanlayıcı',
+                emptyTitle: 'Aktif zamanlayıcı yok',
+                emptyDesc: 'Geri sayım kurmak için "Yeni Zamanlayıcı"ya tıklayın.',
+                createEmpty: 'Zamanlayıcı Oluştur',
+                modalTitle: 'Yeni Zamanlayıcı',
+                nameTitle: 'Başlık',
+                namePlaceholder: 'Mola, Egzersiz...',
+                durationTitle: 'Süre (maks 23:59:59)',
+                cancel: 'İptal',
+                create: 'Oluştur',
+                defaultTimerName: 'Zamanlayıcı',
+                statusFinished: '⚠️ Süre doldu!',
+                statusWarning: '⚡ 5 saniyeden az kaldı',
+                statusRunning: 'Aktif',
+                statusPause: 'Duraklatıldı',
+                btnStop: 'Durdur',
+                btnPause: 'Duraklat',
+                btnStart: 'Başlat',
+                btnAddMin: '+1 dk',
+                btnReset: 'Sıfırla'
+            },
+            ja: {
+                appTitle: 'タイマー',
+                appSubtitle: 'ページを閉じてもタイマーは保存され進行します',
+                langLabel: '言語:',
+                soundLabel: '効果音:',
+                newTimer: '新規タイマー',
+                emptyTitle: 'アクティブなタイマーはありません',
+                emptyDesc: '「新規タイマー」をクリックしてカウントダウンを設定します。',
+                createEmpty: 'タイマーを作成',
+                modalTitle: '新規タイマー',
+                nameTitle: '名前',
+                namePlaceholder: '休憩、運動...',
+                durationTitle: '時間 (最大 23:59:59)',
+                cancel: 'キャンセル',
+                create: '作成',
+                defaultTimerName: 'タイマー',
+                statusFinished: '⚠️ 時間切れです！',
+                statusWarning: '⚡ 残り5秒未満',
+                statusRunning: '実行中',
+                statusPause: '一時停止',
+                btnStop: '停止',
+                btnPause: '一時停止',
+                btnStart: 'スタート',
+                btnAddMin: '+1分',
+                btnReset: 'リセット'
+            },
+            zh: {
+                appTitle: '计时器',
+                appSubtitle: '即使关闭页面，计时器也会自动保存并继续记录',
+                langLabel: '语言:',
+                soundLabel: '音效:',
+                newTimer: '新建计时器',
+                emptyTitle: '没有运行中的计时器',
+                emptyDesc: '点击“新建计时器”使用键盘设置倒计时。',
+                createEmpty: '创建计时器',
+                modalTitle: '新建计时器',
+                nameTitle: '名称',
+                namePlaceholder: '休息，运动...',
+                durationTitle: '时长 (最大 23:59:59)',
+                cancel: '取消',
+                create: '创建',
+                defaultTimerName: '计时器',
+                statusFinished: '⚠️ 时间到！',
+                statusWarning: '⚡ 剩余不到5秒',
+                statusRunning: '运行中',
+                statusPause: '已暂停',
+                btnStop: '停止',
+                btnPause: '暂停',
+                btnStart: '开始',
+                btnAddMin: '+1分钟',
+                btnReset: '重置'
+            },
+            ko: {
+                appTitle: '타이머',
+                appSubtitle: '페이지를 닫아도 타이머가 저장되며 시간이 계산됩니다',
+                langLabel: '언어:',
+                soundLabel: '소리:',
+                newTimer: '새 타이머',
+                emptyTitle: '활성화된 타이머가 없습니다',
+                emptyDesc: '"새 타이머" 버튼을 눌러 카운트다운을 설정하세요.',
+                createEmpty: '타이머 만들기',
+                modalTitle: '새 타이머',
+                nameTitle: '이름',
+                namePlaceholder: '휴식, 운동...',
+                durationTitle: '시간 (최대 23:59:59)',
+                cancel: '취소',
+                create: '만들기',
+                defaultTimerName: '타이머',
+                statusFinished: '⚠️ 시간이 완료되었습니다!',
+                statusWarning: '⚡ 5초 미만 남음',
+                statusRunning: '진행 중',
+                statusPause: '일시 정지',
+                btnStop: '정지',
+                btnPause: '일시 정지',
+                btnStart: '시작',
+                btnAddMin: '+1분',
+                btnReset: '초기화'
+            }
+        };
+
+        let currentLang = localStorage.getItem('global_lang') || 'uk';
         const AudioContext = window.AudioContext || window.webkitAudioContext;
         let audioCtx = null;
         let globalSoundType = localStorage.getItem('global_sound_type') || 'digital';
@@ -157,26 +502,66 @@
         let rawDigits = "000500"; 
         const MAX_SECONDS = (23 * 3600) + (59 * 60) + 59;
 
-        // Оновити мітку звуку при завантаженні
+        const langNames = {
+            uk: 'Українська',
+            en: 'English',
+            es: 'Español',
+            de: 'Deutsch',
+            fr: 'Français',
+            it: 'Italiano',
+            pl: 'Polski',
+            pt: 'Português',
+            tr: 'Türkçe',
+            ja: '日本語',
+            zh: '中文',
+            ko: '한국어'
+        };
+
         const soundLabels = {
             'digital': 'Digital Alarm',
             'chime': 'Gentle Chime',
             'beeps': 'Rapid Beeps',
             'bell': 'Marimba Bell'
         };
-        document.getElementById('current-sound-label').innerText = soundLabels[globalSoundType] || 'Digital Alarm';
 
-        function initAudio() {
-            if (!audioCtx) {
-                audioCtx = new AudioContext();
-            }
-            if (audioCtx.state === 'suspended') {
-                audioCtx.resume();
-            }
+        function applyTranslations() {
+            const t = translations[currentLang] || translations.uk;
+            document.getElementById('app-title').innerText = t.appTitle;
+            document.getElementById('app-subtitle').innerText = t.appSubtitle;
+            document.getElementById('lang-label-title').innerText = t.langLabel;
+            document.getElementById('sound-label-title').innerText = t.soundLabel;
+            document.getElementById('btn-new-timer').innerText = t.newTimer;
+            document.getElementById('empty-title').innerText = t.emptyTitle;
+            document.getElementById('empty-desc').innerText = t.emptyDesc;
+            document.getElementById('btn-create-empty').innerText = t.createEmpty;
+            document.getElementById('modal-title').innerText = t.modalTitle;
+            document.getElementById('label-name-title').innerText = t.nameTitle;
+            document.getElementById('timer-label').placeholder = t.namePlaceholder;
+            document.getElementById('label-duration-title').innerText = t.durationTitle;
+            document.getElementById('btn-cancel').innerText = t.cancel;
+            document.getElementById('btn-create').innerText = t.create;
+            document.getElementById('current-lang-label').innerText = langNames[currentLang] || 'Українська';
+            document.getElementById('current-sound-label').innerText = soundLabels[globalSoundType] || 'Digital Alarm';
+            renderTimers();
+        }
+
+        function toggleLangDropdown(e) {
+            e.stopPropagation();
+            document.getElementById('sound-dropdown-menu').classList.add('hidden');
+            const menu = document.getElementById('lang-dropdown-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        function selectLanguage(langCode, label) {
+            currentLang = langCode;
+            localStorage.setItem('global_lang', langCode);
+            document.getElementById('lang-dropdown-menu').classList.add('hidden');
+            applyTranslations();
         }
 
         function toggleSoundDropdown(e) {
             e.stopPropagation();
+            document.getElementById('lang-dropdown-menu').classList.add('hidden');
             const menu = document.getElementById('sound-dropdown-menu');
             menu.classList.toggle('hidden');
         }
@@ -190,11 +575,24 @@
         }
 
         window.addEventListener('click', () => {
-            const menu = document.getElementById('sound-dropdown-menu');
-            if (menu && !menu.classList.contains('hidden')) {
-                menu.classList.add('hidden');
+            const langMenu = document.getElementById('lang-dropdown-menu');
+            if (langMenu && !langMenu.classList.contains('hidden')) {
+                langMenu.classList.add('hidden');
+            }
+            const soundMenu = document.getElementById('sound-dropdown-menu');
+            if (soundMenu && !soundMenu.classList.contains('hidden')) {
+                soundMenu.classList.add('hidden');
             }
         });
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new AudioContext();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
 
         function playToneSound(type, mode = 'normal') {
             initAudio();
@@ -282,7 +680,7 @@
             }
         }
 
-        // --- РОБОТА З LOCALSTORAGE ТА ОБЧИСЛЕННЯМ ЧАСУ ПОЗА СТОРІНКОЮ ---
+        // LocalStorage & Offline calculation
         function saveTimers() {
             const dataToSave = timers.map(t => ({
                 id: t.id,
@@ -293,11 +691,11 @@
                 isFinished: t.isFinished,
                 lastActiveTimestamp: t.isRunning ? Date.now() : null
             }));
-            localStorage.setItem('saved_timers_v2', JSON.stringify(dataToSave));
+            localStorage.setItem('saved_timers_v3', JSON.stringify(dataToSave));
         }
 
         function loadTimers() {
-            const raw = localStorage.getItem('saved_timers_v2');
+            const raw = localStorage.getItem('saved_timers_v3');
             if (!raw) return;
             try {
                 const loaded = JSON.parse(raw);
@@ -329,7 +727,7 @@
                     };
                 });
             } catch(e) {
-                console.error("Поשка завантаження таймерів", e);
+                console.error("Error loading timers", e);
             }
         }
 
@@ -391,8 +789,9 @@
             const totalSec = getParsedSeconds();
             if (totalSec <= 0) return;
 
+            const t = translations[currentLang] || translations.uk;
             const labelInput = document.getElementById('timer-label').value.trim();
-            const label = labelInput || `Таймер ${timers.length + 1}`;
+            const label = labelInput || `${t.defaultTimerName} ${timers.length + 1}`;
 
             const newTimer = {
                 id: Date.now(),
@@ -407,7 +806,7 @@
             closeModal();
             saveTimers();
             renderTimers();
-            toggleTimer(newTimer.id); // Автоматичний старт нового таймера
+            toggleTimer(newTimer.id);
 
             document.getElementById('timer-label').value = '';
         }
@@ -486,6 +885,7 @@
         function renderTimers() {
             const container = document.getElementById('timers-container');
             const emptyState = document.getElementById('empty-state');
+            const t = translations[currentLang] || translations.uk;
 
             if (timers.length === 0) {
                 container.innerHTML = '';
@@ -506,8 +906,16 @@
                 if (isFinished) cardBorderClass = "border-rose-500 animate-pulse shadow-rose-500/10";
                 else if (isWarning) cardBorderClass = "border-amber-400";
 
+                let statusText = t.statusRunning;
+                if (isFinished) statusText = t.statusFinished;
+                else if (isWarning) statusText = t.statusWarning;
+                else if (!timer.isRunning) statusText = t.statusPause;
+
+                let mainBtnText = timer.isRunning ? t.btnPause : t.btnStart;
+                if (isFinished) mainBtnText = t.btnStop;
+
                 return `
-                    <div class="bg-white dark:bg-slate-900 border ${cardBorderClass} rounded-3xl p-6 shadow-xl flex flex-col justify-between relative overflow-hidden transition-all duration-300 hover:shadow-2xl">
+                    <div class="bg-white dark:bg-[#162238] border ${cardBorderClass} rounded-3xl p-6 shadow-xl flex flex-col justify-between relative overflow-hidden transition-all duration-300 hover:shadow-2xl">
                         <div class="absolute top-0 left-0 right-0 h-1.5 bg-slate-100 dark:bg-slate-800">
                             <div id="progress-${timer.id}" class="h-full ${isFinished ? 'bg-rose-500' : (isWarning ? 'bg-amber-400' : 'bg-indigo-500')} transition-all duration-500" style="width: ${percent}%"></div>
                         </div>
@@ -518,10 +926,10 @@
                                     ${timer.label}
                                 </h3>
                                 <span class="text-xs text-slate-400 font-medium">
-                                    ${isFinished ? '⚠️ Час вичерпано!' : (isWarning ? '⚡ Залишилось менше 5с' : (timer.isRunning ? 'Активний таймер' : 'Пауза'))}
+                                    ${statusText}
                                 </span>
                             </div>
-                            <button onclick="removeTimer(${timer.id})" class="text-slate-400 hover:text-rose-500 p-1 rounded-lg transition-colors" title="Видалити">
+                            <button onclick="removeTimer(${timer.id})" class="text-slate-400 hover:text-rose-500 p-1 rounded-lg transition-colors">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                 </svg>
@@ -536,13 +944,13 @@
 
                         <div class="grid grid-cols-3 gap-2 mt-2">
                             <button onclick="toggleTimer(${timer.id})" class="col-span-1 py-2.5 px-3 ${isFinished ? 'bg-rose-600 hover:bg-rose-500 animate-pulse' : (timer.isRunning ? 'bg-amber-500 hover:bg-amber-400' : 'bg-emerald-600 hover:bg-emerald-500')} text-white font-medium text-sm rounded-xl transition-colors shadow-sm flex items-center justify-center gap-1">
-                                ${isFinished ? 'Зупинити' : (timer.isRunning ? 'Пауза' : 'Старт')}
+                                ${mainBtnText}
                             </button>
-                            <button onclick="addMinute(${timer.id})" class="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-medium text-sm rounded-xl transition-colors flex items-center justify-center" title="Додати 1 хвилину">
-                                +1 хв
+                            <button onclick="addMinute(${timer.id})" class="bg-slate-100 dark:bg-[#0f182b] hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 font-medium text-sm rounded-xl transition-colors flex items-center justify-center">
+                                ${t.btnAddMin}
                             </button>
-                            <button onclick="resetTimer(${timer.id})" class="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-medium text-sm rounded-xl transition-colors flex items-center justify-center">
-                                Скинути
+                            <button onclick="resetTimer(${timer.id})" class="bg-slate-100 dark:bg-[#0f182b] hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 font-medium text-sm rounded-xl transition-colors flex items-center justify-center">
+                                ${t.btnReset}
                             </button>
                         </div>
                     </div>
@@ -550,7 +958,7 @@
             }).join('');
         }
 
-        // --- ГОЛОВНИЙ ЦИКЛ ОДНОГО СЕКУНДНОГО ІНТЕРВАЛУ ---
+        // Timer interval
         setInterval(() => {
             let hasChanges = false;
             let anyFinished = false;
@@ -587,9 +995,9 @@
             }
         }, 1000);
 
-        // Початкове завантаження з пам'яті
+        // Initial launch
         loadTimers();
-        renderTimers();
+        applyTranslations();
         if (timers.some(t => t.isFinished)) {
             startContinuousAlarm();
         }
