@@ -19,7 +19,7 @@
             }
         }
     </script>
-    <!-- Підключення бібліотеки ZXing для сканування штрих-кодів камерою -->
+    <!-- Підключення бібліотеки ZXing для сканування штрих-кодів -->
     <script src="https://unpkg.com/@zxing/library@latest"></script>
     <style>
         body {
@@ -54,9 +54,6 @@
                     </svg>
                     <span>Просканувати</span>
                 </button>
-                <span class="text-xs px-3 py-1.5 rounded-full bg-slate-200/70 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-medium border border-slate-300/40 dark:border-slate-700/50">
-                    Авто-тема
-                </span>
             </div>
         </header>
 
@@ -92,7 +89,7 @@
                 <!-- Search within category & Manual Add button -->
                 <div class="w-full sm:w-72 flex items-center gap-2">
                     <input type="text" id="search-input" oninput="handleSearch()" placeholder="Пошук продукту..." class="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-transparent text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <button onclick="openAddModal()" class="shrink-0 bg-blue-600 hover:bg-blue-700 text-white w-10 h-10 rounded-xl flex items-center justify-center text-lg font-bold shadow-sm shadow-blue-500/25 cursor-pointer" title="Додати продукт вручну (без штрих-коду)">+</button>
+                    <button onclick="openAddModal()" class="shrink-0 bg-blue-600 hover:bg-blue-700 text-white w-10 h-10 rounded-xl flex items-center justify-center text-lg font-bold shadow-sm shadow-blue-500/25 cursor-pointer" title="Додати продукт вручну">+</button>
                 </div>
             </div>
 
@@ -138,7 +135,7 @@
                 <button onclick="stopScanner()" class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 flex items-center justify-center text-sm cursor-pointer">✕</button>
             </div>
             
-            <!-- Вибір камери для стаціонарних планшетів/дисплеїв -->
+            <!-- Вибір камери -->
             <div class="space-y-1">
                 <label class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Вибір камери:</label>
                 <select id="camera-select" onchange="changeCamera()" class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
@@ -153,15 +150,18 @@
                 </div>
             </div>
 
-            <!-- Кнопка для завантаження фото зі штрих-кодом з файлу -->
-            <div>
-                <label class="w-full py-2 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs sm:text-sm transition-colors shadow-sm cursor-pointer flex items-center justify-center gap-2">
-                    <span>📁</span> Обрати фото штрих-коду з файлу
+            <!-- Ручний запуск камери, якщо браузер блокує автостарт -->
+            <div class="flex gap-2">
+                <button onclick="restartCameraStream()" class="flex-1 py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs transition-colors shadow-sm cursor-pointer flex items-center justify-center gap-1.5">
+                    <span>📹</span> Увімкнути/Оновити камеру
+                </button>
+                <label class="flex-1 py-2 px-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs transition-colors shadow-sm cursor-pointer flex items-center justify-center gap-1.5">
+                    <span>📁</span> Фото з файлу
                     <input type="file" id="barcode-file-input" accept="image/*" class="hidden" onchange="handleBarcodeFile(event)">
                 </label>
             </div>
 
-            <p id="scanner-status" class="text-xs text-center text-slate-500 dark:text-slate-400">Сканування в процесі...</p>
+            <p id="scanner-status" class="text-xs text-center text-slate-500 dark:text-slate-400">Натисніть "Увімкнути камеру" для запиту доступу...</p>
             
             <button onclick="stopScanner()" class="w-full py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-sm font-medium hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer">Закрити сканер</button>
         </div>
@@ -174,7 +174,7 @@
                 <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100">Новий штрих-код розпізнано!</h3>
                 <button onclick="closeBindModal()" class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 flex items-center justify-center text-sm cursor-pointer">✕</button>
             </div>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">Цей штрих-код ще не прив'язаний до жодного продукту. Назвіть його та оберіть категорію сховища (збережеться назавжди).</p>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">Цей штрих-код ще не прив'язаний до жодного продукту. Назвіть його та оберіть категорію сховища.</p>
             
             <form id="bind-product-form" class="space-y-4">
                 <div>
@@ -257,18 +257,16 @@
         </div>
     </div>
 
-    <!-- Script logic -->
     <script>
-        let categories = JSON.parse(localStorage.getItem('virtual_fridge_categories_v4')) || [];
-        let items = JSON.parse(localStorage.getItem('virtual_fridge_items_v8')) || [];
-        let barcodeMap = JSON.parse(localStorage.getItem('virtual_fridge_barcodes_v2')) || {};
+        let categories = JSON.parse(localStorage.getItem('virtual_fridge_categories_v5')) || [];
+        let items = JSON.parse(localStorage.getItem('virtual_fridge_items_v9')) || [];
+        let barcodeMap = JSON.parse(localStorage.getItem('virtual_fridge_barcodes_v3')) || {};
         
         let currentCategory = null;
         let searchQuery = '';
 
-        // Змінні для сканера
         let codeReader = null;
-        let scanAction = 'add'; // 'add' або 'remove'
+        let scanAction = 'add'; 
         let lastScannedCode = null;
         let lastScanTime = 0;
         const SCAN_COOLDOWN = 3000;
@@ -290,9 +288,9 @@
         }
 
         function saveData() {
-            localStorage.setItem('virtual_fridge_categories_v4', JSON.stringify(categories));
-            localStorage.setItem('virtual_fridge_items_v8', JSON.stringify(items));
-            localStorage.setItem('virtual_fridge_barcodes_v2', JSON.stringify(barcodeMap));
+            localStorage.setItem('virtual_fridge_categories_v5', JSON.stringify(categories));
+            localStorage.setItem('virtual_fridge_items_v9', JSON.stringify(items));
+            localStorage.setItem('virtual_fridge_barcodes_v3', JSON.stringify(barcodeMap));
         }
 
         function saveAndRefresh() {
@@ -388,33 +386,35 @@
 
             scannerModal.classList.remove('hidden');
             scannerModal.classList.add('flex');
-            document.getElementById('scanner-status').textContent = 'Запит доступу до камери...';
+            document.getElementById('scanner-status').textContent = 'Натисніть кнопку "Увімкнути камеру" нижче...';
+        }
+
+        function restartCameraStream() {
+            const statusEl = document.getElementById('scanner-status');
+            statusEl.textContent = 'Запит доступу до камери...';
 
             if (!codeReader) {
                 codeReader = new ZXing.BrowserMultiFormatReader();
             }
 
-            // Запит дозволу та перелік камер
             codeReader.listVideoInputDevices()
                 .then(videoInputDevices => {
                     const cameraSelect = document.getElementById('camera-select');
                     cameraSelect.innerHTML = '';
 
                     if (videoInputDevices.length === 0) {
-                        document.getElementById('scanner-status').textContent = 'Камер не виявлено. Скористайтеся завантаженням файлу нижче.';
+                        statusEl.textContent = 'Камер не виявлено. Скористайтеся вибором файлу.';
                         return;
                     }
 
                     videoInputDevices.forEach((device, index) => {
                         const option = document.createElement('option');
                         option.value = device.deviceId;
-                        let label = device.label || `Камера ${index + 1}`;
-                        option.textContent = label;
+                        option.textContent = device.label || `Камера ${index + 1}`;
                         cameraSelect.appendChild(option);
                     });
 
                     if (!currentSelectedDeviceId || !videoInputDevices.some(d => d.deviceId === currentSelectedDeviceId)) {
-                        // Пробуємо знайти тилову/задню камеру за замовчуванням якщо доступно
                         const backCam = videoInputDevices.find(d => d.label.toLowerCase().includes('back') || d.label.toLowerCase().includes('rear') || d.label.toLowerCase().includes('задня') || d.label.toLowerCase().includes('environment'));
                         currentSelectedDeviceId = backCam ? backCam.deviceId : videoInputDevices[0].deviceId;
                     }
@@ -423,9 +423,9 @@
                     runScannerWithDevice(currentSelectedDeviceId);
                 })
                 .catch(err => {
-                    console.error('Camera permission or device list error:', err);
-                    document.getElementById('scanner-status').textContent = 'Доступ до камери заборонено або заблоковано. Будь ласка, завантажте фото штрих-коду нижче.';
-                    showNotification('Доступ до камери заблоковано браузером. Використайте кнопку завантаження фото.', 'info');
+                    console.error('Camera error:', err);
+                    statusEl.textContent = 'Доступ заблоковано або камера зайнята. Будь ласка, оберіть фото з файлу.';
+                    showNotification('Не вдалося отримати доступ до камери', 'info');
                 });
         }
 
@@ -436,7 +436,7 @@
                 codeReader.reset();
             } catch(e) {}
 
-            document.getElementById('scanner-status').textContent = 'Наведіть камеру на штрих-код...';
+            document.getElementById('scanner-status').textContent = 'Сканування в процесі...';
 
             codeReader.decodeFromVideoDevice(deviceId, 'interactive', (result, err) => {
                 if (result) {
@@ -454,8 +454,7 @@
                     handleScannedBarcode(code);
                 }
             }).catch(err => {
-                console.error(err);
-                document.getElementById('scanner-status').textContent = 'Не вдалося ініціювати відеопотік камери.';
+                console.warn(err);
             });
         }
 
@@ -470,7 +469,7 @@
             if (!file) return;
 
             const statusEl = document.getElementById('scanner-status');
-            statusEl.textContent = 'Аналіз зображення штрих-коду...';
+            statusEl.textContent = 'Аналіз зображення...';
 
             const reader = new FileReader();
             reader.onload = function(e) {
@@ -486,7 +485,7 @@
                     })
                     .catch(err => {
                         console.warn('File decode warning:', err);
-                        statusEl.textContent = 'Штрих-код на фото не знайдено. Спробуйте інше фото.';
+                        statusEl.textContent = 'Штрих-код на фото не знайдено.';
                         showNotification('Не вдалося зчитати штрих-код з файлу.', 'info');
                     });
             };
@@ -752,8 +751,8 @@
                         <p class="text-xs text-slate-500 dark:text-slate-400">Кількість: <strong class="text-slate-700 dark:text-slate-200 font-bold">${item.qty} шт.</strong></p>
                     </div>
                     <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-800/60">
-                        <button onclick="updateQty(${item.id}, -1)" class="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 flex items-center justify-center font-bold text-sm transition-colors cursor-pointer active:scale-95" title="Зменшити">−</button>
-                        <button onclick="updateQty(${item.id}, 1)" class="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 flex items-center justify-center font-bold text-sm transition-colors cursor-pointer active:scale-95" title="Збільшити">+</button>
+                        <button onclick="updateQty(${item.id}, -1)" class="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 flex items-center justify-center font-bold text-sm transition-colors cursor-pointer active:scale-95">−</button>
+                        <button onclick="updateQty(${item.id}, 1)" class="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 flex items-center justify-center font-bold text-sm transition-colors cursor-pointer active:scale-95">+</button>
                     </div>
                 </div>
             `).join('');
