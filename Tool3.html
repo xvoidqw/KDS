@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="uk" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Кухонний Калькулятор Порцій</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'media',
+            theme: {
+                extend: {
+                    colors: {
+                        customDark: '#0f182b',
+                        customLight: '#f8fafc',
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .theme-transition {
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        /* Hide scrollbar for chrome, safari and opera */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        /* Hide scrollbar for IE, Edge and Firefox */
+        .no-scrollbar {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+    </style>
+</head>
+<body class="h-[100dvh] bg-customLight dark:bg-customDark theme-transition flex items-center justify-center p-2 sm:p-4 overflow-hidden">
+
+    <div class="w-full max-w-[340px] sm:max-w-md mx-auto bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-slate-200/60 dark:border-slate-800/80 rounded-3xl shadow-2xl p-3 sm:p-4 theme-transition flex flex-col h-[560px] sm:h-[620px] select-none">
+        
+        <!-- Header, Theme Indicator & Language Picker -->
+        <div class="flex items-center justify-between mb-2 shrink-0">
+            <div class="flex items-center space-x-1.5 overflow-hidden">
+                <span class="text-base sm:text-lg">🍳</span>
+                <h1 id="app-title" class="text-[11px] sm:text-xs font-semibold tracking-wider text-slate-700 dark:text-slate-300 uppercase truncate">Кухонний Калькулятор</h1>
+            </div>
+            
+            <div class="flex items-center space-x-1.5 shrink-0">
+                <!-- Custom Language Selector -->
+                <div class="relative">
+                    <button onclick="toggleLangDropdown()" id="lang-btn" class="flex items-center space-x-1 bg-slate-100 dark:bg-slate-800/80 px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-medium text-slate-600 dark:text-slate-300 shadow-inner hover:bg-slate-200 dark:hover:bg-slate-700 transition">
+                        <span id="current-lang-flag">🇺🇦</span>
+                        <span id="current-lang-code" class="uppercase">uk</span>
+                    </button>
+                    <!-- Language Dropdown Menu -->
+                    <div id="lang-dropdown" class="hidden absolute right-0 mt-2 w-36 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl z-50 py-1 max-h-48 overflow-y-auto">
+                        <button onclick="changeLanguage('uk')" class="w-full text-left px-3 py-1.5 text-xs text-slate-700 dark:text-slate-200 hover:bg-amber-50 dark:hover:bg-slate-700 flex items-center space-x-2"><span>🇺🇦</span><span>Українська</span></button>
+                        <button onclick="changeLanguage('en')" class="w-full text-left px-3 py-1.5 text-xs text-slate-700 dark:text-slate-200 hover:bg-amber-50 dark:hover:bg-slate-700 flex items-center space-x-2"><span>🇬🇧</span><span>English</span></button>
+                        <button onclick="changeLanguage('es')" class="w-full text-left px-3 py-1.5 text-xs text-slate-700 dark:text-slate-200 hover:bg-amber-50 dark:hover:bg-slate-700 flex items-center space-x-2"><span>🇪🇸</span><span>Español</span></button>
+                        <button onclick="changeLanguage('de')" class="w-full text-left px-3 py-1.5 text-xs text-slate-700 dark:text-slate-200 hover:bg-amber-50 dark:hover:bg-slate-700 flex items-center space-x-2"><span>🇩🇪</span><span>Deutsch</span></button>
+                        <button onclick="changeLanguage('fr')" class="w-full text-left px-3 py-1.5 text-xs text-slate-700 dark:text-slate-200 hover:bg-amber-50 dark:hover:bg-slate-700 flex items-center space-x-2"><span>🇫🇷</span><span>Français</span></button>
+                        <button onclick="changeLanguage('it')" class="w-full text-left px-3 py-1.5 text-xs text-slate-700 dark:text-slate-200 hover:bg-amber-50 dark:hover:bg-slate-700 flex items-center space-x-2"><span>🇮🇹</span><span>Italiano</span></button>
+                        <button onclick="changeLanguage('pl')" class="w-full text-left px-3 py-1.5 text-xs text-slate-700 dark:text-slate-200 hover:bg-amber-50 dark:hover:bg-slate-700 flex items-center space-x-2"><span>🇵🇱</span><span>Polski</span></button>
+                        <button onclick="changeLanguage('pt')" class="w-full text-left px-3 py-1.5 text-xs text-slate-700 dark:text-slate-200 hover:bg-amber-50 dark:hover:bg-slate-700 flex items-center space-x-2"><span>🇵🇹</span><span>Português</span></button>
+                        <button onclick="changeLanguage('tr')" class="w-full text-left px-3 py-1.5 text-xs text-slate-700 dark:text-slate-200 hover:bg-amber-50 dark:hover:bg-slate-700 flex items-center space-x-2"><span>🇹🇷</span><span>Türkçe</span></button>
+                        <button onclick="changeLanguage('ja')" class="w-full text-left px-3 py-1.5 text-xs text-slate-700 dark:text-slate-200 hover:bg-amber-50 dark:hover:bg-slate-700 flex items-center space-x-2"><span>🇯🇵</span><span>日本語</span></button>
+                        <button onclick="changeLanguage('zh')" class="w-full text-left px-3 py-1.5 text-xs text-slate-700 dark:text-slate-200 hover:bg-amber-50 dark:hover:bg-slate-700 flex items-center space-x-2"><span>🇨🇳</span><span>中文</span></button>
+                        <button onclick="changeLanguage('ko')" class="w-full text-left px-3 py-1.5 text-xs text-slate-700 dark:text-slate-200 hover:bg-amber-50 dark:hover:bg-slate-700 flex items-center space-x-2"><span>🇰🇷</span><span>한국어</span></button>
+                    </div>
+                </div>
+
+                <!-- Theme Indicator -->
+                <div class="flex items-center space-x-1 bg-slate-100 dark:bg-slate-800/80 px-2 py-1 rounded-full text-[10px] sm:text-xs font-medium text-slate-600 dark:text-slate-300 shadow-inner">
+                    <span id="theme-indicator-icon">✨</span>
+                    <span id="theme-indicator-text" class="hidden xs:inline">Auto</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex bg-slate-100 dark:bg-slate-800/80 p-1 rounded-xl mb-2 text-[11px] sm:text-xs font-semibold shrink-0">
+            <button onclick="setMode('standard')" id="btn-mode-standard" class="flex-1 py-1.5 rounded-lg transition-all text-slate-600 dark:text-slate-400">Звичайний</button>
+            <button onclick="setMode('kitchen')" id="btn-mode-kitchen" class="flex-1 py-1.5 rounded-lg transition-all bg-white dark:bg-slate-700 text-amber-600 dark:text-amber-400 shadow-sm">🍳 Порції & Вага</button>
+        </div>
+
+        <div id="kitchen-panel" class="mb-2 bg-amber-50/50 dark:bg-amber-950/20 border border-amber-200/60 dark:border-amber-900/40 rounded-xl p-2 theme-transition shrink-0">
+            <div class="text-[10px] sm:text-[11px] font-bold text-amber-800 dark:text-amber-300 mb-1.5 flex justify-between items-center">
+                <span id="scale-label">Масштабування рецепта / порцій:</span>
+                <span id="scale-badge" class="bg-amber-100 dark:bg-amber-900/60 px-2 py-0.5 rounded-full text-[9px] sm:text-[10px]">×1.0</span>
+            </div>
+            <div class="grid grid-cols-3 gap-1.5 mb-1.5">
+                <button onclick="applyScale(0.5)" id="btn-half" class="py-1 px-1 bg-white dark:bg-slate-800 border border-amber-200 dark:border-amber-900/50 rounded-lg text-[10px] sm:text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-amber-100/50 transition">½ Рецепта</button>
+                <button onclick="applyScale(1)" id="btn-orig" class="py-1 px-1 bg-white dark:bg-slate-800 border border-amber-200 dark:border-amber-900/50 rounded-lg text-[10px] sm:text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-amber-100/50 transition">Оригінал</button>
+                <button onclick="applyScale(2)" id="btn-double" class="py-1 px-1 bg-white dark:bg-slate-800 border border-amber-200 dark:border-amber-900/50 rounded-lg text-[10px] sm:text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-amber-100/50 transition">×2 Порції</button>
+            </div>
+            <div class="flex items-center space-x-1">
+                <span id="units-label" class="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 whitespace-nowrap">Одиниці:</span>
+                <div class="flex gap-1 overflow-x-auto pb-0.5 no-scrollbar">
+                    <button onclick="appendUnit('kg')" id="unit-kg" class="px-2 py-0.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md text-[10px] font-medium text-slate-700 dark:text-slate-300 whitespace-nowrap">kg</button>
+                    <button onclick="appendUnit('g')" id="unit-g" class="px-2 py-0.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md text-[10px] font-medium text-slate-700 dark:text-slate-300 whitespace-nowrap">g</button>
+                    <button onclick="appendUnit('pcs')" id="unit-pcs" class="px-2 py-0.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md text-[10px] font-medium text-slate-700 dark:text-slate-300 whitespace-nowrap">pcs</button>
+                    <button onclick="appendUnit('serv.')" id="unit-serv" class="px-2 py-0.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md text-[10px] font-medium text-slate-700 dark:text-slate-300 whitespace-nowrap">serv.</button>
+                    <button onclick="appendUnit('l')" id="unit-l" class="px-2 py-0.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md text-[10px] font-medium text-slate-700 dark:text-slate-300 whitespace-nowrap">l</button>
+                    <button onclick="appendUnit('ml')" id="unit-ml" class="px-2 py-0.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md text-[10px] font-medium text-slate-700 dark:text-slate-300 whitespace-nowrap">ml</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-2 bg-slate-50 dark:bg-slate-950/60 border border-slate-200/80 dark:border-slate-800/80 rounded-xl p-2.5 text-right shadow-inner theme-transition shrink-0">
+            <div id="history" class="h-4 text-[11px] text-slate-400 dark:text-slate-500 font-medium overflow-x-auto whitespace-nowrap mb-0.5 no-scrollbar"></div>
+            <div id="display" class="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-slate-100 tracking-tight overflow-x-auto whitespace-nowrap no-scrollbar">0</div>
+        </div>
+
+        <div class="grid grid-cols-4 gap-1.5 sm:gap-2 flex-1">
+            <!-- Row 1 -->
+            <button onclick="clearCalculator()" class="rounded-xl font-semibold bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 border border-rose-100 dark:border-rose-900/50 hover:bg-rose-100 active:scale-95 transition-all shadow-sm text-xs sm:text-sm flex items-center justify-center">AC</button>
+            <button onclick="appendParentheses()" class="rounded-xl font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200/60 dark:border-slate-700/60 hover:bg-slate-200 active:scale-95 transition-all shadow-sm text-xs sm:text-sm flex items-center justify-center">( )</button>
+            <button onclick="deleteDigit()" class="rounded-xl font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200/60 dark:border-slate-700/60 hover:bg-slate-200 active:scale-95 transition-all shadow-sm text-xs sm:text-sm flex items-center justify-center">⌫</button>
+            <button onclick="appendOperator('÷')" class="rounded-xl font-semibold bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 border border-amber-100 dark:border-amber-900/50 hover:bg-amber-100 active:scale-95 transition-all shadow-sm text-xs sm:text-sm flex items-center justify-center">÷</button>
+
+            <!-- Row 2 -->
+            <button onclick="appendNumber('7')" class="rounded-xl font-semibold bg-slate-50 dark:bg-slate-800/50 text-slate-700 dark:text-slate-200 border border-slate-200/60 dark:border-slate-700/60 hover:bg-slate-100 active:scale-95 transition-all shadow-sm text-xs sm:text-sm flex items-center justify-center">7</button>
+            <button onclick="appendNumber('8')" class="rounded-xl font-semibold bg-slate-50 dark:bg-slate-800/50 text-slate-700 dark:text-slate-200 border border-slate-200/60 dark:border-slate-700/60 hover:bg-slate-100 active:scale-95 transition-all shadow-sm text-xs sm:text-sm flex items-center justify-center">8</button>
+            <button onclick="appendNumber('9')" class="rounded-xl font-semibold bg-slate-50 dark:bg-slate-800/50 text-slate-700 dark:text-slate-200 border border-slate-200/60 dark:border-slate-700/60 hover:bg-slate-100 active:scale-95 transition-all shadow-sm text-xs sm:text-sm flex items-center justify-center">9</button>
+            <button onclick="appendOperator('×')" class="rounded-xl font-semibold bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 border border-amber-100 dark:border-amber-900/50 hover:bg-amber-100 active:scale-95 transition-all shadow-sm text-xs sm:text-sm flex items-center justify-center">×</button>
+
+            <!-- Row 3 -->
+            <button onclick="appendNumber('4')" class="rounded-xl font-semibold bg-slate-50 dark:bg-slate-800/50 text-slate-700 dark:text-slate-200 border border-slate-200/60 dark:border-slate-700/60 hover:bg-slate-100 active:scale-95 transition-all shadow-sm text-xs sm:text-sm flex items-center justify-center">4</button>
+            <button onclick="appendNumber('5')" class="rounded-xl font-semibold bg-slate-50 dark:bg-slate-800/50 text-slate-700 dark:text-slate-200 border border-slate-200/60 dark:border-slate-700/60 hover:bg-slate-100 active:scale-95 transition-all shadow-sm text-xs sm:text-sm flex items-center justify-center">5</button>
+            <button onclick="appendNumber('6')" class="rounded-xl font-semibold bg-slate-50 dark:bg-slate-800/50 text-slate-700 dark:text-slate-200 border border-slate-200/60 dark:border-slate-700/60 hover:bg-slate-100 active:scale-95 transition-all shadow-sm text-xs sm:text-sm flex items-center justify-center">6</button>
+            <button onclick="appendOperator('-')" class="rounded-xl font-semibold bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 border border-amber-100 dark:border-amber-900/50 hover:bg-amber-100 active:scale-95 transition-all shadow-sm text-xs sm:text-sm flex items-center justify-center">-</button>
+
+            <!-- Row 4 -->
+            <button onclick="appendNumber('1')" class="rounded-xl font-semibold bg-slate-50 dark:bg-slate-800/50 text-slate-700 dark:text-slate-200 border border-slate-200/60 dark:border-slate-700/60 hover:bg-slate-100 active:scale-95 transition-all shadow-sm text-xs sm:text-sm flex items-center justify-center">1</button>
+            <button onclick="appendNumber('2')" class="rounded-xl font-semibold bg-slate-50 dark:bg-slate-800/50 text-slate-700 dark:text-slate-200 border border-slate-200/60 dark:border-slate-700/60 hover:bg-slate-100 active:scale-95 transition-all shadow-sm text-xs sm:text-sm flex items-center justify-center">2</button>
+            <button onclick="appendNumber('3')" class="rounded-xl font-semibold bg-slate-50 dark:bg-slate-800/50 text-slate-700 dark:text-slate-200 border border-slate-200/60 dark:border-slate-700/60 hover:bg-slate-100 active:scale-95 transition-all shadow-sm text-xs sm:text-sm flex items-center justify-center">3</button>
+            <button onclick="appendOperator('+')" class="rounded-xl font-semibold bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 border border-amber-100 dark:border-amber-900/50 hover:bg-amber-100 active:scale-95 transition-all shadow-sm text-xs sm:text-sm flex items-center justify-center">+</button>
+
+            <!-- Row 5 -->
+            <button onclick="appendNumber('0')" class="col-span-2 rounded-xl font-semibold bg-slate-50 dark:bg-slate-800/50 text-slate-700 dark:text-slate-200 border border-slate-200/60 dark:border-slate-700/60 hover:bg-slate-100 active:scale-95 transition-all shadow-sm text-xs sm:text-sm flex items-center justify-center">0</button>
+            <button onclick="appendDecimal('.')" class="rounded-xl font-semibold bg-slate-50 dark:bg-slate-800/50 text-slate-700 dark:text-slate-200 border border-slate-200/60 dark:border-slate-700/60 hover:bg-slate-100 active:scale-95 transition-all shadow-sm text-xs sm:text-sm flex items-center justify-center">.</button>
+            <button onclick="calculateResult()" class="rounded-xl font-semibold bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-400 active:scale-95 transition-all shadow-lg shadow-amber-500/25 text-xs sm:text-sm flex items-center justify-center">=</button>
+        </div>
+    </div>
+
+    <script>
+        const translations = {
+            uk: {
+                appTitle: "Кухонний Калькулятор",
+                standard: "Звичайний",
+                kitchen: "🍳 Порції & Вага",
+                scaleLabel: "Масштабування рецепта / порцій:",
+                btnHalf: "½ Рецепта",
+                btnOrig: "Оригінал",
+                btnDouble: "×2 Порції",
+                unitsLabel: "Одиниці:",
+                error: "Помилка",
+                units: { kg: "кг", g: "г", pcs: "шт", "serv.": "порц.", l: "л", ml: "мл" }
+            },
+            en: {
+                appTitle: "Kitchen Calculator",
+                standard: "Standard",
+                kitchen: "🍳 Portions & Weight",
+                scaleLabel: "Recipe / Portion Scaling:",
+                btnHalf: "½ Recipe",
+                btnOrig: "Original",
+                btnDouble: "×2 Portions",
+                unitsLabel: "Units:",
+                error: "Error",
+                units: { kg: "kg", g: "g", pcs: "pcs", "serv.": "serv.", l: "l", ml: "ml" }
+            },
+            es: {
+                appTitle: "Calculadora de Cocina",
+                standard: "Estándar",
+                kitchen: "🍳 Porciones y Peso",
+                scaleLabel: "Escalado de Receta / Porciones:",
+                btnHalf: "½ Receta",
+                btnOrig: "Original",
+                btnDouble: "×2 Porciones",
+                unitsLabel: "Unidades:",
+                error: "Error",
+                units: { kg: "kg", g: "g", pcs: "ud", "serv.": "porc.", l: "l", ml: "ml" }
+            },
+            de: {
+                appTitle: "Küchenrechner",
+                standard: "Standard",
+                kitchen: "🍳 Portionen & Gewicht",
+                scaleLabel: "Rezept- / Portionsskalierung:",
+                btnHalf: "½ Rezept",
+                btnOrig: "Original",
+                btnDouble: "×2 Portionen",
+                unitsLabel: "Einheiten:",
+                error: "Fehler",
+                units: { kg: "kg", g: "g", pcs: "Stk", "serv.": "Port.", l: "l", ml: "ml" }
+            },
+            fr: {
+                appTitle: "Calculateur de Cuisine",
+                standard: "Standard",
+                kitchen: "🍳 Portions et Poids",
+                scaleLabel: "Mise à l'échelle de la recette :",
+                btnHalf: "½ Recette",
+                btnOrig: "Original",
+                btnDouble: "×2 Portions",
+                unitsLabel: "Unités:",
+                error: "Erreur",
+                units: { kg: "kg", g: "g", pcs: "pcs", "serv.": "part.", l: "l", ml: "ml" }
+            },
+            it: {
+                appTitle: "Calcolatore da Cucina",
+                standard: "Standard",
+                kitchen: "🍳 Porzioni e Peso",
+                scaleLabel: "Ridimensionamento ricetta:",
+                btnHalf: "½ Ricetta",
+                btnOrig: "Originale",
+                btnDouble: "×2 Porzioni",
+                unitsLabel: "Unità:",
+                error: "Errore",
+                units: { kg: "kg", g: "g", pcs: "pz", "serv.": "porz.", l: "l", ml: "ml" }
+            },
+            pl: {
+                appTitle: "Kalkulator Kuchenny",
+                standard: "Standardowy",
+                kitchen: "🍳 Porcje i Waga",
+                scaleLabel: "Skalowanie przepisu / porcji:",
+                btnHalf: "½ Przepisu",
+                btnOrig: "Oryginał",
+                btnDouble: "×2 Porcje",
+                unitsLabel: "Jednostki:",
+                error: "Błąd",
+                units: { kg: "kg", g: "g", pcs: "szt", "serv.": "por.", l: "l", ml: "ml" }
+            },
+            pt: {
+                appTitle: "Calculadora de Cozinha",
+                standard: "Padrão",
+                kitchen: "🍳 Porções e Peso",
+                scaleLabel: "Dimensionamento da receita:",
+                btnHalf: "½ Receita",
+                btnOrig: "Original",
+                btnDouble: "×2 Porções",
+                unitsLabel: "Unidades:",
+                error: "Erro",
+                units: { kg: "kg", g: "g", pcs: "un", "serv.": "porç.", l: "l", ml: "ml" }
+            },
+            tr: {
+                appTitle: "Mutfak Hesap Makinesi",
+                standard: "Standart",
+                kitchen: "🍳 Porsiyon & Ağırlık",
+                scaleLabel: "Tarif / Porsiyon Ölçekleme:",
+                btnHalf: "½ Tarif",
+                btnOrig: "Orijinal",
+                btnDouble: "×2 Porsiyon",
+                unitsLabel: "Birimler:",
+                error: "Hata",
+                units: { kg: "kg", g: "g", pcs: "ad", "serv.": "pors.", l: "l", ml: "ml" }
+            },
+            ja: {
+                appTitle: "キッチン電卓",
+                standard: "標準",
+                kitchen: "🍳 分量＆重量",
+                scaleLabel: "レシピ／ポーションのスケーリング：",
+                btnHalf: "½ レシピ",
+                btnOrig: "オリジナル",
+                btnDouble: "×2 ポーション",
+                unitsLabel: "単位：",
+                error: "エラー",
+                units: { kg: "kg", g: "g", pcs: "個", "serv.": "人分", l: "L", ml: "ml" }
+            },
+            zh: {
+                appTitle: "厨房计算器",
+                standard: "标准",
+                kitchen: "🍳 份量与重量",
+                scaleLabel: "食谱/份量缩放：",
+                btnHalf: "½ 食谱",
+                btnOrig: "原版",
+                btnDouble: "×2 份量",
+                unitsLabel: "单位：",
+                error: "错误",
+                units: { kg: "千克", g: "克", pcs: "个", "serv.": "份", l: "升", ml: "毫升" }
+            },
+            ko: {
+                appTitle: "주방 계산기",
+                standard: "표준",
+                kitchen: "🍳 분량 및 무게",
+                scaleLabel: "레시피 / 인원수 조절:",
+                btnHalf: "½ 레시피",
+                btnOrig: "원본",
+                btnDouble: "×2 인분",
+                unitsLabel: "단위:",
+                error: "오류",
+                units: { kg: "kg", g: "g", pcs: "개", "serv.": "인분", l: "L", ml: "ml" }
+            }
+        };
+
+        const flags = {
+            uk: '🇺🇦', en: '🇬🇧', es: '🇪🇸', de: '🇩🇪', fr: '🇫🇷', it: '🇮🇹',
+            pl: '🇵🇱', pt: '🇵🇹', tr: '🇹🇷', ja: '🇯🇵', zh: '🇨🇳', ko: '🇰🇷'
+        };
+
+        let activeUnitKey = null;
+        let currentLang = 'uk';
+        let currentInput = '0';
+        let historyString = '';
+        let resetScreen = false;
+        let currentMode = 'kitchen'; 
+        let openParenthesesCount = 0;
+
+        const displayEl = document.getElementById('display');
+        const historyEl = document.getElementById('history');
+        const themeIndicatorIcon = document.getElementById('theme-indicator-icon');
+        const themeIndicatorText = document.getElementById('theme-indicator-text');
+        const kitchenPanel = document.getElementById('kitchen-panel');
+        const btnStandard = document.getElementById('btn-mode-standard');
+        const btnKitchen = document.getElementById('btn-mode-kitchen');
+        const scaleBadge = document.getElementById('scale-badge');
+        const langDropdown = document.getElementById('lang-dropdown');
+
+        function updateThemeIndicator() {
+            const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            if (isDark) {
+                themeIndicatorIcon.textContent = '🌙';
+                themeIndicatorText.textContent = 'Dark (#0f182b)';
+            } else {
+                themeIndicatorIcon.textContent = '☀️';
+                themeIndicatorText.textContent = 'Light (#f8fafc)';
+            }
+        }
+
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateThemeIndicator);
+        
+        window.addEventListener('DOMContentLoaded', () => {
+            updateThemeIndicator();
+            setMode('kitchen');
+            setLanguage('uk');
+        });
+
+        function toggleLangDropdown() {
+            langDropdown.classList.toggle('hidden');
+        }
+
+        window.addEventListener('click', (e) => {
+            if (!document.getElementById('lang-btn').contains(e.target) && !langDropdown.contains(e.target)) {
+                langDropdown.classList.add('hidden');
+            }
+        });
+
+        function changeLanguage(lang) {
+            setLanguage(lang);
+            langDropdown.classList.add('hidden');
+        }
+
+        function setLanguage(lang) {
+            currentLang = lang;
+            const t = translations[lang];
+            
+            document.getElementById('current-lang-flag').textContent = flags[lang];
+            document.getElementById('current-lang-code').textContent = lang;
+            document.getElementById('app-title').textContent = t.appTitle;
+            
+            if (currentMode === 'standard') {
+                btnStandard.textContent = t.standard;
+            } else {
+                btnKitchen.textContent = t.kitchen;
+            }
+            
+            // Always update both button texts to ensure full menu coverage
+            btnStandard.textContent = t.standard;
+            btnKitchen.textContent = t.kitchen;
+
+            document.getElementById('scale-label').textContent = t.scaleLabel;
+            document.getElementById('btn-half').textContent = t.btnHalf;
+            document.getElementById('btn-orig').textContent = t.btnOrig;
+            document.getElementById('btn-double').textContent = t.btnDouble;
+            document.getElementById('units-label').textContent = t.unitsLabel;
+
+            // Update unit buttons text
+            document.getElementById('unit-kg').textContent = t.units.kg;
+            document.getElementById('unit-g').textContent = t.units.g;
+            document.getElementById('unit-pcs').textContent = t.units.pcs;
+            document.getElementById('unit-serv').textContent = t.units["serv."];
+            document.getElementById('unit-l').textContent = t.units.l;
+            document.getElementById('unit-ml').textContent = t.units.ml;
+
+            // Update active unit label dynamically if set
+            if (activeUnitKey) {
+                let numericPart = parseFloat(currentInput) || 0;
+                currentInput = numericPart + ' ' + t.units[activeUnitKey];
+                updateDisplay();
+            }
+        }
+
+        function setMode(mode) {
+            currentMode = mode;
+            const t = translations[currentLang];
+            if (mode === 'kitchen') {
+                kitchenPanel.style.display = 'block';
+                btnKitchen.className = 'flex-1 py-1.5 rounded-lg transition-all bg-white dark:bg-slate-700 text-amber-600 dark:text-amber-400 shadow-sm';
+                btnStandard.className = 'flex-1 py-1.5 rounded-lg transition-all text-slate-600 dark:text-slate-400';
+            } else {
+                kitchenPanel.style.display = 'none';
+                btnStandard.className = 'flex-1 py-1.5 rounded-lg transition-all bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-200 shadow-sm';
+                btnKitchen.className = 'flex-1 py-1.5 rounded-lg transition-all text-slate-600 dark:text-slate-400';
+                activeUnitKey = null;
+            }
+            btnStandard.textContent = t.standard;
+            btnKitchen.textContent = t.kitchen;
+        }
+
+        function updateDisplay() {
+            displayEl.textContent = currentInput;
+            historyEl.textContent = historyString;
+        }
+
+        function appendNumber(num) {
+            if (currentInput === '0' || resetScreen) {
+                currentInput = num;
+                resetScreen = false;
+            } else {
+                if (activeUnitKey) {
+                    currentInput = currentInput + ' ' + num;
+                    activeUnitKey = null;
+                } else {
+                    currentInput += num;
+                }
+            }
+            updateDisplay();
+        }
+
+        function appendDecimal(dot) {
+            if (resetScreen) {
+                currentInput = '0.';
+                resetScreen = false;
+                activeUnitKey = null;
+                updateDisplay();
+                return;
+            }
+            if (activeUnitKey) activeUnitKey = null;
+            const parts = currentInput.split(/[\+\-×÷\(\)\s]/);
+            const lastPart = parts[parts.length - 1];
+            if (!lastPart.includes('.')) {
+                currentInput += dot;
+                updateDisplay();
+            }
+        }
+
+        function appendOperator(op) {
+            if (resetScreen) {
+                resetScreen = false;
+            }
+            if (activeUnitKey) activeUnitKey = null;
+            const trimmed = currentInput.trim();
+            const lastChar = trimmed.slice(-1);
+            if (['+', '-', '×', '÷'].includes(lastChar)) {
+                currentInput = trimmed.slice(0, -1) + ' ' + op + ' ';
+            } else if (lastChar !== '(') {
+                currentInput += ' ' + op + ' ';
+            }
+            updateDisplay();
+        }
+
+        function appendParentheses() {
+            if (resetScreen) {
+                resetScreen = false;
+            }
+            if (activeUnitKey) activeUnitKey = null;
+            const trimmed = currentInput.trim();
+            const lastChar = trimmed.slice(-1);
+
+            if (currentInput === '0' || lastChar === '(' || ['+', '-', '×', '÷'].includes(lastChar)) {
+                if (currentInput === '0') {
+                    currentInput = '(';
+                } else {
+                    currentInput += '(';
+                }
+                openParenthesesCount++;
+            } else if (openParenthesesCount > 0 && !['+', '-', '×', '÷'].includes(lastChar)) {
+                currentInput += ')';
+                openParenthesesCount--;
+            } else {
+                currentInput += ' × (';
+                openParenthesesCount++;
+            }
+            updateDisplay();
+        }
+
+        function appendUnit(unitKey) {
+            if (resetScreen) {
+                resetScreen = false;
+            }
+            activeUnitKey = unitKey;
+            let numericPart = parseFloat(currentInput);
+            if (isNaN(numericPart)) numericPart = 0;
+
+            const localizedUnitStr = translations[currentLang].units[unitKey];
+            currentInput = numericPart + ' ' + localizedUnitStr;
+            updateDisplay();
+        }
+
+        function applyScale(factor) {
+            try {
+                let numericPart = parseFloat(currentInput);
+                if (isNaN(numericPart)) numericPart = 1;
+                
+                let scaled = numericPart * factor;
+                scaled = Math.round(scaled * 100) / 100;
+
+                let unitStr = '';
+                if (activeUnitKey) {
+                    unitStr = ' ' + translations[currentLang].units[activeUnitKey];
+                } else {
+                    let parts = currentInput.trim().split(' ');
+                    if (parts.length > 1) {
+                        let lastPart = parts[parts.length - 1];
+                        for (let key in translations[currentLang].units) {
+                            if (translations[currentLang].units[key] === lastPart) {
+                                activeUnitKey = key;
+                                unitStr = ' ' + lastPart;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                currentInput = scaled + unitStr;
+                scaleBadge.textContent = '×' + factor;
+                updateDisplay();
+            } catch(e) {}
+        }
+
+        function clearCalculator() {
+            currentInput = '0';
+            historyString = '';
+            openParenthesesCount = 0;
+            activeUnitKey = null;
+            scaleBadge.textContent = '×1.0';
+            resetScreen = false;
+            updateDisplay();
+        }
+
+        function deleteDigit() {
+            if (resetScreen) return;
+            if (activeUnitKey) activeUnitKey = null;
+            if (currentInput.length > 1) {
+                const trimmed = currentInput.trim();
+                const removedChar = trimmed.slice(-1);
+                if (removedChar === '(') openParenthesesCount = Math.max(0, openParenthesesCount - 1);
+                if (removedChar === ')') openParenthesesCount++;
+
+                currentInput = trimmed.slice(0, -1);
+                if (currentInput === '' || currentInput === '-') currentInput = '0';
+            } else {
+                currentInput = '0';
+                openParenthesesCount = 0;
+            }
+            updateDisplay();
+        }
+
+        function calculateResult() {
+            try {
+                historyString = currentInput + ' =';
+                
+                let cleanExpr = currentInput;
+                for (let langKey in translations) {
+                    const langUnits = translations[langKey].units;
+                    for (let uKey in langUnits) {
+                        const regex = new RegExp('\\b' + langUnits[uKey] + '\\b', 'gi');
+                        cleanExpr = cleanExpr.replace(regex, '');
+                    }
+                }
+                cleanExpr = cleanExpr.trim();
+                let expression = cleanExpr.replace(/×/g, '*').replace(/÷/g, '/');
+                
+                if (!expression) return;
+
+                let result = Function('"use strict";return (' + expression + ')')();
+                
+                if (!isFinite(result)) {
+                    throw new Error("Division by zero");
+                }
+                
+                result = Math.round(result * 100000000) / 100000000;
+                
+                let unitStr = '';
+                if (activeUnitKey) {
+                    unitStr = ' ' + translations[currentLang].units[activeUnitKey];
+                }
+
+                currentInput = result.toString() + unitStr;
+                openParenthesesCount = 0;
+                resetScreen = true;
+                updateDisplay();
+            } catch (error) {
+                currentInput = translations[currentLang].error;
+                openParenthesesCount = 0;
+                activeUnitKey = null;
+                resetScreen = true;
+                updateDisplay();
+            }
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if ((e.key >= '0' && e.key <= '9')) {
+                appendNumber(e.key);
+            } else if (e.key === '.') {
+                appendDecimal('.');
+            } else if (e.key === '+') {
+                appendOperator('+');
+            } else if (e.key === '-') {
+                appendOperator('-');
+            } else if (e.key === '*') {
+                appendOperator('×');
+            } else if (e.key === '/') {
+                e.preventDefault();
+                appendOperator('÷');
+            } else if (e.key === '(' || e.key === ')') {
+                appendParentheses();
+            } else if (e.key === 'Enter' || e.key === '=') {
+                calculateResult();
+            } else if (e.key === 'Backspace') {
+                deleteDigit();
+            } else if (e.key === 'Escape') {
+                clearCalculator();
+            }
+        });
+    </script>
+</body>
+</html>
