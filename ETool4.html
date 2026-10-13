@@ -138,22 +138,30 @@
                 <button onclick="stopScanner()" class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 flex items-center justify-center text-sm cursor-pointer">✕</button>
             </div>
             
-            <div id="video-container" class="relative w-full h-64 bg-black rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 flex items-center justify-center">
-                <video id="interactive" class="w-full h-full"></video>
+            <!-- Вибір камери для стаціонарних планшетів/дисплеїв -->
+            <div class="space-y-1">
+                <label class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Вибір камери:</label>
+                <select id="camera-select" onchange="changeCamera()" class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    <option value="">Пошук камер...</option>
+                </select>
+            </div>
+
+            <div id="video-container" class="relative w-full h-56 bg-black rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 flex items-center justify-center">
+                <video id="interactive" class="w-full h-full" playsinline autoplay muted></video>
                 <div class="absolute inset-0 border-2 border-emerald-500/50 rounded-2xl pointer-events-none flex items-center justify-center">
                     <div class="w-3/4 h-1 bg-emerald-500/80 animate-pulse"></div>
                 </div>
             </div>
 
-            <!-- Кнопка для завантаження фото зі штрих-кодом з файлу (наприклад, з телефону через ПК) -->
+            <!-- Кнопка для завантаження фото зі штрих-кодом з файлу -->
             <div>
-                <label class="w-full py-2.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs sm:text-sm transition-colors shadow-sm cursor-pointer flex items-center justify-center gap-2">
+                <label class="w-full py-2 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs sm:text-sm transition-colors shadow-sm cursor-pointer flex items-center justify-center gap-2">
                     <span>📁</span> Обрати фото штрих-коду з файлу
                     <input type="file" id="barcode-file-input" accept="image/*" class="hidden" onchange="handleBarcodeFile(event)">
                 </label>
             </div>
 
-            <p id="scanner-status" class="text-xs text-center text-slate-500 dark:text-slate-400">Шукаємо штрих-код через камеру або оберіть фото вище...</p>
+            <p id="scanner-status" class="text-xs text-center text-slate-500 dark:text-slate-400">Сканування в процесі...</p>
             
             <button onclick="stopScanner()" class="w-full py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-sm font-medium hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer">Закрити сканер</button>
         </div>
@@ -263,7 +271,8 @@
         let scanAction = 'add'; // 'add' або 'remove'
         let lastScannedCode = null;
         let lastScanTime = 0;
-        const SCAN_COOLDOWN = 3000; // Розумна затримка 3 секунди для того ж самого штрихкоду
+        const SCAN_COOLDOWN = 3000;
+        let currentSelectedDeviceId = null;
 
         const notification = document.getElementById('notification');
 
@@ -379,13 +388,57 @@
 
             scannerModal.classList.remove('hidden');
             scannerModal.classList.add('flex');
+            document.getElementById('scanner-status').textContent = 'Запит доступу до камери...';
 
             if (!codeReader) {
                 codeReader = new ZXing.BrowserMultiFormatReader();
             }
 
-            // Пробуємо запустити камеру (або віртуальну OBS)
-            codeReader.decodeFromVideoDevice(null, 'interactive', (result, err) => {
+            // Запит дозволу та перелік камер
+            codeReader.listVideoInputDevices()
+                .then(videoInputDevices => {
+                    const cameraSelect = document.getElementById('camera-select');
+                    cameraSelect.innerHTML = '';
+
+                    if (videoInputDevices.length === 0) {
+                        document.getElementById('scanner-status').textContent = 'Камер не виявлено. Скористайтеся завантаженням файлу нижче.';
+                        return;
+                    }
+
+                    videoInputDevices.forEach((device, index) => {
+                        const option = document.createElement('option');
+                        option.value = device.deviceId;
+                        let label = device.label || `Камера ${index + 1}`;
+                        option.textContent = label;
+                        cameraSelect.appendChild(option);
+                    });
+
+                    if (!currentSelectedDeviceId || !videoInputDevices.some(d => d.deviceId === currentSelectedDeviceId)) {
+                        // Пробуємо знайти тилову/задню камеру за замовчуванням якщо доступно
+                        const backCam = videoInputDevices.find(d => d.label.toLowerCase().includes('back') || d.label.toLowerCase().includes('rear') || d.label.toLowerCase().includes('задня') || d.label.toLowerCase().includes('environment'));
+                        currentSelectedDeviceId = backCam ? backCam.deviceId : videoInputDevices[0].deviceId;
+                    }
+
+                    cameraSelect.value = currentSelectedDeviceId;
+                    runScannerWithDevice(currentSelectedDeviceId);
+                })
+                .catch(err => {
+                    console.error('Camera permission or device list error:', err);
+                    document.getElementById('scanner-status').textContent = 'Доступ до камери заборонено або заблоковано. Будь ласка, завантажте фото штрих-коду нижче.';
+                    showNotification('Доступ до камери заблоковано браузером. Використайте кнопку завантаження фото.', 'info');
+                });
+        }
+
+        function runScannerWithDevice(deviceId) {
+            if (!codeReader) return;
+
+            try {
+                codeReader.reset();
+            } catch(e) {}
+
+            document.getElementById('scanner-status').textContent = 'Наведіть камеру на штрих-код...';
+
+            codeReader.decodeFromVideoDevice(deviceId, 'interactive', (result, err) => {
                 if (result) {
                     const code = result.text;
                     const now = Date.now();
@@ -402,66 +455,40 @@
                 }
             }).catch(err => {
                 console.error(err);
-                document.getElementById('scanner-status').textContent = 'Камера недоступна. Скористайтеся кнопкою вибору фото нижче 👇';
+                document.getElementById('scanner-status').textContent = 'Не вдалося ініціювати відеопотік камери.';
             });
         }
 
-        // Просунуте розпізнавання штрих-коду із завантаженого файлу з підвищенням контрастності та масштабуванням через Canvas
+        function changeCamera() {
+            const cameraSelect = document.getElementById('camera-select');
+            currentSelectedDeviceId = cameraSelect.value;
+            runScannerWithDevice(currentSelectedDeviceId);
+        }
+
         function handleBarcodeFile(event) {
             const file = event.target.files[0];
             if (!file) return;
 
             const statusEl = document.getElementById('scanner-status');
-            statusEl.textContent = 'Обробка та аналіз фото штрих-коду...';
+            statusEl.textContent = 'Аналіз зображення штрих-коду...';
 
             const reader = new FileReader();
             reader.onload = function(e) {
-                const img = new Image();
-                img.onload = function() {
-                    if (!codeReader) {
-                        codeReader = new ZXing.BrowserMultiFormatReader();
-                    }
+                if (!codeReader) {
+                    codeReader = new ZXing.BrowserMultiFormatReader();
+                }
 
-                    // Створюємо canvas для попередньої обробки зображення
-                    const canvas = document.createElement('canvas');
-                    const ctx = canvas.getContext('2d');
-                    
-                    const MAX_DIM = 1200;
-                    let width = img.width;
-                    let height = img.height;
-                    if (width > height && width > MAX_DIM) {
-                        height *= MAX_DIM / width;
-                        width = MAX_DIM;
-                    } else if (height > MAX_DIM) {
-                        width *= MAX_DIM / height;
-                        height = MAX_DIM;
-                    }
-
-                    canvas.width = width;
-                    canvas.height = height;
-                    ctx.drawImage(img, 0, 0, width, height);
-
-                    // Безпечна спроба декодування з обробкою помилок без падіння додатку
-                    try {
-                        codeReader.decodeFromImageUrl(e.target.result)
-                            .then(result => {
-                                const code = result.text;
-                                stopScanner();
-                                handleScannedBarcode(code);
-                            })
-                            .catch(err => {
-                                console.warn('Barcode reader warning:', err);
-                                // Якщо бібліотека не знайшла штрихкод на фотографії (наприклад звичайне фото замість чіткого штрихкоду), 
-                                // генеруємо чи симулюємо штрих-код для зручності тестування або просимо ввести штрихкод вручну
-                                statusEl.textContent = 'Не вдалося автоматично зчитати штрих-код з фото.';
-                                showNotification('Штрих-код не розпізнано. Спробуйте інше фото або створіть товар вручну.', 'info');
-                            });
-                    } catch (e) {
-                        console.error('Scan error:', e);
-                        statusEl.textContent = 'Помилка розпізнавання зображення.';
-                    }
-                };
-                img.src = e.target.result;
+                codeReader.decodeFromImageUrl(e.target.result)
+                    .then(result => {
+                        const code = result.text;
+                        stopScanner();
+                        handleScannedBarcode(code);
+                    })
+                    .catch(err => {
+                        console.warn('File decode warning:', err);
+                        statusEl.textContent = 'Штрих-код на фото не знайдено. Спробуйте інше фото.';
+                        showNotification('Не вдалося зчитати штрих-код з файлу.', 'info');
+                    });
             };
             reader.readAsDataURL(file);
             event.target.value = '';
