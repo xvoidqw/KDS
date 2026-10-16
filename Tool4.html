@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Кухонний Дисплей - Рецепти</title>
+    <title>Рецепти</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
-            darkMode: 'media', // Автоматичне перемикання теми на основі налаштувань девайса
+            darkMode: 'media',
             theme: {
                 extend: {
                     colors: {
@@ -43,23 +43,39 @@
                         <i class="fa-solid fa-utensils text-xl"></i>
                     </div>
                     <div>
-                        <h1 class="text-xl font-bold tracking-tight">Кухонний Дисплей</h1>
-                        <p class="text-xs text-slate-500 dark:text-slate-400">Інтерактивна книга рецептів</p>
+                        <h1 id="appTitleText" class="text-xl font-bold tracking-tight">Рецепти</h1>
+                        <p id="appSubTitleText" class="text-xs text-slate-500 dark:text-slate-400">Інтерактивна книга рецептів</p>
                     </div>
                 </div>
 
-                <!-- Search and Add Button -->
+                <!-- Search, Language Switcher and Add Button -->
                 <div class="flex items-center gap-3 w-full sm:w-auto flex-1 max-w-xl justify-end">
+                    <!-- Language Selector -->
+                    <select id="langSelect" onchange="changeLanguage(this.value)" class="px-3 py-2.5 bg-slate-100 dark:bg-slate-700/60 border border-transparent focus:border-orange-500 rounded-2xl text-xs font-medium focus:outline-none transition-all cursor-pointer">
+                        <option value="uk">🇺🇦 UK</option>
+                        <option value="en">🇬🇧 EN</option>
+                        <option value="es">🇪🇸 ES</option>
+                        <option value="de">🇩🇪 DE</option>
+                        <option value="fr">🇫🇷 FR</option>
+                        <option value="it">🇮🇹 IT</option>
+                        <option value="pl">🇵🇱 PL</option>
+                        <option value="pt">🇵🇹 PT</option>
+                        <option value="tr">🇹🇷 TR</option>
+                        <option value="ja">🇯🇵 JA</option>
+                        <option value="zh">🇨🇳 ZH</option>
+                        <option value="ko">🇰🇷 KO</option>
+                    </select>
+
                     <div class="relative flex-1 sm:max-w-md">
                         <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-400">
                             <i class="fa-solid fa-search"></i>
                         </span>
-                        <input type="text" id="searchInput" oninput="filterRecipes()" placeholder="Пошук рецептів за назвою..." 
+                        <input type="text" id="searchInput" oninput="filterRecipes()" placeholder="Пошук рецептів..." 
                             class="w-full pl-10 pr-4 py-2.5 bg-slate-100 dark:bg-slate-700/60 border border-transparent focus:border-orange-500 dark:focus:border-orange-500 rounded-2xl text-sm focus:outline-none transition-all">
                     </div>
                     <button onclick="openAddModal()" class="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 active:scale-95 text-white px-5 py-2.5 rounded-2xl font-medium text-sm shadow-lg shadow-orange-500/25 transition-all whitespace-nowrap">
                         <i class="fa-solid fa-plus"></i>
-                        <span>Додати рецепт</span>
+                        <span id="addRecipeBtnText">Додати рецепт</span>
                     </button>
                 </div>
             </div>
@@ -76,9 +92,9 @@
                 <div class="w-20 h-20 bg-slate-200 dark:bg-slate-800 rounded-3xl flex items-center justify-center text-slate-400 text-3xl mb-4">
                     <i class="fa-solid fa-bowl-food"></i>
                 </div>
-                <h3 class="text-lg font-semibold mb-1">Рецептів не знайдено</h3>
-                <p class="text-sm text-slate-500 dark:text-slate-400 max-w-sm mb-6">Створіть свій перший кулінарний шедевр, натиснувши кнопку нижче.</p>
-                <button onclick="openAddModal()" class="bg-orange-500 hover:bg-orange-600 text-white px-5 py-2.5 rounded-2xl font-medium text-sm transition-all">
+                <h3 id="emptyTitle" class="text-lg font-semibold mb-1">Рецептів не знайдено</h3>
+                <p id="emptyDesc" class="text-sm text-slate-500 dark:text-slate-400 max-w-sm mb-6">Створіть свій перший кулінарний шедевр, натиснувши кнопку нижче.</p>
+                <button onclick="openAddModal()" id="emptyBtn" class="bg-orange-500 hover:bg-orange-600 text-white px-5 py-2.5 rounded-2xl font-medium text-sm transition-all">
                     Додати рецепт
                 </button>
             </div>
@@ -90,7 +106,7 @@
         <div class="bg-white dark:bg-slate-800 w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden border border-slate-200 dark:border-slate-700 flex flex-col max-h-[90vh]">
             <!-- Modal Header -->
             <div class="px-6 py-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
-                <h3 id="wizardModalTitle" class="text-lg font-bold">Створення рецепта (Крок 1 з 2)</h3>
+                <h3 id="wizardModalTitle" class="text-lg font-bold">Створення рецепта</h3>
                 <button onclick="closeAddModal()" class="w-8 h-8 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
@@ -103,7 +119,7 @@
         </div>
     </div>
 
-    <!-- Modal: View Simple Recipe -->
+    <!-- Modal: View Simple Recipe (Full Screen) -->
     <div id="viewSimpleModal" class="fixed inset-0 z-50 hidden bg-white dark:bg-slate-900 w-full h-full flex flex-col m-0 p-0 rounded-none border-0">
         <div class="px-8 py-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-800/80">
             <h3 id="simpleViewTitle" class="text-2xl font-bold">Назва рецепта</h3>
@@ -115,11 +131,11 @@
             <p id="simpleViewDesc" class="text-slate-700 dark:text-slate-200 whitespace-pre-line text-xl leading-relaxed"></p>
         </div>
         <div class="px-8 py-6 border-t border-slate-200 dark:border-slate-800 flex justify-end bg-slate-50 dark:bg-slate-800/80">
-            <button onclick="closeSimpleModal()" class="bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 px-8 py-3 rounded-2xl font-medium text-base transition-all">Закрити дисплей</button>
+            <button onclick="closeSimpleModal()" id="closeDisplayBtnText" class="bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 px-8 py-3 rounded-2xl font-medium text-base transition-all">Закрити дисплей</button>
         </div>
     </div>
 
-    <!-- Modal: View Interactive Recipe Player -->
+    <!-- Modal: View Interactive Recipe Player (Full Screen) -->
     <div id="viewInteractiveModal" class="fixed inset-0 z-50 hidden bg-white dark:bg-slate-900 w-full h-full flex flex-col m-0 p-0 rounded-none border-0">
         <!-- Top info bar -->
         <div class="px-8 py-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-800/80">
@@ -139,29 +155,841 @@
     </div>
 
     <script>
-        // Початкові приклади рецептів у пам'яті (порожній масив)
-        let recipes = [];
+        // Словники перекладів для 12 мов
+        const translations = {
+            uk: {
+                appTitle: "Рецепти",
+                appSubTitle: "Інтерактивна книга рецептів",
+                searchPlaceholder: "Пошук рецептів...",
+                addRecipe: "Додати рецепт",
+                emptyTitle: "Рецептів не знайдено",
+                emptyDesc: "Створіть свій перший кулінарний шедевр, натиснувши кнопку нижче.",
+                closeDisplay: "Закрити дисплей",
+                interactiveProcess: "Інтерактивний процес",
+                stepOf: "Крок",
+                of: "із",
+                type: "Тип",
+                prevStep: "Попередній крок",
+                nextStep: "Наступний крок",
+                finishRecipe: "Завершити рецепт",
+                saveRecipe: "Зберегти рецепт",
+                next: "Далі",
+                back: "Назад",
+                addAnotherStep: "+ Додати ще крок",
+                recipeName: "Назва рецепта",
+                recipeNamePlaceholder: "Наприклад: Борщ український",
+                shortDesc: "Короткий опис",
+                shortDescPlaceholder: "Короткий опис або особливості...",
+                recipeType: "Тип рецепта",
+                simpleText: "Простий текст",
+                simpleTextDesc: "Звичайний опис рецепта",
+                interactive: "Інтерактивний",
+                interactiveDesc: "Покрокові таймери та дії",
+                fullRecipeText: "Повний текст рецепта та інгредієнти",
+                fullRecipePlaceholder: "Опишіть повністю процес приготування...",
+                stepName: "Назва кроку",
+                stepNamePlaceholder: "Наприклад: Обсмаження цибулі",
+                stepDescLabel: "Опис кроку (за бажанням)",
+                stepDescPlaceholder: "Додаткові інструкції до цього кроку...",
+                stepActionType: "Тип дії кроку",
+                type1: "1. Дія із внутрішнім і зовнішнім таймером",
+                type1Desc: "Виконання під внутрішній час та очікування зовнішнім",
+                type2: "2. Дія із внутрішнім таймером",
+                type2Desc: "Тільки виконання кроку під час відліку часу",
+                type3: "3. Дія із зовнішнім таймером",
+                type3Desc: "Очікування на готовність до наступного кроку",
+                type4: "4. Дія із зовнішнім таймером та підтвердженням",
+                type4Desc: "Очікування + ручне підтвердження",
+                internalTimerSec: "Внутрішній таймер (сек)",
+                externalTimerSec: "Зовнішній таймер (сек)",
+                internalTimerTitle: "Внутрішній таймер (Виконання)",
+                externalTimerTitle: "Зовнішній таймер (Очікування)",
+                stopWaiting: "Зупинити очікування",
+                waitingStopped: "Зупинено ✓",
+                needConfirmation: "Потрібно підтвердження",
+                needConfirmationDesc: "Натисніть кнопку, щоб розпочати.",
+                confirmAndStart: "Підтвердити і запустити",
+                confirmed: "Підтверджено ✓",
+                recipeCreated: "Рецепт успішно створено!",
+                recipeDeleted: "Рецепт успішно видалено",
+                stepAdded: "Крок додано до рецепта",
+                enterTitleError: "Будь ласка, введіть назву рецепта",
+                enterStepTitleError: "Введіть назву поточного кроку",
+                addStepError: "Додайте хоча б один крок до рецепта",
+                enjoyMeal: "Смачного! Рецепт завершено",
+                enjoyDesc: "Ви успішно виконали всі кроки рецепта.",
+                open: "Відкрити",
+                textRecipe: "Текстовий рецепт",
+                stepsCount: "кроків виконання"
+            },
+            en: {
+                appTitle: "Recipes",
+                appSubTitle: "Interactive recipe book",
+                searchPlaceholder: "Search recipes...",
+                addRecipe: "Add Recipe",
+                emptyTitle: "No recipes found",
+                emptyDesc: "Create your first culinary masterpiece by clicking the button below.",
+                closeDisplay: "Close Display",
+                interactiveProcess: "Interactive Process",
+                stepOf: "Step",
+                of: "of",
+                type: "Type",
+                prevStep: "Previous Step",
+                nextStep: "Next Step",
+                finishRecipe: "Finish Recipe",
+                saveRecipe: "Save Recipe",
+                next: "Next",
+                back: "Back",
+                addAnotherStep: "+ Add Another Step",
+                recipeName: "Recipe Name",
+                recipeNamePlaceholder: "e.g., Homemade Pasta",
+                shortDesc: "Short Description",
+                shortDescPlaceholder: "Brief description or highlights...",
+                recipeType: "Recipe Type",
+                simpleText: "Simple Text",
+                simpleTextDesc: "Standard recipe description",
+                interactive: "Interactive",
+                interactiveDesc: "Step-by-step timers & actions",
+                fullRecipeText: "Full recipe text and ingredients",
+                fullRecipePlaceholder: "Describe the cooking process fully...",
+                stepName: "Step Name",
+                stepNamePlaceholder: "e.g., Sauté onions",
+                stepDescLabel: "Step Description (optional)",
+                stepDescPlaceholder: "Additional instructions for this step...",
+                stepActionType: "Step Action Type",
+                type1: "1. Internal & External Timer Action",
+                type1Desc: "Execution with internal time and external waiting",
+                type2: "2. Internal Timer Action",
+                type2Desc: "Execution countdown only",
+                type3: "3. External Timer Action",
+                type3Desc: "Waiting for the next step readiness",
+                type4: "4. External Timer & Confirmation",
+                type4Desc: "Waiting + manual confirmation to start",
+                internalTimerSec: "Internal Timer (sec)",
+                externalTimerSec: "External Timer (sec)",
+                internalTimerTitle: "Internal Timer (Execution)",
+                externalTimerTitle: "External Timer (Waiting)",
+                stopWaiting: "Stop Waiting",
+                waitingStopped: "Stopped ✓",
+                needConfirmation: "Confirmation Required",
+                needConfirmationDesc: "Click the button to start.",
+                confirmAndStart: "Confirm & Start",
+                confirmed: "Confirmed ✓",
+                recipeCreated: "Recipe successfully created!",
+                recipeDeleted: "Recipe successfully deleted",
+                stepAdded: "Step added to recipe",
+                enterTitleError: "Please enter a recipe name",
+                enterStepTitleError: "Enter the name of the current step",
+                addStepError: "Add at least one step to the recipe",
+                enjoyMeal: "Enjoy your meal! Recipe completed",
+                enjoyDesc: "You have successfully completed all recipe steps.",
+                open: "Open",
+                textRecipe: "Text Recipe",
+                stepsCount: "execution steps"
+            },
+            es: {
+                appTitle: "Recetas",
+                appSubTitle: "Libro de recetas interactivo",
+                searchPlaceholder: "Buscar recetas...",
+                addRecipe: "Añadir receta",
+                emptyTitle: "No se encontraron recetas",
+                emptyDesc: "Crea tu primera obra maestra culinaria haciendo clic en el botón de abajo.",
+                closeDisplay: "Cerrar pantalla",
+                interactiveProcess: "Proceso interactivo",
+                stepOf: "Paso",
+                of: "de",
+                type: "Tipo",
+                prevStep: "Paso anterior",
+                nextStep: "Siguiente paso",
+                finishRecipe: "Finalizar receta",
+                saveRecipe: "Guardar receta",
+                next: "Siguiente",
+                back: "Atrás",
+                addAnotherStep: "+ Añadir otro paso",
+                recipeName: "Nombre de la receta",
+                recipeNamePlaceholder: "Ej: Paella Valenciana",
+                shortDesc: "Descripción corta",
+                shortDescPlaceholder: "Breve descripción...",
+                recipeType: "Tipo de receta",
+                simpleText: "Texto simple",
+                simpleTextDesc: "Descripción de receta estándar",
+                interactive: "Interactivo",
+                interactiveDesc: "Temporizadores y acciones paso a paso",
+                fullRecipeText: "Texto completo e ingredientes",
+                fullRecipePlaceholder: "Describe todo el proceso...",
+                stepName: "Nombre del paso",
+                stepNamePlaceholder: "Ej: Freír cebollas",
+                stepDescLabel: "Descripción del paso (opcional)",
+                stepDescPlaceholder: "Instrucciones adicionales...",
+                stepActionType: "Tipo de acción del paso",
+                type1: "1. Acción con temporizador interno y externo",
+                type1Desc: "Ejecución interna y espera externa",
+                type2: "2. Acción con temporizador interno",
+                type2Desc: "Solo cuenta atrás de ejecución",
+                type3: "3. Acción con temporizador externo",
+                type3Desc: "Esperando al siguiente paso",
+                type4: "4. Acción con temporizador externo y confirmación",
+                type4Desc: "Espera + confirmación manual",
+                internalTimerSec: "Temporizador interno (seg)",
+                externalTimerSec: "Temporizador externo (seg)",
+                internalTimerTitle: "Temporizador interno (Ejecución)",
+                externalTimerTitle: "Temporizador externo (Espera)",
+                stopWaiting: "Detener espera",
+                waitingStopped: "Detenido ✓",
+                needConfirmation: "Se requiere confirmación",
+                needConfirmationDesc: "Haga clic para iniciar.",
+                confirmAndStart: "Confirmar y empezar",
+                confirmed: "Confirmado ✓",
+                recipeCreated: "¡Receta creada con éxito!",
+                recipeDeleted: "Receta eliminada con éxito",
+                stepAdded: "Paso añadido a la receta",
+                enterTitleError: "Por favor introduzca el nombre de la receta",
+                enterStepTitleError: "Introduzca el nombre del paso actual",
+                addStepError: "Añada al menos un paso a la receta",
+                enjoyMeal: "¡Buen provecho! Receta completada",
+                enjoyDesc: "Ha completado con éxito todos los pasos.",
+                open: "Abrir",
+                textRecipe: "Receta de texto",
+                stepsCount: "pasos de ejecución"
+            },
+            de: {
+                appTitle: "Rezepte",
+                appSubTitle: "Interaktives Rezeptbuch",
+                searchPlaceholder: "Rezepte suchen...",
+                addRecipe: "Rezept hinzufügen",
+                emptyTitle: "Keine Rezepte gefunden",
+                emptyDesc: "Erstellen Sie Ihr erstes kulinarisches Meisterwerk.",
+                closeDisplay: "Anzeige schließen",
+                interactiveProcess: "Interaktiver Prozess",
+                stepOf: "Schritt",
+                of: "von",
+                type: "Typ",
+                prevStep: "Vorheriger Schritt",
+                nextStep: "Nächster Schritt",
+                finishRecipe: "Rezept beenden",
+                saveRecipe: "Rezept speichern",
+                next: "Weiter",
+                back: "Zurück",
+                addAnotherStep: "+ Weiteren Schritt hinzufügen",
+                recipeName: "Rezeptname",
+                recipeNamePlaceholder: "Z.B. Apfelkuchen",
+                shortDesc: "Kurzbeschreibung",
+                shortDescPlaceholder: "Kurze Beschreibung...",
+                recipeType: "Rezepttyp",
+                simpleText: "Einfacher Text",
+                simpleTextDesc: "Standard-Rezeptbeschreibung",
+                interactive: "Interaktiv",
+                interactiveDesc: "Schritt-für-Schritt Timer & Aktionen",
+                fullRecipeText: "Vollständiger Text und Zutaten",
+                fullRecipePlaceholder: "Vollständiger Kochprozess...",
+                stepName: "Schrittname",
+                stepNamePlaceholder: "Z.B. Zwiebeln anbraten",
+                stepDescLabel: "Schrittbeschreibung (optional)",
+                stepDescPlaceholder: "Zusätzliche Anweisungen...",
+                stepActionType: "Aktionstyp",
+                type1: "1. Aktion mit internem & externem Timer",
+                type1Desc: "Ausführung und Warten",
+                type2: "2. Aktion mit internem Timer",
+                type2Desc: "Nur Ausführungstimer",
+                type3: "3. Aktion mit externem Timer",
+                type3Desc: "Warten auf den nächsten Schritt",
+                type4: "4. Aktion mit externem Timer & Bestätigung",
+                type4Desc: "Warten + manuelle Bestätigung",
+                internalTimerSec: "Interner Timer (Sek)",
+                externalTimerSec: "Externer Timer (Sek)",
+                internalTimerTitle: "Interner Timer (Ausführung)",
+                externalTimerTitle: "Externer Timer (Warten)",
+                stopWaiting: "Warten stoppen",
+                waitingStopped: "Gestoppt ✓",
+                needConfirmation: "Bestätigung erforderlich",
+                needConfirmationDesc: "Klicken zum Starten.",
+                confirmAndStart: "Bestätigen & Starten",
+                confirmed: "Bestätigt ✓",
+                recipeCreated: "Rezept erfolgreich erstellt!",
+                recipeDeleted: "Rezept erfolgreich gelöscht",
+                stepAdded: "Schritt hinzugefügt",
+                enterTitleError: "Bitte geben Sie einen Rezeptnamen ein",
+                enterStepTitleError: "Geben Sie den Namen des Schritts ein",
+                addStepError: "Fügen Sie mindestens einen Schritt hinzu",
+                enjoyMeal: "Guten Appetit! Rezept abgeschlossen",
+                enjoyDesc: "Sie haben alle Schritte erfolgreich beendet.",
+                open: "Öffnen",
+                textRecipe: "Textrezept",
+                stepsCount: "Ausführungsschritte"
+            },
+            fr: {
+                appTitle: "Recettes",
+                appSubTitle: "Livre de recettes interactif",
+                searchPlaceholder: "Rechercher des recettes...",
+                addRecipe: "Ajouter une recette",
+                emptyTitle: "Aucune recette trouvée",
+                emptyDesc: "Créez votre premier chef-d'œuvre culinaire en cliquant ci-dessous.",
+                closeDisplay: "Fermer l'affichage",
+                interactiveProcess: "Processus interactif",
+                stepOf: "Étape",
+                of: "sur",
+                type: "Type",
+                prevStep: "Étape précédente",
+                nextStep: "Étape suivante",
+                finishRecipe: "Terminer la recette",
+                saveRecipe: "Enregistrer la recette",
+                next: "Suivant",
+                back: "Retour",
+                addAnotherStep: "+ Ajouter une autre étape",
+                recipeName: "Nom de la recette",
+                recipeNamePlaceholder: "Ex: Ratatouille",
+                shortDesc: "Courte description",
+                shortDescPlaceholder: "Brève description...",
+                recipeType: "Type de recette",
+                simpleText: "Texte simple",
+                simpleTextDesc: "Description standard",
+                interactive: "Interactif",
+                interactiveDesc: "Minuteurs et actions étape par étape",
+                fullRecipeText: "Texte complet et ingrédients",
+                fullRecipePlaceholder: "Décrivez tout le processus...",
+                stepName: "Nom de l'étape",
+                stepNamePlaceholder: "Ex: Faire revenir les oignons",
+                stepDescLabel: "Description de l'étape (optionnel)",
+                stepDescPlaceholder: "Instructions supplémentaires...",
+                stepActionType: "Type d'action",
+                type1: "1. Action avec minuteur interne et externe",
+                type1Desc: "Exécution et attente",
+                type2: "2. Action avec minuteur interne",
+                type2Desc: "Compte à rebours d'exécution uniquement",
+                type3: "3. Action avec minuteur externe",
+                type3Desc: "Attente de l'étape suivante",
+                type4: "4. Action avec minuteur externe et confirmation",
+                type4Desc: "Attente + confirmation manuelle",
+                internalTimerSec: "Minuteur interne (sec)",
+                externalTimerSec: "Minuteur externe (sec)",
+                internalTimerTitle: "Minuteur interne (Exécution)",
+                externalTimerTitle: "Minuteur externe (Attente)",
+                stopWaiting: "Arrêter l'attente",
+                waitingStopped: "Arrêté ✓",
+                needConfirmation: "Confirmation requise",
+                needConfirmationDesc: "Cliquez pour commencer.",
+                confirmAndStart: "Confirmer et démarrer",
+                confirmed: "Confirmé ✓",
+                recipeCreated: "Recette créée avec succès !",
+                recipeDeleted: "Recette supprimée avec succès",
+                stepAdded: "Étape ajoutée à la recette",
+                enterTitleError: "Veuillez entrer un nom de recette",
+                enterStepTitleError: "Entrez le nom de l'étape actuelle",
+                addStepError: "Ajoutez au moins une étape à la recette",
+                enjoyMeal: "Bon appétit ! Recette terminée",
+                enjoyDesc: "Vous avez terminé toutes les étapes avec succès.",
+                open: "Ouvrir",
+                textRecipe: "Recette textuelle",
+                stepsCount: "étapes d'exécution"
+            },
+            it: {
+                appTitle: "Ricette",
+                appSubTitle: "Libro di ricette interattivo",
+                searchPlaceholder: "Cerca ricette...",
+                addRecipe: "Aggiungi ricetta",
+                emptyTitle: "Nessuna ricetta trovata",
+                emptyDesc: "Crea il tuo primo capolavoro culinario cliccando sotto.",
+                closeDisplay: "Chiudi display",
+                interactiveProcess: "Processo interattivo",
+                stepOf: "Passo",
+                of: "di",
+                type: "Tipo",
+                prevStep: "Passo precedente",
+                nextStep: "Passo successivo",
+                finishRecipe: "Termina ricetta",
+                saveRecipe: "Salva ricetta",
+                next: "Avanti",
+                back: "Indietro",
+                addAnotherStep: "+ Aggiungi un altro passo",
+                recipeName: "Nome della ricetta",
+                recipeNamePlaceholder: "Es: Spaghetti alla Carbonara",
+                shortDesc: "Breve descrizione",
+                shortDescPlaceholder: "Breve descrizione...",
+                recipeType: "Tipo di ricetta",
+                simpleText: "Testo semplice",
+                simpleTextDesc: "Descrizione standard della ricetta",
+                interactive: "Interattivo",
+                interactiveDesc: "Timer e azioni passo dopo passo",
+                fullRecipeText: "Testo completo e ingredienti",
+                fullRecipePlaceholder: "Descrivi il processo di cottura...",
+                stepName: "Nome del passo",
+                stepNamePlaceholder: "Es: Rosolare la cipolla",
+                stepDescLabel: "Descrizione del passo (opzionale)",
+                stepDescPlaceholder: "Istruzioni aggiuntive...",
+                stepActionType: "Tipo di azione",
+                type1: "1. Azione con timer interno ed esterno",
+                type1Desc: "Esecuzione e attesa",
+                type2: "2. Azione con timer interno",
+                type2Desc: "Solo conto alla rovescia di esecuzione",
+                type3: "3. Azione con timer esterno",
+                type3Desc: "In attesa del prossimo passo",
+                type4: "4. Azione con timer esterno e conferma",
+                type4Desc: "Attesa + conferma manuale",
+                internalTimerSec: "Timer interno (sec)",
+                externalTimerSec: "Timer esterno (sec)",
+                internalTimerTitle: "Timer interno (Esecuzione)",
+                externalTimerTitle: "Timer esterno (Attesa)",
+                stopWaiting: "Ferma attesa",
+                waitingStopped: "Fermato ✓",
+                needConfirmation: "Conferma richiesta",
+                needConfirmationDesc: "Clicca per iniziare.",
+                confirmAndStart: "Conferma e avvia",
+                confirmed: "Confermato ✓",
+                recipeCreated: "Ricetta creata con successo!",
+                recipeDeleted: "Ricetta eliminata con successo",
+                stepAdded: "Passo aggiunto alla ricetta",
+                enterTitleError: "Inserisci un nome per la ricetta",
+                enterStepTitleError: "Inserisci il nome del passo attuale",
+                addStepError: "Aggiungi almeno un passo alla ricetta",
+                enjoyMeal: "Buon appetito! Ricetta completata",
+                enjoyDesc: "Hai completato con successo tutti i passaggi.",
+                open: "Apri",
+                textRecipe: "Ricetta testuale",
+                stepsCount: "passi di esecuzione"
+            },
+            pl: {
+                appTitle: "Przepisy",
+                appSubTitle: "Interaktywna księga przepisów",
+                searchPlaceholder: "Szukaj przepisów...",
+                addRecipe: "Dodaj przepis",
+                emptyTitle: "Nie znaleziono przepisów",
+                emptyDesc: "Stwórz swoje pierwsze kulinarne arcydzieło, klikając poniżej.",
+                closeDisplay: "Zamknij widok",
+                interactiveProcess: "Proces interaktywny",
+                stepOf: "Krok",
+                of: "z",
+                type: "Typ",
+                prevStep: "Poprzedni krok",
+                nextStep: "Następny krok",
+                finishRecipe: "Zakończ przepis",
+                saveRecipe: "Zapisz przepis",
+                next: "Dalej",
+                back: "Wstecz",
+                addAnotherStep: "+ Dodaj kolejny krok",
+                recipeName: "Nazwa przepisu",
+                recipeNamePlaceholder: "Np. Pierogi ruskie",
+                shortDesc: "Krótki opis",
+                shortDescPlaceholder: "Krótki opis...",
+                recipeType: "Typ przepisu",
+                simpleText: "Zwykły tekst",
+                simpleTextDesc: "Standardowy opis przepisu",
+                interactive: "Interaktywny",
+                interactiveDesc: "Minutniki i akcje krok po kroku",
+                fullRecipeText: "Pełny tekst przepisu i składniki",
+                fullRecipePlaceholder: "Opisz cały proces gotowania...",
+                stepName: "Nazwa kroku",
+                stepNamePlaceholder: "Np. Podsmaż cebulę",
+                stepDescLabel: "Opis kroku (opcjonalnie)",
+                stepDescPlaceholder: "Dodatkowe instrukcje...",
+                stepActionType: "Typ akcji kroku",
+                type1: "1. Akcja z zegarem wewnętrznym i zewnętrznym",
+                type1Desc: "Wykonanie i oczekiwanie",
+                type2: "2. Akcja z zegarem wewnętrznym",
+                type2Desc: "Tylko odliczanie wykonania",
+                type3: "3. Akcja z zegarem zewnętrznym",
+                type3Desc: "Oczekiwanie na gotowość",
+                type4: "4. Akcja z zegarem zewnętrznym i potwierdzeniem",
+                type4Desc: "Oczekiwanie + potwierdzenie ręczne",
+                internalTimerSec: "Zegar wewnętrzny (sek)",
+                externalTimerSec: "Zegar zewnętrzny (sek)",
+                internalTimerTitle: "Zegar wewnętrzny (Wykonanie)",
+                externalTimerTitle: "Zegar zewnętrzny (Oczekiwanie)",
+                stopWaiting: "Zatrzymaj oczekiwanie",
+                waitingStopped: "Zatrzymano ✓",
+                needConfirmation: "Wymagane potwierdzenie",
+                needConfirmationDesc: "Kliknij przycisk, aby rozpocząć.",
+                confirmAndStart: "Potwierdź i uruchom",
+                confirmed: "Potwierdzone ✓",
+                recipeCreated: "Przepis utworzony pomyślnie!",
+                recipeDeleted: "Przepis został usunięty",
+                stepAdded: "Dodano krok do przepisu",
+                enterTitleError: "Wprowadź nazwę przepisu",
+                enterStepTitleError: "Wprowadź nazwę obecnego kroku",
+                addStepError: "Dodaj co najmniej jeden krok",
+                enjoyMeal: "Smacznego! Przepis ukończony",
+                enjoyDesc: "Pomyślnie ukończyłeś wszystkie kroki przepisu.",
+                open: "Otwórz",
+                textRecipe: "Przepis tekstowy",
+                stepsCount: "kroków wykonania"
+            },
+            pt: {
+                appTitle: "Receitas",
+                appSubTitle: "Livro de receitas interativo",
+                searchPlaceholder: "Pesquisar receitas...",
+                addRecipe: "Adicionar receita",
+                emptyTitle: "Nenhuma receita encontrada",
+                emptyDesc: "Crie a sua primeira obra-prima culinária clicando abaixo.",
+                closeDisplay: "Fechar ecrã",
+                interactiveProcess: "Processo interativo",
+                stepOf: "Passo",
+                of: "de",
+                type: "Tipo",
+                prevStep: "Passo anterior",
+                nextStep: "Próximo passo",
+                finishRecipe: "Concluir receita",
+                saveRecipe: "Guardar receita",
+                next: "Seguinte",
+                back: "Voltar",
+                addAnotherStep: "+ Adicionar outro passo",
+                recipeName: "Nome da receita",
+                recipeNamePlaceholder: "Ex: Bacalhau à Brás",
+                shortDesc: "Breve descrição",
+                shortDescPlaceholder: "Breve descrição...",
+                recipeType: "Tipo de receita",
+                simpleText: "Texto simples",
+                simpleTextDesc: "Descrição de receita padrão",
+                interactive: "Interativo",
+                interactiveDesc: "Temporizadores e ações passo a passo",
+                fullRecipeText: "Texto completo e ingredientes",
+                fullRecipePlaceholder: "Descreva todo o processo...",
+                stepName: "Nome do passo",
+                stepNamePlaceholder: "Ex: Dourar a cebola",
+                stepDescLabel: "Descrição do passo (opcional)",
+                stepDescPlaceholder: "Instruções adicionais...",
+                stepActionType: "Tipo de ação",
+                type1: "1. Ação com temporizador interno e externo",
+                type1Desc: "Execução e espera",
+                type2: "2. Ação com temporizador interno",
+                type2Desc: "Apenas contagem decrescente",
+                type3: "3. Ação com temporizador externo",
+                type3Desc: "A aguardar o próximo passo",
+                type4: "4. Ação com temporizador externo e confirmação",
+                type4Desc: "Espera + confirmação manual",
+                internalTimerSec: "Temporizador interno (seg)",
+                externalTimerSec: "Temporizador externo (seg)",
+                internalTimerTitle: "Temporizador interno (Execução)",
+                externalTimerTitle: "Temporizador externo (Espera)",
+                stopWaiting: "Parar espera",
+                waitingStopped: "Parado ✓",
+                needConfirmation: "Confirmação necessária",
+                needConfirmationDesc: "Clique no botão para iniciar.",
+                confirmAndStart: "Confirmar e iniciar",
+                confirmed: "Confirmado ✓",
+                recipeCreated: "Receita criada com sucesso!",
+                recipeDeleted: "Receita eliminada com sucesso",
+                stepAdded: "Passo adicionado à receita",
+                enterTitleError: "Por favor insira um nome para a receita",
+                enterStepTitleError: "Insira o nome do passo atual",
+                addStepError: "Adicione pelo menos um passo à receita",
+                enjoyMeal: "Bom apetite! Receita concluída",
+                enjoyDesc: "Concluiu com sucesso todos os passos.",
+                open: "Abrir",
+                textRecipe: "Receita de texto",
+                stepsCount: "passos de execução"
+            },
+            tr: {
+                appTitle: "Tarifler",
+                appSubTitle: "İnteraktif tarif kitabı",
+                searchPlaceholder: "Tarif ara...",
+                addRecipe: "Tarif Ekle",
+                emptyTitle: "Tarif bulunamadı",
+                emptyDesc: "Aşağıdaki düğmeye tıklayarak ilk şaheserinizi oluşturun.",
+                closeDisplay: "Ekranı Kapat",
+                interactiveProcess: "İnteraktif Süreç",
+                stepOf: "Adım",
+                of: "/",
+                type: "Tür",
+                prevStep: "Önceki Adım",
+                nextStep: "Sonraki Adım",
+                finishRecipe: " Tarifi Bitir",
+                saveRecipe: "Tarifi Kaydet",
+                next: "İleri",
+                back: "Geri",
+                addAnotherStep: "+ Başka Adım Ekle",
+                recipeName: "Tarif Adı",
+                recipeNamePlaceholder: "Örn: Mantı",
+                shortDesc: "Kısa Açıklama",
+                shortDescPlaceholder: "Kısa açıklama...",
+                recipeType: "Tarif Türü",
+                simpleText: "Düz Metin",
+                simpleTextDesc: "Standart tarif açıklaması",
+                interactive: "İnteraktif",
+                interactiveDesc: "Adım adım zamanlayıcılar ve eylemler",
+                fullRecipeText: "Tam Tarif Metni ve Malzemeler",
+                fullRecipePlaceholder: "Pişirme sürecini tam olarak yazın...",
+                stepName: "Adım Adı",
+                stepNamePlaceholder: "Örn: Soğanları kavurun",
+                stepDescLabel: "Adım Açıklaması (isteğe bağlı)",
+                stepDescPlaceholder: "Ek talimatlar...",
+                stepActionType: "Eylem Türü",
+                type1: "1. İç ve Dış Zamanlayıcı Eylemi",
+                type1Desc: "Yürütme ve bekleme",
+                type2: "2. İç Zamanlayıcı Eylemi",
+                type2Desc: "Yalnızca yürütme geri sayımı",
+                type3: "3. Dış Zamanlayıcı Eylemi",
+                type3Desc: "Sonraki adım için bekleme",
+                type4: "4. Dış Zamanlayıcı ve Onay Eylemi",
+                type4Desc: "Bekleme + manuel onay",
+                internalTimerSec: "İç Zamanlayıcı (sn)",
+                externalTimerSec: "Dış Zamanlayıcı (sn)",
+                internalTimerTitle: "İç Zamanlayıcı (Yürütme)",
+                externalTimerTitle: "Dış Zamanlayıcı (Bekleme)",
+                stopWaiting: "Beklemeyi Durdur",
+                waitingStopped: "Durduruldu ✓",
+                needConfirmation: "Onay Gerekiyor",
+                needConfirmationDesc: "Başlatmak için tıklayın.",
+                confirmAndStart: "Onayla ve Başlat",
+                confirmed: "Onaylandı ✓",
+                recipeCreated: "Tarif başarıyla oluşturuldu!",
+                recipeDeleted: "Tarif başarıyla silindi",
+                stepAdded: "Adım tarife eklendi",
+                enterTitleError: "Lütfen bir tarif adı girin",
+                enterStepTitleError: "Mevcut adımın adını girin",
+                addStepError: "Tarife en az bir adım ekleyin",
+                enjoyMeal: "Afiyet olsun! Tarif tamamlandı",
+                enjoyDesc: "Tüm adımları başarıyla tamamladınız.",
+                open: "Aç",
+                textRecipe: "Metin Tarifi",
+                stepsCount: "uygulama adımı"
+            },
+            ja: {
+                appTitle: "レシピ",
+                appSubTitle: "インタラクティブなレシピ本",
+                searchPlaceholder: "レシピを検索...",
+                addRecipe: "レシピを追加",
+                emptyTitle: "レシピが見つかりません",
+                emptyDesc: "下のボタンをクリックして最初の料理を作成しましょう。",
+                closeDisplay: "画面を閉じる",
+                interactiveProcess: "インタラクティブプロセス",
+                stepOf: "ステップ",
+                of: "/",
+                type: "タイプ",
+                prevStep: "前のステップ",
+                nextStep: "次のステップ",
+                finishRecipe: "レシピを完了",
+                saveRecipe: "レシピを保存",
+                next: "次へ",
+                back: "戻る",
+                addAnotherStep: "+ ステップを追加",
+                recipeName: "レシピ名",
+                recipeNamePlaceholder: "例：カレーライス",
+                shortDesc: "簡単な説明",
+                shortDescPlaceholder: "短い説明...",
+                recipeType: "レシピの種類",
+                simpleText: "シンプルなテキスト",
+                simpleTextDesc: "標準のレシピ説明",
+                interactive: "インタラクティブ",
+                interactiveDesc: "ステップごとのタイマーとアクション",
+                fullRecipeText: "完全なレシピと材料",
+                fullRecipePlaceholder: "調理プロセスを完全に記述...",
+                stepName: "ステップ名",
+                stepNamePlaceholder: "例：玉ねぎを炒める",
+                stepDescLabel: "ステップの説明（任意）",
+                stepDescPlaceholder: "追加の指示...",
+                stepActionType: "アクションタイプ",
+                type1: "1. 内部および外部タイマーアクション",
+                type1Desc: "実行と待機",
+                type2: "2. 内部タイマーアクション",
+                type2Desc: "実行カウントダウンのみ",
+                type3: "3. 外部タイマーアクション",
+                type3Desc: "次のステップの待機",
+                type4: "4. 外部タイマーと確認アクション",
+                type4Desc: "待機 + 手動確認",
+                internalTimerSec: "内部タイマー (秒)",
+                externalTimerSec: "外部タイマー (秒)",
+                internalTimerTitle: "内部タイマー (実行)",
+                externalTimerTitle: "外部タイマー (待機)",
+                stopWaiting: "待機を停止",
+                waitingStopped: "停止完了 ✓",
+                needConfirmation: "確認が必要です",
+                needConfirmationDesc: "クリックして開始します。",
+                confirmAndStart: "確認して開始",
+                confirmed: "確認済み ✓",
+                recipeCreated: "レシピが正常に作成されました！",
+                recipeDeleted: "レシピが削除されました",
+                stepAdded: "レシピにステップが追加されました",
+                enterTitleError: "レシピ名を入力してください",
+                enterStepTitleError: "現在のステップ名を入力してください",
+                addStepError: "レシピに少なくとも1つのステップを追加してください",
+                enjoyMeal: "お疲れ様でした！レシピ完了です",
+                enjoyDesc: "すべてのステップを正常に完了しました。",
+                open: "開く",
+                textRecipe: "テキストレシピ",
+                stepsCount: "実行ステップ"
+            },
+            zh: {
+                appTitle: "食谱",
+                appSubTitle: "互动食谱书",
+                searchPlaceholder: "搜索食谱...",
+                addRecipe: "添加食谱",
+                emptyTitle: "未找到食谱",
+                emptyDesc: "点击下方按钮创建您的第一个烹饪杰作。",
+                closeDisplay: "关闭显示",
+                interactiveProcess: "互动流程",
+                stepOf: "步骤",
+                of: "/",
+                type: "类型",
+                prevStep: "上一步",
+                nextStep: "下一步",
+                finishRecipe: "完成食谱",
+                saveRecipe: "保存食谱",
+                next: "下一步",
+                back: "返回",
+                addAnotherStep: "+ 添加另一个步骤",
+                recipeName: "食谱名称",
+                recipeNamePlaceholder: "例如：红烧肉",
+                shortDesc: "简短描述",
+                shortDescPlaceholder: "简短说明...",
+                recipeType: "食谱类型",
+                simpleText: "纯文本",
+                simpleTextDesc: "标准食谱说明",
+                interactive: "互动式",
+                interactiveDesc: "分步计时器与操作",
+                fullRecipeText: "完整食谱及配料",
+                fullRecipePlaceholder: "详细描述烹饪过程...",
+                stepName: "步骤名称",
+                stepNamePlaceholder: "例如：炒洋葱",
+                stepDescLabel: "步骤描述（可选）",
+                stepDescPlaceholder: "额外说明...",
+                stepActionType: "步骤操作类型",
+                type1: "1. 内部与外部计时器操作",
+                type1Desc: "执行与外部等待",
+                type2: "2. 内部计时器操作",
+                type2Desc: "仅执行倒计时",
+                type3: "3. 外部计时器操作",
+                type3Desc: "等待下一步就绪",
+                type4: "4. 外部计时器与确认操作",
+                type4Desc: "等待 + 手动确认",
+                internalTimerSec: "内部计时器（秒）",
+                externalTimerSec: "外部计时器（秒）",
+                internalTimerTitle: "内部计时器（执行）",
+                externalTimerTitle: "外部计时器（等待）",
+                stopWaiting: "停止等待",
+                waitingStopped: "已停止 ✓",
+                needConfirmation: "需要确认",
+                needConfirmationDesc: "点击按钮开始。",
+                confirmAndStart: "确认并开始",
+                confirmed: "已确认 ✓",
+                recipeCreated: "食谱创建成功！",
+                recipeDeleted: "食谱删除成功",
+                stepAdded: "已添加步骤到食谱",
+                enterTitleError: "请输入食谱名称",
+                enterStepTitleError: "请输入当前步骤名称",
+                addStepError: "请为食谱添加至少一个步骤",
+                enjoyMeal: "请享用！食谱已完成",
+                enjoyDesc: "您已成功完成所有食谱步骤。",
+                open: "打开",
+                textRecipe: "文本食谱",
+                stepsCount: "执行步骤"
+            },
+            ko: {
+                appTitle: "레시피",
+                appSubTitle: "인터랙티브 레시피 북",
+                searchPlaceholder: "레시피 검색...",
+                addRecipe: "레시피 추가",
+                emptyTitle: "레시피가 없습니다",
+                emptyDesc: "아래 버튼을 눌러 첫 번째 요리 걸작을 만드세요.",
+                closeDisplay: "디스플레이 닫기",
+                interactiveProcess: "인터랙티브 프로세스",
+                stepOf: "단계",
+                of: "/",
+                type: "유형",
+                prevStep: "이전 단계",
+                nextStep: "다음 단계",
+                finishRecipe: "레시피 완료",
+                saveRecipe: "레시피 저장",
+                next: "다음",
+                back: "뒤로",
+                addAnotherStep: "+ 단계 추가",
+                recipeName: "레시피 이름",
+                recipeNamePlaceholder: "예: 김치찌개",
+                shortDesc: "간단한 설명",
+                shortDescPlaceholder: "간단한 설명...",
+                recipeType: "레시피 유형",
+                simpleText: "일반 텍스트",
+                simpleTextDesc: "표준 레시피 설명",
+                interactive: "인터랙티브",
+                interactiveDesc: "단계별 타이머 및 작업",
+                fullRecipeText: "전체 레시피 및 재료",
+                fullRecipePlaceholder: "조리 과정을 상세히 설명하세요...",
+                stepName: "단계 이름",
+                stepNamePlaceholder: "예: 양파 볶기",
+                stepDescLabel: "단계 설명 (선택사항)",
+                stepDescPlaceholder: "추가 지침...",
+                stepActionType: "단계 작업 유형",
+                type1: "1. 내부 및 외부 타이머 작업",
+                type1Desc: "실행 및 외부 대기",
+                type2: "2. 내부 타이머 작업",
+                type2Desc: "실행 카운트다운 전용",
+                type3: "3. 외부 타이머 작업",
+                type3Desc: "다음 단계 준비 대기",
+                type4: "4. 외부 타이머 및 확인 작업",
+                type4Desc: "대기 + 수동 확인",
+                internalTimerSec: "내부 타이머 (초)",
+                externalTimerSec: "외부 타이머 (초)",
+                internalTimerTitle: "내부 타이머 (실행)",
+                externalTimerTitle: "외부 타이머 (대기)",
+                stopWaiting: "대기 중지",
+                waitingStopped: "중지됨 ✓",
+                needConfirmation: "확인 필요",
+                needConfirmationDesc: "시작하려면 클릭하세요.",
+                confirmAndStart: "확인 및 시작",
+                confirmed: "확인됨 ✓",
+                recipeCreated: "레시피가 성공적으로 생성되었습니다!",
+                recipeDeleted: "레시피가 삭제되었습니다",
+                stepAdded: "레시피에 단계가 추가되었습니다",
+                enterTitleError: "레시피 이름을 입력하세요",
+                enterStepTitleError: "현재 단계 이름을 입력하세요",
+                addStepError: "레시피에 최소 한 개의 단계를 추가하세요",
+                enjoyMeal: "맛있게 드세요! 레시피 완료",
+                enjoyDesc: "모든 레시피 단계를 성공적으로 완료했습니다.",
+                open: "열기",
+                textRecipe: "텍스트 레시피",
+                stepsCount: "실행 단계"
+            }
+        };
+
+        // Поточна мова за замовчуванням
+        let currentLang = localStorage.getItem('app_lang') || 'uk';
+
+        function t(key) {
+            return translations[currentLang][key] || translations['uk'][key] || key;
+        }
+
+        function changeLanguage(lang) {
+            currentLang = lang;
+            localStorage.setItem('app_lang', lang);
+            updateUIStrings();
+            renderRecipes(document.getElementById('searchInput').value);
+        }
+
+        function updateUIStrings() {
+            document.getElementById('langSelect').value = currentLang;
+            document.getElementById('appTitleText').innerText = t('appTitle');
+            document.getElementById('appSubTitleText').innerText = t('appSubTitle');
+            document.getElementById('searchInput').placeholder = t('searchPlaceholder');
+            document.getElementById('addRecipeBtnText').innerText = t('addRecipe');
+            document.getElementById('emptyTitle').innerText = t('emptyTitle');
+            document.getElementById('emptyDesc').innerText = t('emptyDesc');
+            document.getElementById('emptyBtn').innerText = t('addRecipe');
+            document.getElementById('closeDisplayBtnText').innerText = t('closeDisplay');
+        }
+
+        // Завантаження рецептів із localStorage
+        let recipes = JSON.parse(localStorage.getItem('saved_recipes')) || [];
+
+        function saveRecipesToStorage() {
+            localStorage.setItem('saved_recipes', JSON.stringify(recipes));
+        }
 
         // Змінні для стану створення рецепта
         let newRecipeDraft = {
             title: '',
             description: '',
-            type: 'simple', // 'simple' або 'interactive'
+            type: 'simple', 
             content: '',
             steps: []
         };
 
-        // Тимчасовий крок під час створення інтерактивного рецепта
         let currentStepDraft = {
             title: '',
             description: '',
-            actionType: '1', // 1, 2, 3, 4
+            actionType: '1', 
             internalTime: 0,
             externalTime: 0,
             requireManualConfirm: false
         };
 
-        // Стан активного плеєра
         let activePlayer = {
             recipe: null,
             currentStepIndex: 0,
@@ -173,7 +1001,7 @@
             externalInterval: null
         };
 
-        // Аудіо-сповіщення (вбудований синтезатор звуку через Web Audio API без зовнішніх файлів)
+        // Web Audio API аудіо сигналів
         function playBeep(frequency = 587.33, duration = 0.2) {
             try {
                 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -198,12 +1026,11 @@
             setTimeout(() => playBeep(783.99, 0.3), 300);
         }
 
-        // Ініціалізація при завантаженні
         document.addEventListener('DOMContentLoaded', () => {
+            updateUIStrings();
             renderRecipes();
         });
 
-        // Головна функція рендерингу сітки рецептів
         function renderRecipes(filterText = '') {
             const grid = document.getElementById('recipeGrid');
             const emptyState = document.getElementById('emptyState');
@@ -227,37 +1054,35 @@
                         <div class="flex items-center justify-between mb-4">
                             <span class="px-3 py-1 rounded-full text-xs font-semibold ${recipe.type === 'interactive' ? 'bg-orange-100 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'}">
                                 <i class="fa-solid ${recipe.type === 'interactive' ? 'fa-bolt' : 'fa-align-left'} mr-1"></i>
-                                ${recipe.type === 'interactive' ? 'Інтерактивний' : 'Простий текст'}
+                                ${recipe.type === 'interactive' ? t('interactive') : t('simpleText')}
                             </span>
                             <button onclick="event.stopPropagation(); deleteRecipe(${index})" class="w-8 h-8 rounded-full hover:bg-red-50 dark:hover:bg-red-950/40 text-slate-400 hover:text-red-500 flex items-center justify-center transition-colors">
                                 <i class="fa-solid fa-trash-can text-xs"></i>
                             </button>
                         </div>
                         <h3 class="text-lg font-bold mb-2 group-hover:text-orange-500 transition-colors">${escapeHtml(recipe.title)}</h3>
-                        <p class="text-sm text-slate-500 dark:text-slate-400 line-clamp-2 mb-4">${escapeHtml(recipe.description || 'Без опису')}</p>
+                        <p class="text-sm text-slate-500 dark:text-slate-400 line-clamp-2 mb-4">${escapeHtml(recipe.description || '')}</p>
                     </div>
                     <div class="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-700/60 text-xs text-slate-400 font-medium">
-                        <span>${recipe.type === 'interactive' ? `${recipe.steps.length} кроків виконання` : 'Текстовий рецепт'}</span>
-                        <span class="text-orange-500 flex items-center gap-1 group-hover:translate-x-1 transition-transform">Відкрити <i class="fa-solid fa-arrow-right text-[10px]"></i></span>
+                        <span>${recipe.type === 'interactive' ? `${recipe.steps.length} ${t('stepsCount')}` : t('textRecipe')}</span>
+                        <span class="text-orange-500 flex items-center gap-1 group-hover:translate-x-1 transition-transform">${t('open')} <i class="fa-solid fa-arrow-right text-[10px]"></i></span>
                     </div>
                 </div>
             `).join('');
         }
 
-        // Пошук
         function filterRecipes() {
             const query = document.getElementById('searchInput').value;
             renderRecipes(query);
         }
 
-        // Видалення рецепта
         function deleteRecipe(index) {
             recipes.splice(index, 1);
+            saveRecipesToStorage();
             renderRecipes(document.getElementById('searchInput').value);
-            showNotification('Рецепт успішно видалено', 'success');
+            showNotification(t('recipeDeleted'), 'success');
         }
 
-        // Мастер додавання рецепта - Крок 1
         function openAddModal() {
             newRecipeDraft = { title: '', description: '', type: 'simple', content: '', steps: [] };
             const modal = document.getElementById('addModal');
@@ -270,41 +1095,41 @@
         }
 
         function renderWizardStep1() {
-            document.getElementById('wizardModalTitle').innerText = 'Створення рецепта (Крок 1 з 2)';
+            document.getElementById('wizardModalTitle').innerText = `${t('addRecipe')} (1/2)`;
             const body = document.getElementById('wizardBody');
             body.innerHTML = `
                 <div class="space-y-4">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase mb-1">Назва рецепта</label>
-                        <input type="text" id="draftTitle" value="${escapeHtml(newRecipeDraft.title)}" placeholder="Наприклад: Борч український" 
+                        <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase mb-1">${t('recipeName')}</label>
+                        <input type="text" id="draftTitle" value="${escapeHtml(newRecipeDraft.title)}" placeholder="${t('recipeNamePlaceholder')}" 
                             class="w-full px-4 py-3 bg-slate-100 dark:bg-slate-700/60 border border-transparent focus:border-orange-500 rounded-2xl text-sm focus:outline-none transition-all">
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase mb-1">Короткий опис</label>
-                        <textarea id="draftDesc" rows="3" placeholder="Короткий опис або особливості..." 
+                        <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase mb-1">${t('shortDesc')}</label>
+                        <textarea id="draftDesc" rows="3" placeholder="${t('shortDescPlaceholder')}" 
                             class="w-full px-4 py-3 bg-slate-100 dark:bg-slate-700/60 border border-transparent focus:border-orange-500 rounded-2xl text-sm focus:outline-none transition-all">${escapeHtml(newRecipeDraft.description)}</textarea>
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase mb-2">Тип рецепта</label>
+                        <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase mb-2">${t('recipeType')}</label>
                         <div class="grid grid-cols-2 gap-4">
                             <label class="flex items-center gap-3 p-4 rounded-2xl border-2 cursor-pointer transition-all ${newRecipeDraft.type === 'simple' ? 'border-orange-500 bg-orange-500/5' : 'border-slate-200 dark:border-slate-700'}">
                                 <input type="radio" name="recipeType" value="simple" ${newRecipeDraft.type === 'simple' ? 'checked' : ''} onchange="setRecipeType('simple')" class="text-orange-500 focus:ring-orange-500">
                                 <div>
-                                    <div class="font-bold text-sm">Простий текст</div>
-                                    <div class="text-xs text-slate-500">Звичайний опис рецепта</div>
+                                    <div class="font-bold text-sm">${t('simpleText')}</div>
+                                    <div class="text-xs text-slate-500">${t('simpleTextDesc')}</div>
                                 </div>
                             </label>
                             <label class="flex items-center gap-3 p-4 rounded-2xl border-2 cursor-pointer transition-all ${newRecipeDraft.type === 'interactive' ? 'border-orange-500 bg-orange-500/5' : 'border-slate-200 dark:border-slate-700'}">
                                 <input type="radio" name="recipeType" value="interactive" ${newRecipeDraft.type === 'interactive' ? 'checked' : ''} onchange="setRecipeType('interactive')" class="text-orange-500 focus:ring-orange-500">
                                 <div>
-                                    <div class="font-bold text-sm">Інтерактивний</div>
-                                    <div class="text-xs text-slate-500">Покрокові таймери та дії</div>
+                                    <div class="font-bold text-sm">${t('interactive')}</div>
+                                    <div class="text-xs text-slate-500">${t('interactiveDesc')}</div>
                                 </div>
                             </label>
                         </div>
                     </div>
                     <div class="pt-4 flex justify-end">
-                        <button onclick="submitWizardStep1()" class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2.5 rounded-2xl font-medium text-sm shadow-lg shadow-orange-500/20 transition-all">Далі</button>
+                        <button onclick="submitWizardStep1()" class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2.5 rounded-2xl font-medium text-sm shadow-lg shadow-orange-500/20 transition-all">${t('next')}</button>
                     </div>
                 </div>
             `;
@@ -319,7 +1144,7 @@
             const desc = document.getElementById('draftDesc').value.trim();
 
             if (!title) {
-                showNotification('Будь ласка, введіть назву рецепта', 'error');
+                showNotification(t('enterTitleError'), 'error');
                 return;
             }
 
@@ -329,26 +1154,24 @@
             if (newRecipeDraft.type === 'simple') {
                 renderWizardSimpleContent();
             } else {
-                // Починаємо створення першого кроку
                 currentStepDraft = { title: '', description: '', actionType: '1', internalTime: 60, externalTime: 120, requireManualConfirm: false };
                 renderWizardInteractiveStep(1);
             }
         }
 
-        // Рендеринг для простого рецепта
         function renderWizardSimpleContent() {
-            document.getElementById('wizardModalTitle').innerText = 'Створення простого рецепта (Крок 2 з 2)';
+            document.getElementById('wizardModalTitle').innerText = `${t('addRecipe')} (2/2)`;
             const body = document.getElementById('wizardBody');
             body.innerHTML = `
                 <div class="space-y-4">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase mb-1">Повний текст рецепта та інгредієнти</label>
-                        <textarea id="draftContent" rows="8" placeholder="Опишіть повністю процес приготування..." 
+                        <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase mb-1">${t('fullRecipeText')}</label>
+                        <textarea id="draftContent" rows="8" placeholder="${t('fullRecipePlaceholder')}" 
                             class="w-full px-4 py-3 bg-slate-100 dark:bg-slate-700/60 border border-transparent focus:border-orange-500 rounded-2xl text-sm focus:outline-none transition-all">${escapeHtml(newRecipeDraft.content)}</textarea>
                     </div>
                     <div class="pt-4 flex justify-between">
-                        <button onclick="renderWizardStep1()" class="px-5 py-2.5 rounded-2xl font-medium text-sm hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">Назад</button>
-                        <button onclick="saveSimpleRecipe()" class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2.5 rounded-2xl font-medium text-sm shadow-lg shadow-orange-500/20 transition-all">Зберегти рецепт</button>
+                        <button onclick="renderWizardStep1()" class="px-5 py-2.5 rounded-2xl font-medium text-sm hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">${t('back')}</button>
+                        <button onclick="saveSimpleRecipe()" class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2.5 rounded-2xl font-medium text-sm shadow-lg shadow-orange-500/20 transition-all">${t('saveRecipe')}</button>
                     </div>
                 </div>
             `;
@@ -358,56 +1181,56 @@
             const content = document.getElementById('draftContent').value.trim();
             newRecipeDraft.content = content;
             recipes.push({...newRecipeDraft});
+            saveRecipesToStorage();
             closeAddModal();
             renderRecipes();
-            showNotification('Рецепт успішно створено!', 'success');
+            showNotification(t('recipeCreated'), 'success');
         }
 
-        // Рендеринг конструктора кроків для інтерактивного рецепта
         function renderWizardInteractiveStep(stepNumber) {
-            document.getElementById('wizardModalTitle').innerText = `Крок ${stepNumber}: Конструктор дії`;
+            document.getElementById('wizardModalTitle').innerText = `${t('stepOf')} ${stepNumber}`;
             const body = document.getElementById('wizardBody');
             body.innerHTML = `
                 <div class="space-y-4">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase mb-1">Назва кроку</label>
-                        <input type="text" id="stepTitle" value="${escapeHtml(currentStepDraft.title)}" placeholder="Наприклад: Обсмаження цибулі" 
+                        <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase mb-1">${t('stepName')}</label>
+                        <input type="text" id="stepTitle" value="${escapeHtml(currentStepDraft.title)}" placeholder="${t('stepNamePlaceholder')}" 
                             class="w-full px-4 py-3 bg-slate-100 dark:bg-slate-700/60 border border-transparent focus:border-orange-500 rounded-2xl text-sm focus:outline-none transition-all">
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase mb-1">Опис кроку (за бажанням)</label>
-                        <textarea id="stepDesc" rows="2" placeholder="Додаткові інструкції до цього кроку..." 
+                        <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase mb-1">${t('stepDescLabel')}</label>
+                        <textarea id="stepDesc" rows="2" placeholder="${t('stepDescPlaceholder')}" 
                             class="w-full px-4 py-3 bg-slate-100 dark:bg-slate-700/60 border border-transparent focus:border-orange-500 rounded-2xl text-sm focus:outline-none transition-all">${escapeHtml(currentStepDraft.description)}</textarea>
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase mb-2">Тип дії кроку</label>
+                        <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase mb-2">${t('stepActionType')}</label>
                         <div class="grid grid-cols-1 gap-3">
                             <label class="flex items-center gap-3 p-3.5 rounded-2xl border-2 cursor-pointer transition-all ${currentStepDraft.actionType === '1' ? 'border-orange-500 bg-orange-500/5' : 'border-slate-200 dark:border-slate-700'}">
                                 <input type="radio" name="actionType" value="1" ${currentStepDraft.actionType === '1' ? 'checked' : ''} onchange="setActionType('1')" class="text-orange-500">
                                 <div>
-                                    <div class="font-bold text-sm">1. Дія із внутрішнім і зовнішнім таймером</div>
-                                    <div class="text-xs text-slate-500">Виконання процесу під таймер + очікування результату</div>
+                                    <div class="font-bold text-sm">${t('type1')}</div>
+                                    <div class="text-xs text-slate-500">${t('type1Desc')}</div>
                                 </div>
                             </label>
                             <label class="flex items-center gap-3 p-3.5 rounded-2xl border-2 cursor-pointer transition-all ${currentStepDraft.actionType === '2' ? 'border-orange-500 bg-orange-500/5' : 'border-slate-200 dark:border-slate-700'}">
                                 <input type="radio" name="actionType" value="2" ${currentStepDraft.actionType === '2' ? 'checked' : ''} onchange="setActionType('2')" class="text-orange-500">
                                 <div>
-                                    <div class="font-bold text-sm">2. Дія із внутрішнім таймером</div>
-                                    <div class="text-xs text-slate-500">Тільки виконання кроку під час відліку часу</div>
+                                    <div class="font-bold text-sm">${t('type2')}</div>
+                                    <div class="text-xs text-slate-500">${t('type2Desc')}</div>
                                 </div>
                             </label>
                             <label class="flex items-center gap-3 p-3.5 rounded-2xl border-2 cursor-pointer transition-all ${currentStepDraft.actionType === '3' ? 'border-orange-500 bg-orange-500/5' : 'border-slate-200 dark:border-slate-700'}">
                                 <input type="radio" name="actionType" value="3" ${currentStepDraft.actionType === '3' ? 'checked' : ''} onchange="setActionType('3')" class="text-orange-500">
                                 <div>
-                                    <div class="font-bold text-sm">3. Дія із зовнішнім таймером</div>
-                                    <div class="text-xs text-slate-500">Очікування на готовність до наступного кроку</div>
+                                    <div class="font-bold text-sm">${t('type3')}</div>
+                                    <div class="text-xs text-slate-500">${t('type3Desc')}</div>
                                 </div>
                             </label>
                             <label class="flex items-center gap-3 p-3.5 rounded-2xl border-2 cursor-pointer transition-all ${currentStepDraft.actionType === '4' ? 'border-orange-500 bg-orange-500/5' : 'border-slate-200 dark:border-slate-700'}">
                                 <input type="radio" name="actionType" value="4" ${currentStepDraft.actionType === '4' ? 'checked' : ''} onchange="setActionType('4')" class="text-orange-500">
                                 <div>
-                                    <div class="font-bold text-sm">4. Дія із зовнішнім таймером та підтвердженням</div>
-                                    <div class="text-xs text-slate-500">Очікування + ручне підтвердження початку внутрішньої дії</div>
+                                    <div class="font-bold text-sm">${t('type4')}</div>
+                                    <div class="text-xs text-slate-500">${t('type4Desc')}</div>
                                 </div>
                             </label>
                         </div>
@@ -415,22 +1238,22 @@
 
                     <div class="grid grid-cols-2 gap-4 pt-2">
                         <div>
-                            <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase mb-1">Внутрішній таймер (сек)</label>
+                            <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase mb-1">${t('internalTimerSec')}</label>
                             <input type="number" id="stepInternalTime" value="${currentStepDraft.internalTime}" min="0" 
                                 class="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/60 border border-transparent focus:border-orange-500 rounded-2xl text-sm focus:outline-none">
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase mb-1">Зовнішній таймер (сек)</label>
+                            <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase mb-1">${t('externalTimerSec')}</label>
                             <input type="number" id="stepExternalTime" value="${currentStepDraft.externalTime}" min="0" 
                                 class="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/60 border border-transparent focus:border-orange-500 rounded-2xl text-sm focus:outline-none">
                         </div>
                     </div>
 
                     <div class="pt-4 flex items-center justify-between border-t border-slate-200 dark:border-slate-700">
-                        <span class="text-xs text-slate-400 font-medium">Всього кроків створено: ${newRecipeDraft.steps.length}</span>
+                        <span class="text-xs text-slate-400 font-medium">${newRecipeDraft.steps.length}</span>
                         <div class="flex gap-2">
-                            <button onclick="saveAndAddAnotherStep()" class="bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 px-4 py-2.5 rounded-2xl font-medium text-xs transition-all">+ Додати ще крок</button>
-                            <button onclick="finishInteractiveRecipe()" class="bg-orange-500 hover:bg-orange-600 text-white px-5 py-2.5 rounded-2xl font-medium text-xs shadow-lg shadow-orange-500/20 transition-all">Завершити рецепт</button>
+                            <button onclick="saveAndAddAnotherStep()" class="bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 px-4 py-2.5 rounded-2xl font-medium text-xs transition-all">${t('addAnotherStep')}</button>
+                            <button onclick="finishInteractiveRecipe()" class="bg-orange-500 hover:bg-orange-600 text-white px-5 py-2.5 rounded-2xl font-medium text-xs shadow-lg shadow-orange-500/20 transition-all">${t('finishRecipe')}</button>
                         </div>
                     </div>
                 </div>
@@ -447,27 +1270,20 @@
             currentStepDraft.internalTime = parseInt(document.getElementById('stepInternalTime').value) || 0;
             currentStepDraft.externalTime = parseInt(document.getElementById('stepExternalTime').value) || 0;
             currentStepDraft.actionType = document.querySelector('input[name="actionType"]:checked').value;
-
-            // Налаштовуємо прапорці підтвердження залежно від типу
-            if (currentStepDraft.actionType === '4') {
-                currentStepDraft.requireManualConfirm = true;
-            } else {
-                currentStepDraft.requireManualConfirm = false;
-            }
+            currentStepDraft.requireManualConfirm = (currentStepDraft.actionType === '4');
         }
 
         function saveAndAddAnotherStep() {
             collectCurrentStepData();
             if (!currentStepDraft.title) {
-                showNotification('Введіть назву поточного кроку', 'error');
+                showNotification(t('enterStepTitleError'), 'error');
                 return;
             }
 
             newRecipeDraft.steps.push({...currentStepDraft});
-            // Скидаємо для наступного кроку
             currentStepDraft = { title: '', description: '', actionType: '1', internalTime: 60, externalTime: 120, requireManualConfirm: false };
             renderWizardInteractiveStep(newRecipeDraft.steps.length + 1);
-            showNotification('Крок додано до рецепта', 'success');
+            showNotification(t('stepAdded'), 'success');
         }
 
         function finishInteractiveRecipe() {
@@ -477,30 +1293,31 @@
             }
 
             if (newRecipeDraft.steps.length === 0) {
-                showNotification('Додайте хоча б один крок до рецепта', 'error');
+                showNotification(t('addStepError'), 'error');
                 return;
             }
 
             recipes.push({...newRecipeDraft});
+            saveRecipesToStorage();
             closeAddModal();
             renderRecipes();
-            showNotification('Інтерактивний рецепт створено успішно!', 'success');
+            showNotification(t('recipeCreated'), 'success');
         }
 
-        // Відкриття рецепта залежно від типу
         function openRecipe(index) {
             const recipe = recipes[index];
             if (!recipe) return;
 
             if (recipe.type === 'simple') {
                 document.getElementById('simpleViewTitle').innerText = recipe.title;
-                document.getElementById('simpleViewDesc').innerText = recipe.content || 'Опис відсутній.';
+                document.getElementById('simpleViewDesc').innerText = recipe.content || '';
                 const modal = document.getElementById('viewSimpleModal');
                 modal.classList.remove('hidden');
             } else {
                 activePlayer.recipe = recipe;
                 activePlayer.currentStepIndex = 0;
                 stopTimer();
+                stopExternalTimer();
                 document.getElementById('playerRecipeTitle').innerText = recipe.title;
                 const modal = document.getElementById('viewInteractiveModal');
                 modal.classList.remove('hidden');
@@ -514,10 +1331,10 @@
 
         function closeInteractiveModal() {
             stopTimer();
+            stopExternalTimer();
             document.getElementById('viewInteractiveModal').classList.add('hidden');
         }
 
-        // Інтерактивний плеєр кроків
         function renderInteractivePlayerStep() {
             const recipe = activePlayer.recipe;
             const idx = activePlayer.currentStepIndex;
@@ -530,9 +1347,9 @@
                         <div class="w-24 h-24 bg-green-100 dark:bg-green-950/60 text-green-500 rounded-full flex items-center justify-center text-4xl mb-6 shadow-xl shadow-green-500/10">
                             <i class="fa-solid fa-check"></i>
                         </div>
-                        <h3 class="text-3xl font-bold mb-3">Смачного! Рецепт завершено</h3>
-                        <p class="text-base text-slate-500 dark:text-slate-400 mb-8 max-w-md">Ви успішно виконали всі кроки рецепта "${escapeHtml(recipe.title)}".</p>
-                        <button onclick="closeInteractiveModal()" class="bg-orange-500 hover:bg-orange-600 text-white px-10 py-4 rounded-2xl font-medium text-base transition-all shadow-xl shadow-orange-500/25">Закрити дисплей</button>
+                        <h3 class="text-3xl font-bold mb-3">${t('enjoyMeal')}</h3>
+                        <p class="text-base text-slate-500 dark:text-slate-400 mb-8 max-w-md">${t('enjoyDesc')} "${escapeHtml(recipe.title)}".</p>
+                        <button onclick="closeInteractiveModal()" class="bg-orange-500 hover:bg-orange-600 text-white px-10 py-4 rounded-2xl font-medium text-base transition-all shadow-xl shadow-orange-500/25">${t('closeDisplay')}</button>
                     </div>
                 `;
                 return;
@@ -553,33 +1370,33 @@
                     </div>
 
                     <div class="flex items-center justify-between mb-4">
-                        <span class="bg-orange-100 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400 text-xs px-3.5 py-1.5 rounded-full font-bold">Крок ${idx + 1} із ${recipe.steps.length}</span>
-                        <span class="text-xs text-slate-400 font-medium">Тип: ${getStepTypeName(step.actionType)}</span>
+                        <span class="bg-orange-100 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400 text-xs px-3.5 py-1.5 rounded-full font-bold">${t('stepOf')} ${idx + 1} ${t('of')} ${recipe.steps.length}</span>
+                        <span class="text-xs text-slate-400 font-medium">${t('type')}: ${step.actionType}</span>
                     </div>
 
                     <h2 class="text-4xl font-bold mb-4">${escapeHtml(step.title)}</h2>
-                    <p class="text-xl text-slate-600 dark:text-slate-300 leading-relaxed mb-10">${escapeHtml(step.description || 'Немає детального опису до цього кроку.')}</p>
+                    <p class="text-xl text-slate-600 dark:text-slate-300 leading-relaxed mb-10">${escapeHtml(step.description || '')}</p>
                     
                     <div id="timerSection" class="grid grid-cols-1 sm:grid-cols-2 gap-8 mb-8">
                         ${showInternalTimer ? `
                             <div class="p-8 rounded-3xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 flex flex-col justify-between">
                                 <div class="flex items-center justify-between mb-4">
-                                    <span class="text-xs font-semibold text-slate-400 uppercase"><i class="fa-solid fa-hourglass-half mr-1"></i> Внутрішній таймер (Виконання)</span>
+                                    <span class="text-xs font-semibold text-slate-400 uppercase"><i class="fa-solid fa-hourglass-half mr-1"></i> ${t('internalTimerTitle')}</span>
                                     <span id="internalTimeDisplay" class="text-3xl font-bold font-mono">${formatTime(step.internalTime)}</span>
                                 </div>
-                                <div class="text-xs text-orange-500 font-medium mt-2" id="internalStatus">Відлік до кінця виконання кроку</div>
+                                <div class="text-xs text-orange-500 font-medium mt-2" id="internalStatus">...</div>
                             </div>
                         ` : ''}
 
                         ${showExternalTimer ? `
                             <div class="p-8 rounded-3xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 flex flex-col justify-between">
                                 <div class="flex items-center justify-between mb-4">
-                                    <span class="text-xs font-semibold text-slate-400 uppercase"><i class="fa-regular fa-clock mr-1"></i> Зовнішній таймер (Очікування)</span>
+                                    <span class="text-xs font-semibold text-slate-400 uppercase"><i class="fa-regular fa-clock mr-1"></i> ${t('externalTimerTitle')}</span>
                                     <span id="externalTimeDisplay" class="text-3xl font-bold font-mono">${formatTime(step.externalTime)}</span>
                                 </div>
                                 <div class="flex items-center justify-between mt-4">
-                                    <span class="text-xs text-blue-500 font-medium" id="externalStatus">Відлік вниз до закінчення очікування</span>
-                                    <button onclick="stopExternalTimerManual()" id="stopExternalBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-xs font-semibold transition-all shadow-md">Зупинити очікування</button>
+                                    <span class="text-xs text-blue-500 font-medium" id="externalStatus">...</span>
+                                    <button onclick="stopExternalTimerManual()" id="stopExternalBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-xs font-semibold transition-all shadow-md">${t('stopWaiting')}</button>
                                 </div>
                             </div>
                         ` : ''}
@@ -590,23 +1407,23 @@
                             <div class="flex items-center gap-4">
                                 <i class="fa-solid fa-triangle-exclamation text-amber-500 text-3xl"></i>
                                 <div>
-                                    <div class="font-bold text-base text-amber-800 dark:text-amber-200">Потрібно підтвердження</div>
-                                    <div class="text-sm text-amber-600 dark:text-amber-400">Натисніть кнопку, щоб запустити внутрішній таймер.</div>
+                                    <div class="font-bold text-base text-amber-800 dark:text-amber-200">${t('needConfirmation')}</div>
+                                    <div class="text-sm text-amber-600 dark:text-amber-400">${t('needConfirmationDesc')}</div>
                                 </div>
                             </div>
-                            <button onclick="confirmAndStartInternal(${step.internalTime})" id="confirmBtn" class="bg-amber-500 hover:bg-amber-600 text-white px-8 py-3.5 rounded-2xl font-medium text-sm shadow-lg shadow-amber-500/20 transition-all whitespace-nowrap">Підтвердити і запустити</button>
+                            <button onclick="confirmAndStartInternal(${step.internalTime}, ${step.externalTime})" id="confirmBtn" class="bg-amber-500 hover:bg-amber-600 text-white px-8 py-3.5 rounded-2xl font-medium text-sm shadow-lg shadow-amber-500/20 transition-all whitespace-nowrap">${t('confirmAndStart')}</button>
                         </div>
                     ` : ''}
                 </div>
 
                 <!-- Footer Navigation -->
                 <div class="pt-8 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
-                    <button onclick="prevStep()" ${idx === 0 ? 'disabled' : ''} class="px-8 py-4 rounded-2xl text-base font-medium hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-40 transition-colors">Попередній крок</button>
-                    <button onclick="nextStep()" class="bg-orange-500 hover:bg-orange-600 text-white px-10 py-4 rounded-2xl text-base font-medium shadow-xl shadow-orange-500/25 transition-all">Наступний крок</button>
+                    <button onclick="prevStep()" ${idx === 0 ? 'disabled' : ''} class="px-8 py-4 rounded-2xl text-base font-medium hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-40 transition-colors">${t('prevStep')}</button>
+                    <button onclick="nextStep()" class="bg-orange-500 hover:bg-orange-600 text-white px-10 py-4 rounded-2xl text-base font-medium shadow-xl shadow-orange-500/25 transition-all">${t('nextStep')}</button>
                 </div>
             `;
 
-            // Логіка запуску таймерів за типами
+            // Логіка таймерів залежно від типу кроку
             if (step.actionType === '1') {
                 if (step.internalTime > 0) {
                     startInternalWithSound(step.internalTime, () => {
@@ -621,22 +1438,15 @@
                 startInternalWithSound(step.internalTime, null);
             } else if (step.actionType === '3' && step.externalTime > 0) {
                 startCountdownExternalTimer('externalTimeDisplay', step.externalTime);
-            } else if (step.actionType === '4' && step.externalTime > 0) {
-                startCountdownExternalTimer('externalTimeDisplay', step.externalTime);
+            } else if (step.actionType === '4') {
+                // Для 4 типу зовнішній таймер запускається зразу, а внутрішній чекає на підтвердження
+                if (step.externalTime > 0) {
+                    startCountdownExternalTimer('externalTimeDisplay', step.externalTime);
+                }
             }
         }
 
-        function getStepTypeName(type) {
-            switch(type) {
-                case '1': return 'Внутрішній + Зовнішній таймер';
-                case '2': return 'Внутрішній таймер';
-                case '3': return 'Зовнішній таймер';
-                case '4': return 'Зовнішній + Підтвердження';
-                default: return 'Стандартна дія';
-            }
-        }
-
-        // Внутрішній таймер із звуковими сигналами (іде вниз, зупиняється автоматично)
+        // Внутрішній таймер: лунає звук останні секунди, потім грає фінальна мелодія і таймер завершується автоматично
         function startInternalWithSound(seconds, onCompleteCallback) {
             stopTimer();
             activePlayer.timeLeft = seconds;
@@ -655,8 +1465,7 @@
                     stopTimer();
                     playCompletionMelody();
                     const statusEl = document.getElementById('internalStatus');
-                    if (statusEl) statusEl.innerText = 'Внутрішній таймер завершено!';
-                    showNotification('Внутрішній таймер завершено!', 'success');
+                    if (statusEl) statusEl.innerText = '✓';
                     if (typeof onCompleteCallback === 'function') {
                         onCompleteCallback();
                     }
@@ -664,7 +1473,7 @@
             }, 1000);
         }
 
-        // Зовнішній таймер: тепер іде ВНИЗ (зворотний відлік очікування), поки користувач сам не зупинить або не закінчиться час
+        // Зовнішній таймер: йде ВНИЗ поки користувач не зупинить кнопкою
         function startCountdownExternalTimer(displayId, initialSeconds) {
             stopExternalTimer();
             activePlayer.externalTimeLeft = initialSeconds;
@@ -679,8 +1488,6 @@
 
                         if (activePlayer.externalTimeLeft === 0) {
                             playCompletionMelody();
-                            const statusEl = document.getElementById('externalStatus');
-                            if (statusEl) statusEl.innerText = 'Час очікування вичерпано!';
                         }
                     }
                 }
@@ -691,24 +1498,22 @@
             stopExternalTimer();
             playBeep(650, 0.2);
             const statusEl = document.getElementById('externalStatus');
-            if (statusEl) statusEl.innerText = 'Очікування зупинено користувачем.';
+            if (statusEl) statusEl.innerText = '✓';
             const btn = document.getElementById('stopExternalBtn');
             if (btn) {
-                btn.innerText = 'Зупинено ✓';
+                btn.innerText = t('waitingStopped');
                 btn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
                 btn.classList.add('bg-green-600');
             }
-            showNotification('Очікування завершено', 'success');
         }
 
-        function confirmAndStartInternal(intSec) {
+        function confirmAndStartInternal(intSec, extSec) {
             const btn = document.getElementById('confirmBtn');
             if (btn) {
-                btn.innerText = 'Підтверджено ✓';
+                btn.innerText = t('confirmed');
                 btn.classList.remove('bg-amber-500', 'hover:bg-amber-600');
                 btn.classList.add('bg-green-500');
             }
-            showNotification('Внутрішній таймер запущено!', 'success');
             if (intSec > 0) {
                 startInternalWithSound(intSec, null);
             }
@@ -752,7 +1557,6 @@
             return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
         }
 
-        // Утиліта для сповіщень
         function showNotification(message, type = 'success') {
             const notif = document.createElement('div');
             notif.className = `fixed bottom-6 right-6 z-50 px-5 py-3 rounded-2xl shadow-xl text-white text-sm font-medium flex items-center gap-3 transition-all transform translate-y-2 opacity-0 ${type === 'error' ? 'bg-red-500' : 'bg-slate-900 dark:bg-slate-700 border border-slate-700'}`;
