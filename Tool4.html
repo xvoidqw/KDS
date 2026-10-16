@@ -31,49 +31,56 @@
         body { font-family: 'Inter', sans-serif; }
     </style>
 </head>
-<body class="h-full bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 transition-colors duration-200">
+<body class="h-full bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 transition-colors duration-200 overflow-x-hidden">
 
-    <div class="min-h-full flex flex-col">
+    <div class="min-h-full flex flex-col max-w-full">
         
         <!-- Header / Search Bar -->
         <header class="sticky top-0 z-30 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-700 px-4 py-4 sm:px-8">
-            <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div class="flex items-center gap-3 w-full sm:w-auto">
-                    <div class="bg-orange-500 text-white p-3 rounded-2xl shadow-md">
+            <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-3 w-full md:w-auto">
+                    <div class="bg-orange-500 text-white p-3 rounded-2xl shadow-md shrink-0">
                         <i class="fa-solid fa-utensils text-xl"></i>
                     </div>
-                    <div>
-                        <h1 id="appTitleText" class="text-xl font-bold tracking-tight">Рецепти</h1>
-                        <p id="appSubTitleText" class="text-xs text-slate-500 dark:text-slate-400">Інтерактивна книга рецептів</p>
+                    <div class="min-w-0">
+                        <h1 id="appTitleText" class="text-xl font-bold tracking-tight truncate">Рецепти</h1>
+                        <p id="appSubTitleText" class="text-xs text-slate-500 dark:text-slate-400 truncate">Інтерактивна книга рецептів</p>
                     </div>
                 </div>
 
                 <!-- Search, Language Switcher and Add Button -->
-                <div class="flex items-center gap-3 w-full sm:w-auto flex-1 max-w-xl justify-end">
-                    <!-- Language Selector -->
-                    <select id="langSelect" onchange="changeLanguage(this.value)" class="px-3 py-2.5 bg-slate-100 dark:bg-slate-700/60 border border-transparent focus:border-orange-500 rounded-2xl text-xs font-medium focus:outline-none transition-all cursor-pointer">
-                        <option value="uk">🇺🇦 UK</option>
-                        <option value="en">🇬🇧 EN</option>
-                        <option value="es">🇪🇸 ES</option>
-                        <option value="de">🇩🇪 DE</option>
-                        <option value="fr">🇫🇷 FR</option>
-                        <option value="it">🇮🇹 IT</option>
-                        <option value="pl">🇵🇱 PL</option>
-                        <option value="pt">🇵🇹 PT</option>
-                        <option value="tr">🇹🇷 TR</option>
-                        <option value="ja">🇯🇵 JA</option>
-                        <option value="zh">🇨🇳 ZH</option>
-                        <option value="ko">🇰🇷 KO</option>
-                    </select>
+                <div class="flex items-center gap-2 sm:gap-3 w-full md:w-auto flex-1 max-w-xl justify-end flex-wrap sm:flex-nowrap">
+                    <!-- Custom Tailwind Language Selector Dropdown -->
+                    <div class="relative shrink-0" id="langDropdownContainer">
+                        <button onclick="toggleLangDropdown()" id="langDropdownBtn" class="flex items-center gap-2 px-3.5 py-2.5 bg-slate-100 dark:bg-slate-700/60 hover:bg-slate-200 dark:hover:bg-slate-700 border border-transparent focus:border-orange-500 rounded-2xl text-xs font-medium focus:outline-none transition-all cursor-pointer">
+                            <span id="currentLangLabel">🇺🇦 Українська</span>
+                            <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 transition-transform duration-200" id="langChevron"></i>
+                        </button>
+                        <!-- Виправлено позиціонування: right-0 та обмеження довжини + безпечний мобільний перенос -->
+                        <div id="langMenu" class="hidden absolute left-0 sm:left-auto sm:right-0 mt-2 w-48 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-xl py-2 z-50 max-h-60 overflow-y-auto">
+                            <div onclick="selectLanguage('uk', '🇺🇦 Українська')" class="px-4 py-2 text-xs font-medium hover:bg-orange-50 dark:hover:bg-orange-950/40 hover:text-orange-500 cursor-pointer transition-colors">🇺🇦 Українська</div>
+                            <div onclick="selectLanguage('en', '🇬🇧 English')" class="px-4 py-2 text-xs font-medium hover:bg-orange-50 dark:hover:bg-orange-950/40 hover:text-orange-500 cursor-pointer transition-colors">🇬🇧 English</div>
+                            <div onclick="selectLanguage('es', '🇪🇸 Español')" class="px-4 py-2 text-xs font-medium hover:bg-orange-50 dark:hover:bg-orange-950/40 hover:text-orange-500 cursor-pointer transition-colors">🇪🇸 Español</div>
+                            <div onclick="selectLanguage('de', '🇩🇪 Deutsch')" class="px-4 py-2 text-xs font-medium hover:bg-orange-50 dark:hover:bg-orange-950/40 hover:text-orange-500 cursor-pointer transition-colors">🇩🇪 Deutsch</div>
+                            <div onclick="selectLanguage('fr', '🇫🇷 Français')" class="px-4 py-2 text-xs font-medium hover:bg-orange-50 dark:hover:bg-orange-950/40 hover:text-orange-500 cursor-pointer transition-colors">🇫🇷 Français</div>
+                            <div onclick="selectLanguage('it', '🇮🇹 Italiano')" class="px-4 py-2 text-xs font-medium hover:bg-orange-50 dark:hover:bg-orange-950/40 hover:text-orange-500 cursor-pointer transition-colors">🇮🇹 Italiano</div>
+                            <div onclick="selectLanguage('pl', '🇵🇱 Polski')" class="px-4 py-2 text-xs font-medium hover:bg-orange-50 dark:hover:bg-orange-950/40 hover:text-orange-500 cursor-pointer transition-colors">🇵🇱 Polski</div>
+                            <div onclick="selectLanguage('pt', '🇵🇹 Português')" class="px-4 py-2 text-xs font-medium hover:bg-orange-50 dark:hover:bg-orange-950/40 hover:text-orange-500 cursor-pointer transition-colors">🇵🇹 Português</div>
+                            <div onclick="selectLanguage('tr', '🇹🇷 Türkçe')" class="px-4 py-2 text-xs font-medium hover:bg-orange-50 dark:hover:bg-orange-950/40 hover:text-orange-500 cursor-pointer transition-colors">🇹🇷 Türkçe</div>
+                            <div onclick="selectLanguage('ja', '🇯🇵 日本語')" class="px-4 py-2 text-xs font-medium hover:bg-orange-50 dark:hover:bg-orange-950/40 hover:text-orange-500 cursor-pointer transition-colors">🇯🇵 日本語</div>
+                            <div onclick="selectLanguage('zh', '🇨🇳 中文')" class="px-4 py-2 text-xs font-medium hover:bg-orange-50 dark:hover:bg-orange-950/40 hover:text-orange-500 cursor-pointer transition-colors">🇨🇳 中文</div>
+                            <div onclick="selectLanguage('ko', '🇰🇷 한국어')" class="px-4 py-2 text-xs font-medium hover:bg-orange-50 dark:hover:bg-orange-950/40 hover:text-orange-500 cursor-pointer transition-colors">🇰🇷 한국어</div>
+                        </div>
+                    </div>
 
-                    <div class="relative flex-1 sm:max-w-md">
+                    <div class="relative flex-1 min-w-[140px] sm:max-w-md">
                         <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-400">
                             <i class="fa-solid fa-search"></i>
                         </span>
                         <input type="text" id="searchInput" oninput="filterRecipes()" placeholder="Пошук рецептів..." 
                             class="w-full pl-10 pr-4 py-2.5 bg-slate-100 dark:bg-slate-700/60 border border-transparent focus:border-orange-500 dark:focus:border-orange-500 rounded-2xl text-sm focus:outline-none transition-all">
                     </div>
-                    <button onclick="openAddModal()" class="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 active:scale-95 text-white px-5 py-2.5 rounded-2xl font-medium text-sm shadow-lg shadow-orange-500/25 transition-all whitespace-nowrap">
+                    <button onclick="openAddModal()" class="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 active:scale-95 text-white px-4 sm:px-5 py-2.5 rounded-2xl font-medium text-sm shadow-lg shadow-orange-500/25 transition-all whitespace-nowrap shrink-0">
                         <i class="fa-solid fa-plus"></i>
                         <span id="addRecipeBtnText">Додати рецепт</span>
                     </button>
@@ -82,7 +89,7 @@
         </header>
 
         <!-- Main Content Grid -->
-        <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-8">
+        <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-8 box-border">
             <div id="recipeGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 <!-- Динамічно заповнюється карток рецептів -->
             </div>
@@ -102,10 +109,10 @@
     </div>
 
     <!-- Modal: Add Recipe Wizard -->
-    <div id="addModal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="bg-white dark:bg-slate-800 w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden border border-slate-200 dark:border-slate-700 flex flex-col max-h-[90vh]">
+    <div id="addModal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-white dark:bg-slate-800 w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden border border-slate-200 dark:border-slate-700 flex flex-col max-h-[90vh] my-auto">
             <!-- Modal Header -->
-            <div class="px-6 py-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
+            <div class="px-6 py-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between shrink-0">
                 <h3 id="wizardModalTitle" class="text-lg font-bold">Створення рецепта</h3>
                 <button onclick="closeAddModal()" class="w-8 h-8 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
                     <i class="fa-solid fa-xmark"></i>
@@ -120,36 +127,36 @@
     </div>
 
     <!-- Modal: View Simple Recipe (Full Screen) -->
-    <div id="viewSimpleModal" class="fixed inset-0 z-50 hidden bg-white dark:bg-slate-900 w-full h-full flex flex-col m-0 p-0 rounded-none border-0">
-        <div class="px-8 py-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-800/80">
-            <h3 id="simpleViewTitle" class="text-2xl font-bold">Назва рецепта</h3>
-            <button onclick="closeSimpleModal()" class="w-12 h-12 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
+    <div id="viewSimpleModal" class="fixed inset-0 z-50 hidden bg-white dark:bg-slate-900 w-full h-full flex flex-col m-0 p-0 rounded-none border-0 overflow-hidden">
+        <div class="px-6 sm:px-8 py-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-800/80 shrink-0">
+            <h3 id="simpleViewTitle" class="text-xl sm:text-2xl font-bold truncate pr-4">Назва рецепта</h3>
+            <button onclick="closeSimpleModal()" class="w-10 h-10 sm:w-12 sm:h-12 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors shrink-0">
                 <i class="fa-solid fa-xmark text-xl"></i>
             </button>
         </div>
-        <div class="p-12 overflow-y-auto flex-1 max-w-5xl mx-auto w-full">
-            <p id="simpleViewDesc" class="text-slate-700 dark:text-slate-200 whitespace-pre-line text-xl leading-relaxed"></p>
+        <div class="p-6 sm:p-12 overflow-y-auto flex-1 max-w-5xl mx-w-full sm:max-w-5xl w-full box-border">
+            <p id="simpleViewDesc" class="text-slate-700 dark:text-slate-200 whitespace-pre-line text-lg sm:text-xl leading-relaxed break-words"></p>
         </div>
-        <div class="px-8 py-6 border-t border-slate-200 dark:border-slate-800 flex justify-end bg-slate-50 dark:bg-slate-800/80">
-            <button onclick="closeSimpleModal()" id="closeDisplayBtnText" class="bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 px-8 py-3 rounded-2xl font-medium text-base transition-all">Закрити дисплей</button>
+        <div class="px-6 sm:px-8 py-6 border-t border-slate-200 dark:border-slate-800 flex justify-end bg-slate-50 dark:bg-slate-800/80 shrink-0">
+            <button onclick="closeSimpleModal()" id="closeDisplayBtnText" class="bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 px-6 sm:px-8 py-3 rounded-2xl font-medium text-base transition-all">Закрити дисплей</button>
         </div>
     </div>
 
     <!-- Modal: View Interactive Recipe Player (Full Screen) -->
-    <div id="viewInteractiveModal" class="fixed inset-0 z-50 hidden bg-white dark:bg-slate-900 w-full h-full flex flex-col m-0 p-0 rounded-none border-0">
+    <div id="viewInteractiveModal" class="fixed inset-0 z-50 hidden bg-white dark:bg-slate-900 w-full h-full flex flex-col m-0 p-0 rounded-none border-0 overflow-hidden">
         <!-- Top info bar -->
-        <div class="px-8 py-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-800/80">
-            <div>
-                <span id="playerRecipeCategory" class="text-xs font-semibold text-orange-500 uppercase tracking-wider">Інтерактивний процес</span>
-                <h3 id="playerRecipeTitle" class="text-2xl font-bold">Назва рецепта</h3>
+        <div class="px-6 sm:px-8 py-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-800/80 shrink-0">
+            <div class="min-w-0 pr-4">
+                <span id="playerRecipeCategory" class="text-xs font-semibold text-orange-500 uppercase tracking-wider block">Інтерактивний процес</span>
+                <h3 id="playerRecipeTitle" class="text-xl sm:text-2xl font-bold truncate">Назва рецепта</h3>
             </div>
-            <button onclick="closeInteractiveModal()" class="w-12 h-12 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
+            <button onclick="closeInteractiveModal()" class="w-10 h-10 sm:w-12 sm:h-12 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors shrink-0">
                 <i class="fa-solid fa-xmark text-xl"></i>
             </button>
         </div>
 
         <!-- Step content container -->
-        <div class="p-10 overflow-y-auto flex-1 flex flex-col justify-between max-w-5xl mx-auto w-full" id="playerStepContainer">
+        <div class="p-6 sm:p-10 overflow-y-auto flex-1 flex flex-col justify-between max-w-5xl mx-auto w-full box-border" id="playerStepContainer">
             <!-- Динамічний плеєр кроків -->
         </div>
     </div>
@@ -918,7 +925,7 @@
                 internalTimerSec: "내부 타이머 (초)",
                 externalTimerSec: "외부 타이머 (초)",
                 internalTimerTitle: "내부 타이머 (실행)",
-                externalTimerTitle: "외부 타이머 (대기)",
+                externalTimerTitle: "내부 타이머 (대기)",
                 stopWaiting: "대기 중지",
                 waitingStopped: "중지됨 ✓",
                 needConfirmation: "확인 필요",
@@ -939,22 +946,54 @@
             }
         };
 
-        // Поточна мова за замовчуванням
+        const langLabels = {
+            uk: "🇺🇦 Українська",
+            en: "🇬🇧 English",
+            es: "🇪🇸 Español",
+            de: "🇩🇪 Deutsch",
+            fr: "🇫🇷 Français",
+            it: "🇮🇹 Italiano",
+            pl: "🇵🇱 Polski",
+            pt: "🇵🇹 Português",
+            tr: "🇹🇷 Türkçe",
+            ja: "🇯🇵 日本語",
+            zh: "🇨🇳 中文",
+            ko: "🇰🇷 한국어"
+        };
+
         let currentLang = localStorage.getItem('app_lang') || 'uk';
 
         function t(key) {
             return translations[currentLang][key] || translations['uk'][key] || key;
         }
 
-        function changeLanguage(lang) {
+        function toggleLangDropdown() {
+            const menu = document.getElementById('langMenu');
+            const chevron = document.getElementById('langChevron');
+            menu.classList.toggle('hidden');
+            chevron.classList.toggle('rotate-180');
+        }
+
+        window.addEventListener('click', function(e) {
+            const container = document.getElementById('langDropdownContainer');
+            if (container && !container.contains(e.target)) {
+                document.getElementById('langMenu').classList.add('hidden');
+                document.getElementById('langChevron').classList.remove('rotate-180');
+            }
+        });
+
+        function selectLanguage(lang, label) {
             currentLang = lang;
             localStorage.setItem('app_lang', lang);
+            document.getElementById('currentLangLabel').innerText = label;
+            document.getElementById('langMenu').classList.add('hidden');
+            document.getElementById('langChevron').classList.remove('rotate-180');
             updateUIStrings();
             renderRecipes(document.getElementById('searchInput').value);
         }
 
         function updateUIStrings() {
-            document.getElementById('langSelect').value = currentLang;
+            document.getElementById('currentLangLabel').innerText = langLabels[currentLang] || "🇺🇦 Українська";
             document.getElementById('appTitleText').innerText = t('appTitle');
             document.getElementById('appSubTitleText').innerText = t('appSubTitle');
             document.getElementById('searchInput').placeholder = t('searchPlaceholder');
@@ -965,14 +1004,12 @@
             document.getElementById('closeDisplayBtnText').innerText = t('closeDisplay');
         }
 
-        // Завантаження рецептів із localStorage
         let recipes = JSON.parse(localStorage.getItem('saved_recipes')) || [];
 
         function saveRecipesToStorage() {
             localStorage.setItem('saved_recipes', JSON.stringify(recipes));
         }
 
-        // Змінні для стану створення рецепта
         let newRecipeDraft = {
             title: '',
             description: '',
@@ -1001,7 +1038,6 @@
             externalInterval: null
         };
 
-        // Web Audio API аудіо сигналів
         function playBeep(frequency = 587.33, duration = 0.2) {
             try {
                 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -1049,7 +1085,7 @@
 
             grid.innerHTML = filtered.map((recipe, index) => `
                 <div onclick="openRecipe(${index})" class="group bg-white dark:bg-slate-800 rounded-3xl p-6 shadow-sm hover:shadow-xl border border-slate-200 dark:border-slate-700 cursor-pointer transition-all duration-300 flex flex-col justify-between relative overflow-hidden">
-                    <div class="absolute top-0 right-0 w-32 h-32 bg-orange-500/5 rounded-full blur-2xl group-hover:bg-orange-500/10 transition-all"></div>
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-orange-500/5 rounded-full blur-2xl group-hover:bg-orange-500/10 transition-all pointer-events-none"></div>
                     <div>
                         <div class="flex items-center justify-between mb-4">
                             <span class="px-3 py-1 rounded-full text-xs font-semibold ${recipe.type === 'interactive' ? 'bg-orange-100 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'}">
@@ -1060,12 +1096,12 @@
                                 <i class="fa-solid fa-trash-can text-xs"></i>
                             </button>
                         </div>
-                        <h3 class="text-lg font-bold mb-2 group-hover:text-orange-500 transition-colors">${escapeHtml(recipe.title)}</h3>
-                        <p class="text-sm text-slate-500 dark:text-slate-400 line-clamp-2 mb-4">${escapeHtml(recipe.description || '')}</p>
+                        <h3 class="text-lg font-bold mb-2 group-hover:text-orange-500 transition-colors break-words">${escapeHtml(recipe.title)}</h3>
+                        <p class="text-sm text-slate-500 dark:text-slate-400 line-clamp-2 mb-4 break-words">${escapeHtml(recipe.description || '')}</p>
                     </div>
                     <div class="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-700/60 text-xs text-slate-400 font-medium">
-                        <span>${recipe.type === 'interactive' ? `${recipe.steps.length} ${t('stepsCount')}` : t('textRecipe')}</span>
-                        <span class="text-orange-500 flex items-center gap-1 group-hover:translate-x-1 transition-transform">${t('open')} <i class="fa-solid fa-arrow-right text-[10px]"></i></span>
+                        <span class="truncate pr-2">${recipe.type === 'interactive' ? `${recipe.steps.length} ${t('stepsCount')}` : t('textRecipe')}</span>
+                        <span class="text-orange-500 flex items-center gap-1 shrink-0 group-hover:translate-x-1 transition-transform">${t('open')} <i class="fa-solid fa-arrow-right text-[10px]"></i></span>
                     </div>
                 </div>
             `).join('');
@@ -1111,7 +1147,7 @@
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase mb-2">${t('recipeType')}</label>
-                        <div class="grid grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <label class="flex items-center gap-3 p-4 rounded-2xl border-2 cursor-pointer transition-all ${newRecipeDraft.type === 'simple' ? 'border-orange-500 bg-orange-500/5' : 'border-slate-200 dark:border-slate-700'}">
                                 <input type="radio" name="recipeType" value="simple" ${newRecipeDraft.type === 'simple' ? 'checked' : ''} onchange="setRecipeType('simple')" class="text-orange-500 focus:ring-orange-500">
                                 <div>
@@ -1236,7 +1272,7 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4 pt-2">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
                         <div>
                             <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase mb-1">${t('internalTimerSec')}</label>
                             <input type="number" id="stepInternalTime" value="${currentStepDraft.internalTime}" min="0" 
@@ -1249,7 +1285,7 @@
                         </div>
                     </div>
 
-                    <div class="pt-4 flex items-center justify-between border-t border-slate-200 dark:border-slate-700">
+                    <div class="pt-4 flex items-center justify-between border-t border-slate-200 dark:border-slate-700 flex-wrap gap-2">
                         <span class="text-xs text-slate-400 font-medium">${newRecipeDraft.steps.length}</span>
                         <div class="flex gap-2">
                             <button onclick="saveAndAddAnotherStep()" class="bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 px-4 py-2.5 rounded-2xl font-medium text-xs transition-all">${t('addAnotherStep')}</button>
@@ -1343,20 +1379,20 @@
 
             if (!step) {
                 container.innerHTML = `
-                    <div class="flex flex-col items-center justify-center text-center py-20 flex-1">
-                        <div class="w-24 h-24 bg-green-100 dark:bg-green-950/60 text-green-500 rounded-full flex items-center justify-center text-4xl mb-6 shadow-xl shadow-green-500/10">
+                    <div class="flex flex-col items-center justify-center text-center py-10 sm:py-20 flex-1">
+                        <div class="w-20 h-20 sm:w-24 sm:h-24 bg-green-100 dark:bg-green-950/60 text-green-500 rounded-full flex items-center justify-center text-3xl sm:text-4xl mb-6 shadow-xl shadow-green-500/10">
                             <i class="fa-solid fa-check"></i>
                         </div>
-                        <h3 class="text-3xl font-bold mb-3">${t('enjoyMeal')}</h3>
-                        <p class="text-base text-slate-500 dark:text-slate-400 mb-8 max-w-md">${t('enjoyDesc')} "${escapeHtml(recipe.title)}".</p>
-                        <button onclick="closeInteractiveModal()" class="bg-orange-500 hover:bg-orange-600 text-white px-10 py-4 rounded-2xl font-medium text-base transition-all shadow-xl shadow-orange-500/25">${t('closeDisplay')}</button>
+                        <h3 class="text-2xl sm:text-3xl font-bold mb-3">${t('enjoyMeal')}</h3>
+                        <p class="text-sm sm:text-base text-slate-500 dark:text-slate-400 mb-8 max-w-md px-4">${t('enjoyDesc')} "${escapeHtml(recipe.title)}".</p>
+                        <button onclick="closeInteractiveModal()" class="bg-orange-500 hover:bg-orange-600 text-white px-8 sm:px-10 py-3.5 sm:py-4 rounded-2xl font-medium text-sm sm:text-base transition-all shadow-xl shadow-orange-500/25">${t('closeDisplay')}</button>
                     </div>
                 `;
                 return;
             }
 
             let progressDots = recipe.steps.map((s, i) => `
-                <div class="h-2.5 flex-1 rounded-full ${i < idx ? 'bg-orange-500' : (i === idx ? 'bg-orange-400 animate-pulse' : 'bg-slate-200 dark:bg-slate-800')}"></div>
+                <div class="h-2 flex-1 rounded-full ${i < idx ? 'bg-orange-500' : (i === idx ? 'bg-orange-400 animate-pulse' : 'bg-slate-200 dark:bg-slate-800')}"></div>
             `).join('');
 
             let showInternalTimer = (step.actionType === '1' || step.actionType === '2') && step.internalTime > 0;
@@ -1364,62 +1400,62 @@
             let needConfirmation = step.actionType === '4';
 
             container.innerHTML = `
-                <div>
-                    <div class="flex items-center gap-3 mb-8">
+                <div class="space-y-6">
+                    <div class="flex items-center gap-2 mb-2">
                         ${progressDots}
                     </div>
 
-                    <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center justify-between">
                         <span class="bg-orange-100 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400 text-xs px-3.5 py-1.5 rounded-full font-bold">${t('stepOf')} ${idx + 1} ${t('of')} ${recipe.steps.length}</span>
                         <span class="text-xs text-slate-400 font-medium">${t('type')}: ${step.actionType}</span>
                     </div>
 
-                    <h2 class="text-4xl font-bold mb-4">${escapeHtml(step.title)}</h2>
-                    <p class="text-xl text-slate-600 dark:text-slate-300 leading-relaxed mb-10">${escapeHtml(step.description || '')}</p>
+                    <h2 class="text-2xl sm:text-4xl font-bold break-words">${escapeHtml(step.title)}</h2>
+                    <p class="text-base sm:text-xl text-slate-600 dark:text-slate-300 leading-relaxed break-words">${escapeHtml(step.description || '')}</p>
                     
-                    <div id="timerSection" class="grid grid-cols-1 sm:grid-cols-2 gap-8 mb-8">
+                    <div id="timerSection" class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-8">
                         ${showInternalTimer ? `
-                            <div class="p-8 rounded-3xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 flex flex-col justify-between">
+                            <div class="p-6 sm:p-8 rounded-3xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 flex flex-col justify-between">
                                 <div class="flex items-center justify-between mb-4">
                                     <span class="text-xs font-semibold text-slate-400 uppercase"><i class="fa-solid fa-hourglass-half mr-1"></i> ${t('internalTimerTitle')}</span>
-                                    <span id="internalTimeDisplay" class="text-3xl font-bold font-mono">${formatTime(step.internalTime)}</span>
+                                    <span id="internalTimeDisplay" class="text-2xl sm:text-3xl font-bold font-mono">${formatTime(step.internalTime)}</span>
                                 </div>
                                 <div class="text-xs text-orange-500 font-medium mt-2" id="internalStatus">...</div>
                             </div>
                         ` : ''}
 
                         ${showExternalTimer ? `
-                            <div class="p-8 rounded-3xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 flex flex-col justify-between">
+                            <div class="p-6 sm:p-8 rounded-3xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 flex flex-col justify-between">
                                 <div class="flex items-center justify-between mb-4">
                                     <span class="text-xs font-semibold text-slate-400 uppercase"><i class="fa-regular fa-clock mr-1"></i> ${t('externalTimerTitle')}</span>
-                                    <span id="externalTimeDisplay" class="text-3xl font-bold font-mono">${formatTime(step.externalTime)}</span>
+                                    <span id="externalTimeDisplay" class="text-2xl sm:text-3xl font-bold font-mono">${formatTime(step.externalTime)}</span>
                                 </div>
                                 <div class="flex items-center justify-between mt-4">
                                     <span class="text-xs text-blue-500 font-medium" id="externalStatus">...</span>
-                                    <button onclick="stopExternalTimerManual()" id="stopExternalBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-xs font-semibold transition-all shadow-md">${t('stopWaiting')}</button>
+                                    <button onclick="stopExternalTimerManual()" id="stopExternalBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-xs font-semibold transition-all shadow-md shrink-0">${t('stopWaiting')}</button>
                                 </div>
                             </div>
                         ` : ''}
                     </div>
 
                     ${needConfirmation ? `
-                        <div id="confirmSection" class="p-6 rounded-3xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 mb-8 flex items-center justify-between">
+                        <div id="confirmSection" class="p-5 sm:p-6 rounded-3xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                             <div class="flex items-center gap-4">
-                                <i class="fa-solid fa-triangle-exclamation text-amber-500 text-3xl"></i>
+                                <i class="fa-solid fa-triangle-exclamation text-amber-500 text-3xl shrink-0"></i>
                                 <div>
                                     <div class="font-bold text-base text-amber-800 dark:text-amber-200">${t('needConfirmation')}</div>
                                     <div class="text-sm text-amber-600 dark:text-amber-400">${t('needConfirmationDesc')}</div>
                                 </div>
                             </div>
-                            <button onclick="confirmAndStartInternal(${step.internalTime}, ${step.externalTime})" id="confirmBtn" class="bg-amber-500 hover:bg-amber-600 text-white px-8 py-3.5 rounded-2xl font-medium text-sm shadow-lg shadow-amber-500/20 transition-all whitespace-nowrap">${t('confirmAndStart')}</button>
+                            <button onclick="confirmAndStartInternal(${step.internalTime}, ${step.externalTime})" id="confirmBtn" class="bg-amber-500 hover:bg-amber-600 text-white px-6 sm:px-8 py-3.5 rounded-2xl font-medium text-sm shadow-lg shadow-amber-500/20 transition-all whitespace-nowrap w-full sm:w-auto">${t('confirmAndStart')}</button>
                         </div>
                     ` : ''}
                 </div>
 
                 <!-- Footer Navigation -->
-                <div class="pt-8 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
-                    <button onclick="prevStep()" ${idx === 0 ? 'disabled' : ''} class="px-8 py-4 rounded-2xl text-base font-medium hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-40 transition-colors">${t('prevStep')}</button>
-                    <button onclick="nextStep()" class="bg-orange-500 hover:bg-orange-600 text-white px-10 py-4 rounded-2xl text-base font-medium shadow-xl shadow-orange-500/25 transition-all">${t('nextStep')}</button>
+                <div class="pt-6 sm:pt-8 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between gap-4 shrink-0">
+                    <button onclick="prevStep()" ${idx === 0 ? 'disabled' : ''} class="px-6 sm:px-8 py-3.5 sm:py-4 rounded-2xl text-sm sm:text-base font-medium hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-40 transition-colors">${t('prevStep')}</button>
+                    <button onclick="nextStep()" class="bg-orange-500 hover:bg-orange-600 text-white px-8 sm:px-10 py-3.5 sm:py-4 rounded-2xl text-sm sm:text-base font-medium shadow-xl shadow-orange-500/25 transition-all">${t('nextStep')}</button>
                 </div>
             `;
 
@@ -1542,7 +1578,7 @@
             if (activePlayer.currentStepIndex > 0) {
                 stopTimer();
                 stopExternalTimer();
-                activePlayer.currentStepIndex--;
+            activePlayer.currentStepIndex--;
                 renderInteractivePlayerStep();
             }
         }
@@ -1555,8 +1591,8 @@
 
         function showNotification(message, type = 'success') {
             const notif = document.createElement('div');
-            notif.className = `fixed bottom-6 right-6 z-50 px-5 py-3 rounded-2xl shadow-xl text-white text-sm font-medium flex items-center gap-3 transition-all transform translate-y-2 opacity-0 ${type === 'error' ? 'bg-red-500' : 'bg-slate-900 dark:bg-slate-700 border border-slate-700'}`;
-            notif.innerHTML = `<i class="fa-solid ${type === 'error' ? 'fa-circle-exclamation text-white' : 'fa-circle-check text-orange-400'}"></i> <span>${escapeHtml(message)}</span>`;
+            notif.className = `fixed bottom-6 right-6 z-50 px-5 py-3 rounded-2xl shadow-xl text-white text-sm font-medium flex items-center gap-3 transition-all transform translate-y-2 opacity-0 max-w-[90vw] ${type === 'error' ? 'bg-red-500' : 'bg-slate-900 dark:bg-slate-700 border border-slate-700'}`;
+            notif.innerHTML = `<i class="fa-solid ${type === 'error' ? 'fa-circle-exclamation text-white' : 'fa-circle-check text-orange-400'} shrink-0"></i> <span class="break-words">${escapeHtml(message)}</span>`;
             document.body.appendChild(notif);
 
             setTimeout(() => {
@@ -1567,6 +1603,12 @@
                 notif.classList.add('translate-y-2', 'opacity-0');
                 setTimeout(() => notif.remove(), 300);
             }, 3000);
+        }
+
+        function formatTime(sec) {
+            const m = Math.floor(sec / 60);
+            const s = sec % 60;
+            return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
         }
 
         function escapeHtml(str) {
