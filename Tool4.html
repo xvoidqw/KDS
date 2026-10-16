@@ -3,889 +3,776 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Рецепти</title>
+    <title>Кухонний Дисплей - Рецепти</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
-            darkMode: 'media',
+            darkMode: 'media', // Автоматичне перемикання теми на основі налаштувань девайса
             theme: {
-                extend: {}
+                extend: {
+                    colors: {
+                        kitchen: {
+                            50: '#fdf8f6',
+                            100: '#f2e8e5',
+                            500: '#f97316',
+                            600: '#ea580c',
+                            700: '#c2410c',
+                        }
+                    }
+                }
             }
         }
     </script>
+    <!-- FontAwesome для іконок -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+    </style>
 </head>
-<body class="h-full bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 flex flex-col">
+<body class="h-full bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 transition-colors duration-200">
 
-    <!-- Верхня панель -->
-    <header class="bg-white dark:bg-gray-800 shadow p-4 flex flex-wrap justify-between items-center gap-4">
-        <h1 id="ui-title" class="text-2xl font-bold">Рецепти</h1>
+    <div class="min-h-full flex flex-col">
         
-        <div class="flex items-center gap-3 flex-1 max-w-md">
-            <input type="text" id="searchInput" oninput="filterRecipes()" placeholder="Пошук рецептів..." 
-                class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <!-- Header / Search Bar -->
+        <header class="sticky top-0 z-30 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-700 px-4 py-4 sm:px-8">
+            <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-3 w-full sm:w-auto">
+                    <div class="bg-orange-500 text-white p-3 rounded-2xl shadow-md">
+                        <i class="fa-solid fa-utensils text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold tracking-tight">Кухонний Дисплей</h1>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Інтерактивна книга рецептів</p>
+                    </div>
+                </div>
+
+                <!-- Search and Add Button -->
+                <div class="flex items-center gap-3 w-full sm:w-auto flex-1 max-w-xl justify-end">
+                    <div class="relative flex-1 sm:max-w-md">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-400">
+                            <i class="fa-solid fa-search"></i>
+                        </span>
+                        <input type="text" id="searchInput" oninput="filterRecipes()" placeholder="Пошук рецептів за назвою..." 
+                            class="w-full pl-10 pr-4 py-2.5 bg-slate-100 dark:bg-slate-700/60 border border-transparent focus:border-orange-500 dark:focus:border-orange-500 rounded-2xl text-sm focus:outline-none transition-all">
+                    </div>
+                    <button onclick="openAddModal()" class="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 active:scale-95 text-white px-5 py-2.5 rounded-2xl font-medium text-sm shadow-lg shadow-orange-500/25 transition-all whitespace-nowrap">
+                        <i class="fa-solid fa-plus"></i>
+                        <span>Додати рецепт</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content Grid -->
+        <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-8">
+            <div id="recipeGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Динамічно заповнюється карток рецептів -->
+            </div>
+
+            <!-- Empty State -->
+            <div id="emptyState" class="hidden flex-col items-center justify-center py-20 text-center">
+                <div class="w-20 h-20 bg-slate-200 dark:bg-slate-800 rounded-3xl flex items-center justify-center text-slate-400 text-3xl mb-4">
+                    <i class="fa-solid fa-bowl-food"></i>
+                </div>
+                <h3 class="text-lg font-semibold mb-1">Рецептів не знайдено</h3>
+                <p class="text-sm text-slate-500 dark:text-slate-400 max-w-sm mb-6">Створіть свій перший кулінарний шедевр, натиснувши кнопку нижче.</p>
+                <button onclick="openAddModal()" class="bg-orange-500 hover:bg-orange-600 text-white px-5 py-2.5 rounded-2xl font-medium text-sm transition-all">
+                    Додати рецепт
+                </button>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal: Add Recipe Wizard -->
+    <div id="addModal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-800 w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden border border-slate-200 dark:border-slate-700 flex flex-col max-h-[90vh]">
+            <!-- Modal Header -->
+            <div class="px-6 py-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                <h3 id="wizardModalTitle" class="text-lg font-bold">Створення рецепта (Крок 1 з 2)</h3>
+                <button onclick="closeAddModal()" class="w-8 h-8 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Modal Body Content -->
+            <div class="p-6 overflow-y-auto flex-1" id="wizardBody">
+                <!-- Динамічний вміст майстра -->
+            </div>
         </div>
+    </div>
 
-        <div class="flex items-center gap-3">
-            <!-- Селектор мови (власне меню) -->
-            <select id="langSelect" onchange="changeLanguage(this.value)" class="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 focus:outline-none">
-                <option value="uk">Українська</option>
-                <option value="en">English</option>
-                <option value="es">Español</option>
-                <option value="de">Deutsch</option>
-                <option value="fr">Français</option>
-                <option value="it">Italiano</option>
-                <option value="pl">Polski</option>
-                <option value="pt">Português</option>
-                <option value="tr">Türkçe</option>
-                <option value="ja">日本語</option>
-                <option value="zh">中文</option>
-                <option value="ko">한국어</option>
-            </select>
-
-            <button onclick="openAddModal()" id="ui-add-btn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition">
-                + Додати рецепт
+    <!-- Modal: View Simple Recipe -->
+    <div id="viewSimpleModal" class="fixed inset-0 z-50 hidden bg-white dark:bg-slate-900 w-full h-full flex flex-col m-0 p-0 rounded-none border-0">
+        <div class="px-8 py-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-800/80">
+            <h3 id="simpleViewTitle" class="text-2xl font-bold">Назва рецепта</h3>
+            <button onclick="closeSimpleModal()" class="w-12 h-12 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
+                <i class="fa-solid fa-xmark text-xl"></i>
             </button>
         </div>
-    </header>
-
-    <!-- Основний контент (Сітка рецептів) -->
-    <main class="flex-1 p-6 overflow-y-auto">
-        <div id="recipesGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            <!-- Динамічні картки -->
+        <div class="p-12 overflow-y-auto flex-1 max-w-5xl mx-auto w-full">
+            <p id="simpleViewDesc" class="text-slate-700 dark:text-slate-200 whitespace-pre-line text-xl leading-relaxed"></p>
         </div>
-        <div id="noRecipesText" class="text-center text-gray-500 dark:text-gray-400 mt-20 text-xl hidden">
-            Немає рецептів. Додайте перший!
-        </div>
-    </main>
-
-    <!-- Модальне вікно створення рецепта (Крок 1) -->
-    <div id="addModal" class="fixed inset-0 bg-black/60 flex items-center justify-center p-4 hidden z-50">
-        <div class="bg-white dark:bg-gray-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl">
-            <h2 id="ui-modal-title" class="text-xl font-bold mb-4">Створення рецепта</h2>
-            
-            <div class="space-y-4">
-                <div>
-                    <label id="ui-label-name" class="block text-sm font-medium mb-1">Назва рецепта</label>
-                    <input type="text" id="newRecipeName" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent">
-                </div>
-                <div>
-                    <label id="ui-label-desc" class="block text-sm font-medium mb-1">Опис рецепта</label>
-                    <textarea id="newRecipeDesc" rows="3" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent"></textarea>
-                </div>
-                <div>
-                    <label id="ui-label-type" class="block text-sm font-medium mb-1">Тип рецепта</label>
-                    <select id="newRecipeType" onchange="toggleRecipeTypeInputs()" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent">
-                        <option value="simple" id="ui-type-simple">Простий текст</option>
-                        <option value="interactive" id="ui-type-interactive">Інтерактивний рецепт</option>
-                    </select>
-                </div>
-
-                <!-- Блок для простого тексту -->
-                <div id="simpleContentContainer">
-                    <label id="ui-label-fulltext" class="block text-sm font-medium mb-1">Повний текст опису</label>
-                    <textarea id="newRecipeFullText" rows="5" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent"></textarea>
-                </div>
-            </div>
-
-            <div class="flex justify-end gap-3 mt-6">
-                <button onclick="closeAddModal()" id="ui-btn-cancel" class="px-4 py-2 rounded-lg bg-gray-200 dark:bg-gray-700 font-medium">Скасувати</button>
-                <button onclick="handleNextStep()" id="ui-btn-next" class="px-4 py-2 rounded-lg bg-blue-600 text-white font-medium">Далі</button>
-            </div>
+        <div class="px-8 py-6 border-t border-slate-200 dark:border-slate-800 flex justify-end bg-slate-50 dark:bg-slate-800/80">
+            <button onclick="closeSimpleModal()" class="bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 px-8 py-3 rounded-2xl font-medium text-base transition-all">Закрити дисплей</button>
         </div>
     </div>
 
-    <!-- Модальне вікно для додавання кроків інтерактивного рецепта -->
-    <div id="stepModal" class="fixed inset-0 bg-black/60 flex items-center justify-center p-4 hidden z-50">
-        <div class="bg-white dark:bg-gray-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl">
-            <h2 id="ui-step-modal-title" class="text-xl font-bold mb-4">Додати крок рецепта</h2>
-            
-            <div class="space-y-4">
-                <div>
-                    <label id="ui-step-name-label" class="block text-sm font-medium mb-1">Назва кроку</label>
-                    <input type="text" id="stepName" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent">
-                </div>
-                <div>
-                    <label id="ui-step-desc-label" class="block text-sm font-medium mb-1">Опис кроку (за бажанням)</label>
-                    <textarea id="stepDesc" rows="2" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent"></textarea>
-                </div>
-                <div>
-                    <label id="ui-step-action-type" class="block text-sm font-medium mb-1">Тип дії кроку</label>
-                    <select id="stepActionType" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent">
-                        <option value="1" id="ui-act-1">1. Дія із внутрішнім і зовнішнім таймером</option>
-                        <option value="2" id="ui-act-2">2. Дія із внутрішнім таймером</option>
-                        <option value="3" id="ui-act-3">3. Дія із зовнішнім таймером</option>
-                        <option value="4" id="ui-act-4">4. Дія із зовнішнім таймером та підтвердженням для внутрішнього</option>
-                    </select>
-                </div>
+    <!-- Modal: View Interactive Recipe Player -->
+    <div id="viewInteractiveModal" class="fixed inset-0 z-50 hidden bg-white dark:bg-slate-900 w-full h-full flex flex-col m-0 p-0 rounded-none border-0">
+        <!-- Top info bar -->
+        <div class="px-8 py-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-800/80">
+            <div>
+                <span id="playerRecipeCategory" class="text-xs font-semibold text-orange-500 uppercase tracking-wider">Інтерактивний процес</span>
+                <h3 id="playerRecipeTitle" class="text-2xl font-bold">Назва рецепта</h3>
             </div>
-
-            <div class="flex justify-end gap-3 mt-6">
-                <button onclick="saveStepAndAddAnother()" id="ui-btn-add-another" class="px-4 py-2 rounded-lg bg-gray-200 dark:bg-gray-700 font-medium">+ Додати крок</button>
-                <button onclick="finishInteractiveRecipe()" id="ui-btn-finish" class="px-4 py-2 rounded-lg bg-green-600 text-white font-medium">Завершити</button>
-            </div>
+            <button onclick="closeInteractiveModal()" class="w-12 h-12 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
         </div>
-    </div>
 
-    <!-- Повноекранний перегляд рецепта -->
-    <div id="viewModal" class="fixed inset-0 bg-white dark:bg-gray-900 z-50 hidden flex flex-col">
-        <header class="p-4 border-b border-gray-200 dark:border-gray-800 flex justify-between items-center">
-            <h2 id="viewTitle" class="text-2xl font-bold"></h2>
-            <button onclick="closeViewModal()" id="ui-btn-close" class="text-lg font-bold px-4 py-2 bg-gray-200 dark:bg-gray-800 rounded-lg">✕</button>
-        </header>
-        <div id="viewContent" class="flex-1 p-8 overflow-y-auto max-w-4xl mx-auto w-full flex flex-col justify-center">
-            <!-- Динамічний вміст перегляду -->
+        <!-- Step content container -->
+        <div class="p-10 overflow-y-auto flex-1 flex flex-col justify-between max-w-5xl mx-auto w-full" id="playerStepContainer">
+            <!-- Динамічний плеєр кроків -->
         </div>
     </div>
 
     <script>
-        // Переклади інтерфейсу для 12 мов
-        const translations = {
-            uk: {
-                appTitle: "Рецепти",
-                searchPlaceholder: "Пошук рецептів...",
-                addBtn: "+ Додати рецепт",
-                noRecipes: "Немає рецептів. Додайте перший!",
-                modalTitle: "Створення рецепта",
-                labelName: "Назва рецепта",
-                labelDesc: "Опис рецепта",
-                labelType: "Тип рецепта",
-                typeSimple: "Простий текст",
-                typeInteractive: "Інтерактивний рецепт",
-                labelFullText: "Повний текст опису",
-                cancel: "Скасувати",
-                next: "Далі",
-                stepModalTitle: "Додати крок рецепта",
-                stepNameLabel: "Назва кроку",
-                stepDescLabel: "Опис кроку (за бажанням)",
-                stepActionType: "Тип дії кроку",
-                act1: "1. Дія із внутрішнім і зовнішнім таймером",
-                act2: "2. Дія із внутрішнім таймером",
-                act3: "3. Дія із зовнішнім таймером",
-                act4: "4. Дія із зовнішнім таймером та підтвердженням для внутрішнього",
-                addAnotherStep: "+ Додати крок",
-                finish: "Завершити",
-                startInternal: "Запустити внутрішній таймер",
-                confirmInternal: "Підтвердити внутрішній таймер",
-                stopExternal: "Зупинити зовнішній таймер",
-                nextStep: "Наступний крок",
-                completeRecipe: "Рецепт завершено!"
-            },
-            en: {
-                appTitle: "Recipes",
-                searchPlaceholder: "Search recipes...",
-                addBtn: "+ Add Recipe",
-                noRecipes: "No recipes yet. Add one!",
-                modalTitle: "Create Recipe",
-                labelName: "Recipe Name",
-                labelDesc: "Recipe Description",
-                labelType: "Recipe Type",
-                typeSimple: "Simple Text",
-                typeInteractive: "Interactive Recipe",
-                labelFullText: "Full Description Text",
-                cancel: "Cancel",
-                next: "Next",
-                stepModalTitle: "Add Recipe Step",
-                stepNameLabel: "Step Name",
-                stepDescLabel: "Step Description (optional)",
-                stepActionType: "Step Action Type",
-                act1: "1. Action with internal and external timer",
-                act2: "2. Action with internal timer",
-                act3: "3. Action with external timer",
-                act4: "4. Action with external timer and internal confirmation",
-                addAnotherStep: "+ Add Step",
-                finish: "Finish",
-                startInternal: "Start Internal Timer",
-                confirmInternal: "Confirm Internal Timer",
-                stopExternal: "Stop External Timer",
-                nextStep: "Next Step",
-                completeRecipe: "Recipe Completed!"
-            },
-            es: {
-                appTitle: "Recetas",
-                searchPlaceholder: "Buscar recetas...",
-                addBtn: "+ Añadir Receta",
-                noRecipes: "No hay recetas. ¡Añade una!",
-                modalTitle: "Crear Receta",
-                labelName: "Nombre de la receta",
-                labelDesc: "Descripción de la receta",
-                labelType: "Tipo de receta",
-                typeSimple: "Texto Simple",
-                typeInteractive: "Receta Interactiva",
-                labelFullText: "Texto completo",
-                cancel: "Cancelar",
-                next: "Siguiente",
-                stepModalTitle: "Añadir Paso",
-                stepNameLabel: "Nombre del paso",
-                stepDescLabel: "Descripción (opcional)",
-                stepActionType: "Tipo de acción",
-                act1: "1. Acción con temporizador interno y externo",
-                act2: "2. Acción con temporizador interno",
-                act3: "3. Acción con temporizador externo",
-                act4: "4. Acción con temporizador externo y confirmación interna",
-                addAnotherStep: "+ Añadir Paso",
-                finish: "Finalizar",
-                startInternal: "Iniciar Temporizador Interno",
-                confirmInternal: "Confirmar Temporizador Interno",
-                stopExternal: "Detener Temporizador Externo",
-                nextStep: "Siguiente Paso",
-                completeRecipe: "¡Receta Completada!"
-            },
-            de: {
-                appTitle: "Rezepte",
-                searchPlaceholder: "Rezepte suchen...",
-                addBtn: "+ Rezept hinzufügen",
-                noRecipes: "Keine Rezepte. Fügen Sie eins hinzu!",
-                modalTitle: "Rezept erstellen",
-                labelName: "Rezeptname",
-                labelDesc: "Rezeptbeschreibung",
-                labelType: "Rezepttyp",
-                typeSimple: "Einfacher Text",
-                typeInteractive: "Interaktives Rezept",
-                labelFullText: "Vollständiger Text",
-                cancel: "Abbrechen",
-                next: "Weiter",
-                stepModalTitle: "Schritt hinzufügen",
-                stepNameLabel: "Schrittname",
-                stepDescLabel: "Beschreibung (optional)",
-                stepActionType: "Aktionstyp",
-                act1: "1. Aktion mit internem und externem Timer",
-                act2: "2. Aktion mit internem Timer",
-                act3: "3. Aktion mit externem Timer",
-                act4: "4. Aktion mit externem Timer und interner Bestätigung",
-                addAnotherStep: "+ Schritt hinzufügen",
-                finish: "Fertig",
-                startInternal: "Interne Zeit starten",
-                confirmInternal: "Interne Zeit bestätigen",
-                stopExternal: "Externe Zeit stoppen",
-                nextStep: "Nächster Schritt",
-                completeRecipe: "Rezept abgeschlossen!"
-            },
-            fr: {
-                appTitle: "Recettes",
-                searchPlaceholder: "Rechercher des recettes...",
-                addBtn: "+ Ajouter une recette",
-                noRecipes: "Aucune recette. Ajoutez-en une!",
-                modalTitle: "Créer une recette",
-                labelName: "Nom de la recette",
-                labelDesc: "Description de la recette",
-                labelType: "Type de recette",
-                typeSimple: "Texte simple",
-                typeInteractive: "Recette interactive",
-                labelFullText: "Texte complet",
-                cancel: "Annuler",
-                next: "Suivant",
-                stepModalTitle: "Ajouter une étape",
-                stepNameLabel: "Nom de l'étape",
-                stepDescLabel: "Description (optionnelle)",
-                stepActionType: "Type d'action",
-                act1: "1. Action avec minuteur interne et externe",
-                act2: "2. Action avec minuteur interne",
-                act3: "3. Action avec minuteur externe",
-                act4: "4. Action avec minuteur externe et confirmation interne",
-                addAnotherStep: "+ Ajouter une étape",
-                finish: "Terminer",
-                startInternal: "Démarrer minuteur interne",
-                confirmInternal: "Confirmer minuteur interne",
-                stopExternal: "Arrêter minuteur externe",
-                nextStep: "Étape suivante",
-                completeRecipe: "Recette terminée !"
-            },
-            it: {
-                appTitle: "Ricette",
-                searchPlaceholder: "Cerca ricette...",
-                addBtn: "+ Aggiungi Ricetta",
-                noRecipes: "Nessuna ricetta. Aggiungine una!",
-                modalTitle: "Crea Ricetta",
-                labelName: "Nome della ricetta",
-                labelDesc: "Descrizione della ricetta",
-                labelType: "Tipo di ricetta",
-                typeSimple: "Testo semplice",
-                typeInteractive: "Ricetta interattiva",
-                labelFullText: "Testo completo",
-                cancel: "Annulla",
-                next: "Avanti",
-                stepModalTitle: "Aggiungi passaggio",
-                stepNameLabel: "Nome del passaggio",
-                stepDescLabel: "Descrizione (opzionale)",
-                stepActionType: "Tipo di azione",
-                act1: "1. Azione con timer interno ed esterno",
-                act2: "2. Azione con timer interno",
-                act3: "3. Azione con timer esterno",
-                act4: "4. Azione con timer esterno e conferma interna",
-                addAnotherStep: "+ Aggiungi passaggio",
-                finish: "Fine",
-                startInternal: "Avvia timer interno",
-                confirmInternal: "Conferma timer interno",
-                stopExternal: "Ferma timer esterno",
-                nextStep: "Passaggio successivo",
-                completeRecipe: "Ricetta completata!"
-            },
-            pl: {
-                appTitle: "Przepisy",
-                searchPlaceholder: "Szukaj przepisów...",
-                addBtn: "+ Dodaj przepis",
-                noRecipes: "Brak przepisów. Dodaj pierwszy!",
-                modalTitle: "Utwórz przepis",
-                labelName: "Nazwa przepisu",
-                labelDesc: "Opis przepisu",
-                labelType: "Typ przepisu",
-                typeSimple: "Prosty tekst",
-                typeInteractive: "Interaktywny przepis",
-                labelFullText: "Pełny tekst",
-                cancel: "Anuluj",
-                next: "Dalej",
-                stepModalTitle: "Dodaj krok",
-                stepNameLabel: "Nazwa kroku",
-                stepDescLabel: "Opis (opcjonalnie)",
-                stepActionType: "Typ działania",
-                act1: "1. Działanie z timerem wewnętrznym i zewnętrznym",
-                act2: "2. Działanie z timerem wewnętrznym",
-                act3: "3. Działanie z timerem zewnętrznym",
-                act4: "4. Działanie z timerem zewnętrznym i potwierdzeniem wewnętrznym",
-                addAnotherStep: "+ Dodaj krok",
-                finish: "Zakończ",
-                startInternal: "Uruchom timer wewnętrzny",
-                confirmInternal: "Potwierdź timer wewnętrzny",
-                stopExternal: "Zatrzymaj timer zewnętrzny",
-                nextStep: "Następny krok",
-                completeRecipe: "Przepis zakończony!"
-            },
-            pt: {
-                appTitle: "Receitas",
-                searchPlaceholder: "Pesquisar receitas...",
-                addBtn: "+ Adicionar Receita",
-                noRecipes: "Sem receitas. Adicione uma!",
-                modalTitle: "Criar Receita",
-                labelName: "Nome da receita",
-                labelDesc: "Descrição da receita",
-                labelType: "Tipo de receita",
-                typeSimple: "Texto Simples",
-                typeInteractive: "Receita Interativa",
-                labelFullText: "Texto completo",
-                cancel: "Cancelar",
-                next: "Seguinte",
-                stepModalTitle: "Adicionar Passo",
-                stepNameLabel: "Nome do passo",
-                stepDescLabel: "Descrição (opcional)",
-                stepActionType: "Tipo de ação",
-                act1: "1. Ação com temporizador interno e externo",
-                act2: "2. Ação com temporizador interno",
-                act3: "3. Ação com temporizador externo",
-                act4: "4. Ação com temporizador externo e confirmação interna",
-                addAnotherStep: "+ Adicionar Passo",
-                finish: "Concluir",
-                startInternal: "Iniciar Temporizador Interno",
-                confirmInternal: "Confirmar Temporizador Interno",
-                stopExternal: "Parar Temporizador Externo",
-                nextStep: "Próximo Passo",
-                completeRecipe: "Receita Concluída!"
-            },
-            tr: {
-                appTitle: "Tarifler",
-                searchPlaceholder: "Tarif ara...",
-                addBtn: "+ Tarif Ekle",
-                noRecipes: "Henüz tarif yok. Bir tane ekleyin!",
-                modalTitle: "Tarif Oluştur",
-                labelName: "Tarif Adı",
-                labelDesc: "Tarif Açıklaması",
-                labelType: "Tarif Türü",
-                typeSimple: "Düz Metin",
-                typeInteractive: "İnteraktif Tarif",
-                labelFullText: "Tam Açıklama Metni",
-                cancel: "İptal",
-                next: "İleri",
-                stepModalTitle: "Adım Ekle",
-                stepNameLabel: "Adım Adı",
-                stepDescLabel: "Adım Açıklaması (isteğe bağlı)",
-                stepActionType: "Adım Eylem Türü",
-                act1: "1. İç ve dış zamanlayıcılı eylem",
-                act2: "2. İç zamanlayıcılı eylem",
-                act3: "3. Dış zamanlayıcılı eylem",
-                act4: "4. Dış zamanlayıcılı ve iç onaylı eylem",
-                addAnotherStep: "+ Adım Ekle",
-                finish: "Bitir",
-                startInternal: "İç Zamanlayıcıyı Başlat",
-                confirmInternal: "İç Zamanlayıcıyı Onayla",
-                stopExternal: "Dış Zamanlayıcıyı Durdur",
-                nextStep: "Sonraki Adım",
-                completeRecipe: "Tarif Tamamlandı!"
-            },
-            ja: {
-                appTitle: "レシピ",
-                searchPlaceholder: "レシピを検索...",
-                addBtn: "+ レシピを追加",
-                no_recipes: "レシピがありません。追加してください！",
-                modalTitle: "レシピ作成",
-                labelName: "レシピ名",
-                labelDesc: "レシピの説明",
-                labelType: "レシピタイプ",
-                typeSimple: "シンプルテキスト",
-                typeInteractive: "インタラクティブレシピ",
-                labelFullText: "詳細説明",
-                cancel: "キャンセル",
-                next: "次へ",
-                stepModalTitle: "ステップを追加",
-                stepNameLabel: "ステップ名",
-                stepDescLabel: "説明（任意）",
-                stepActionType: "アクションタイプ",
-                act1: "1. 内部および外部タイマー付きアクション",
-                act2: "2. 内部タイマー付きアクション",
-                act3: "3. 外部タイマー付きアクション",
-                act4: "4. 外部タイマーおよび内部確認付きアクション",
-                addAnotherStep: "+ ステップを追加",
-                finish: "完了",
-                startInternal: "内部タイマー開始",
-                confirmInternal: "内部タイマー確認",
-                stopExternal: "外部タイマー停止",
-                nextStep: "次のステップ",
-                completeRecipe: "レシピ完了！"
-            },
-            zh: {
-                appTitle: "食谱",
-                searchPlaceholder: "搜索食谱...",
-                addBtn: "+ 添加食谱",
-                noRecipes: "暂无食谱。添加一个吧！",
-                modalTitle: "创建食谱",
-                labelName: "食谱名称",
-                labelDesc: "食谱描述",
-                labelType: "食谱类型",
-                typeSimple: "纯文本",
-                typeInteractive: "互动食谱",
-                labelFullText: "完整描述",
-                cancel: "取消",
-                next: "下一步",
-                stepModalTitle: "添加步骤",
-                stepNameLabel: "步骤名称",
-                stepDescLabel: "步骤描述（可选）",
-                stepActionType: "步骤动作类型",
-                act1: "1. 带有内部和外部定时器的动作",
-                act2: "2. 带有内部定时器的动作",
-                act3: "3. 带有外部定时器的动作",
-                act4: "4. 带有外部定时器和内部确认的动作",
-                addAnotherStep: "+ 添加步骤",
-                finish: "完成",
-                startInternal: "启动内部定时器",
-                confirmInternal: "确认内部定时器",
-                stopExternal: "停止外部定时器",
-                nextStep: "下一步",
-                completeRecipe: "食谱完成！"
-            },
-            ko: {
-                appTitle: "레시피",
-                searchPlaceholder: "레시피 검색...",
-                addBtn: "+ 레시피 추가",
-                noRecipes: "레시피가 없습니다. 첫 번째 레시피를 추가하세요!",
-                modalTitle: "레시피 만들기",
-                labelName: "레시피 이름",
-                labelDesc: "레시피 설명",
-                labelType: "레시피 유형",
-                typeSimple: "단순 텍스트",
-                typeInteractive: "인터랙티브 레시피",
-                labelFullText: "전체 설명",
-                cancel: "취소",
-                next: "다음",
-                stepModalTitle: "단계 추가",
-                stepNameLabel: "단계 이름",
-                stepDescLabel: "단계 설명 (선택사항)",
-                stepActionType: "단계 작업 유형",
-                act1: "1. 내부 및 외부 타이머가 있는 작업",
-                act2: "2. 내부 타이머가 있는 작업",
-                act3: "3. 외부 타이머가 있는 작업",
-                act4: "4. 외부 타이머 및 내부 확인이 있는 작업",
-                addAnotherStep: "+ 단계 추가",
-                finish: "완료",
-                startInternal: "내부 타이머 시작",
-                confirmInternal: "내부 타이머 확인",
-                stopExternal: "외부 타이머 정지",
-                nextStep: "다음 단계",
-                completeRecipe: "레시피 완료!"
-            }
+        // Початкові приклади рецептів у пам'яті (порожній масив)
+        let recipes = [];
+
+        // Змінні для стану створення рецепта
+        let newRecipeDraft = {
+            title: '',
+            description: '',
+            type: 'simple', // 'simple' або 'interactive'
+            content: '',
+            steps: []
         };
 
-        let currentLang = 'uk';
+        // Тимчасовий крок під час створення інтерактивного рецепта
+        let currentStepDraft = {
+            title: '',
+            description: '',
+            actionType: '1', // 1, 2, 3, 4
+            internalTime: 0,
+            externalTime: 0,
+            requireManualConfirm: false
+        };
 
-        function changeLanguage(lang) {
-            currentLang = lang;
-            const t = translations[lang] || translations['uk'];
+        // Стан активного плеєра
+        let activePlayer = {
+            recipe: null,
+            currentStepIndex: 0,
+            timerInterval: null,
+            timeLeft: 0,
+            externalTimeLeft: 0,
+            timerRunning: false,
+            externalTimerRunning: false,
+            externalInterval: null
+        };
 
-            document.getElementById('ui-title').innerText = t.appTitle;
-            document.getElementById('searchInput').placeholder = t.searchPlaceholder;
-            document.getElementById('ui-add-btn').innerText = t.addBtn;
-            document.getElementById('noRecipesText').innerText = t.noRecipes;
-            document.getElementById('ui-modal-title').innerText = t.modalTitle;
-            document.getElementById('ui-label-name').innerText = t.labelName;
-            document.getElementById('ui-label-desc').innerText = t.labelDesc;
-            document.getElementById('ui-label-type').innerText = t.labelType;
-            document.getElementById('ui-type-simple').innerText = t.typeSimple;
-            document.getElementById('ui-type-interactive').innerText = t.typeInteractive;
-            document.getElementById('ui-label-fulltext').innerText = t.labelFullText;
-            document.getElementById('ui-btn-cancel').innerText = t.cancel;
-            document.getElementById('ui-btn-next').innerText = t.next;
+        // Аудіо-сповіщення (вбудований синтезатор звуку через Web Audio API без зовнішніх файлів)
+        function playBeep(frequency = 587.33, duration = 0.2) {
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.value = frequency;
+                gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch (e) {
+                console.log('Audio error:', e);
+            }
+        }
 
-            document.getElementById('ui-step-modal-title').innerText = t.stepModalTitle;
-            document.getElementById('ui-step-name-label').innerText = t.stepNameLabel;
-            document.getElementById('ui-step-desc-label').innerText = t.stepDescLabel;
-            document.getElementById('ui-step-action-type').innerText = t.stepActionType;
-            document.getElementById('ui-act-1').innerText = t.act1;
-            document.getElementById('ui-act-2').innerText = t.act2;
-            document.getElementById('ui-act-3').innerText = t.act3;
-            document.getElementById('ui-act-4').innerText = t.act4;
-            document.getElementById('ui-btn-add-another').innerText = t.addAnotherStep;
-            document.getElementById('ui-btn-finish').innerText = t.finish;
+        function playCompletionMelody() {
+            playBeep(523.25, 0.15);
+            setTimeout(() => playBeep(659.25, 0.15), 150);
+            setTimeout(() => playBeep(783.99, 0.3), 300);
+        }
 
+        // Ініціалізація при завантаженні
+        document.addEventListener('DOMContentLoaded', () => {
             renderRecipes();
-        }
+        });
 
-        // Завантаження збережених рецептів з localStorage (порожньо за замовчуванням)
-        let recipes = JSON.parse(localStorage.getItem('recipes')) || [];
-        let tempRecipeData = null;
-        let tempSteps = [];
+        // Головна функція рендерингу сітки рецептів
+        function renderRecipes(filterText = '') {
+            const grid = document.getElementById('recipeGrid');
+            const emptyState = document.getElementById('emptyState');
 
-        function saveToStorage() {
-            localStorage.setItem('recipes', JSON.stringify(recipes));
-        }
-
-        function renderRecipes(filter = '') {
-            const grid = document.getElementById('recipesGrid');
-            const noText = document.getElementById('noRecipesText');
-            grid.innerHTML = '';
-
-            const filtered = recipes.filter(r => r.name.toLowerCase().includes(filter.toLowerCase()));
+            const filtered = recipes.filter(r => r.title.toLowerCase().includes(filterText.toLowerCase()));
 
             if (filtered.length === 0) {
-                noText.classList.remove('hidden');
+                grid.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                emptyState.classList.add('flex');
                 return;
-            } else {
-                noText.classList.add('hidden');
             }
 
-            filtered.forEach((recipe, index) => {
-                const card = document.createElement('div');
-                card.className = "bg-white dark:bg-gray-800 p-5 rounded-2xl shadow hover:shadow-lg transition cursor-pointer flex flex-col justify-between";
-                card.onclick = () => openViewModal(index);
-                card.innerHTML = `
+            emptyState.classList.remove('flex');
+            emptyState.classList.add('hidden');
+
+            grid.innerHTML = filtered.map((recipe, index) => `
+                <div onclick="openRecipe(${index})" class="group bg-white dark:bg-slate-800 rounded-3xl p-6 shadow-sm hover:shadow-xl border border-slate-200 dark:border-slate-700 cursor-pointer transition-all duration-300 flex flex-col justify-between relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-orange-500/5 rounded-full blur-2xl group-hover:bg-orange-500/10 transition-all"></div>
                     <div>
-                        <h3 class="text-xl font-bold mb-2">${escapeHtml(recipe.name)}</h3>
-                        <p class="text-gray-600 dark:text-gray-400 text-sm line-clamp-3">${escapeHtml(recipe.desc)}</p>
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="px-3 py-1 rounded-full text-xs font-semibold ${recipe.type === 'interactive' ? 'bg-orange-100 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'}">
+                                <i class="fa-solid ${recipe.type === 'interactive' ? 'fa-bolt' : 'fa-align-left'} mr-1"></i>
+                                ${recipe.type === 'interactive' ? 'Інтерактивний' : 'Простий текст'}
+                            </span>
+                            <button onclick="event.stopPropagation(); deleteRecipe(${index})" class="w-8 h-8 rounded-full hover:bg-red-50 dark:hover:bg-red-950/40 text-slate-400 hover:text-red-500 flex items-center justify-center transition-colors">
+                                <i class="fa-solid fa-trash-can text-xs"></i>
+                            </button>
+                        </div>
+                        <h3 class="text-lg font-bold mb-2 group-hover:text-orange-500 transition-colors">${escapeHtml(recipe.title)}</h3>
+                        <p class="text-sm text-slate-500 dark:text-slate-400 line-clamp-2 mb-4">${escapeHtml(recipe.description || 'Без опису')}</p>
                     </div>
-                    <div class="mt-4 flex justify-between items-center text-xs text-blue-500 font-medium">
-                        <span>${recipe.type === 'simple' ? '📝' : '⚡'} ${recipe.type === 'simple' ? (translations[currentLang].typeSimple || 'Simple') : (translations[currentLang].typeInteractive || 'Interactive')}</span>
-                        <button onclick="event.stopPropagation(); deleteRecipe(${index})" class="text-red-500 hover:underline">✕</button>
+                    <div class="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-700/60 text-xs text-slate-400 font-medium">
+                        <span>${recipe.type === 'interactive' ? `${recipe.steps.length} кроків виконання` : 'Текстовий рецепт'}</span>
+                        <span class="text-orange-500 flex items-center gap-1 group-hover:translate-x-1 transition-transform">Відкрити <i class="fa-solid fa-arrow-right text-[10px]"></i></span>
                     </div>
-                `;
-                grid.appendChild(card);
-            });
+                </div>
+            `).join('');
         }
 
+        // Пошук
         function filterRecipes() {
             const query = document.getElementById('searchInput').value;
             renderRecipes(query);
         }
 
+        // Видалення рецепта
+        function deleteRecipe(index) {
+            recipes.splice(index, 1);
+            renderRecipes(document.getElementById('searchInput').value);
+            showNotification('Рецепт успішно видалено', 'success');
+        }
+
+        // Мастер додавання рецепта - Крок 1
         function openAddModal() {
-            document.getElementById('newRecipeName').value = '';
-            document.getElementById('newRecipeDesc').value = '';
-            document.getElementById('newRecipeFullText').value = '';
-            document.getElementById('newRecipeType').value = 'simple';
-            toggleRecipeTypeInputs();
-            document.getElementById('addModal').classList.remove('hidden');
+            newRecipeDraft = { title: '', description: '', type: 'simple', content: '', steps: [] };
+            const modal = document.getElementById('addModal');
+            modal.classList.remove('hidden');
+            renderWizardStep1();
         }
 
         function closeAddModal() {
             document.getElementById('addModal').classList.add('hidden');
         }
 
-        function toggleRecipeTypeInputs() {
-            const type = document.getElementById('newRecipeType').value;
-            const simpleContainer = document.getElementById('simpleContentContainer');
-            if (type === 'simple') {
-                simpleContainer.classList.remove('hidden');
-            } else {
-                simpleContainer.classList.add('hidden');
-            }
+        function renderWizardStep1() {
+            document.getElementById('wizardModalTitle').innerText = 'Створення рецепта (Крок 1 з 2)';
+            const body = document.getElementById('wizardBody');
+            body.innerHTML = `
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase mb-1">Назва рецепта</label>
+                        <input type="text" id="draftTitle" value="${escapeHtml(newRecipeDraft.title)}" placeholder="Наприклад: Борч український" 
+                            class="w-full px-4 py-3 bg-slate-100 dark:bg-slate-700/60 border border-transparent focus:border-orange-500 rounded-2xl text-sm focus:outline-none transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase mb-1">Короткий опис</label>
+                        <textarea id="draftDesc" rows="3" placeholder="Короткий опис або особливості..." 
+                            class="w-full px-4 py-3 bg-slate-100 dark:bg-slate-700/60 border border-transparent focus:border-orange-500 rounded-2xl text-sm focus:outline-none transition-all">${escapeHtml(newRecipeDraft.description)}</textarea>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase mb-2">Тип рецепта</label>
+                        <div class="grid grid-cols-2 gap-4">
+                            <label class="flex items-center gap-3 p-4 rounded-2xl border-2 cursor-pointer transition-all ${newRecipeDraft.type === 'simple' ? 'border-orange-500 bg-orange-500/5' : 'border-slate-200 dark:border-slate-700'}">
+                                <input type="radio" name="recipeType" value="simple" ${newRecipeDraft.type === 'simple' ? 'checked' : ''} onchange="setRecipeType('simple')" class="text-orange-500 focus:ring-orange-500">
+                                <div>
+                                    <div class="font-bold text-sm">Простий текст</div>
+                                    <div class="text-xs text-slate-500">Звичайний опис рецепта</div>
+                                </div>
+                            </label>
+                            <label class="flex items-center gap-3 p-4 rounded-2xl border-2 cursor-pointer transition-all ${newRecipeDraft.type === 'interactive' ? 'border-orange-500 bg-orange-500/5' : 'border-slate-200 dark:border-slate-700'}">
+                                <input type="radio" name="recipeType" value="interactive" ${newRecipeDraft.type === 'interactive' ? 'checked' : ''} onchange="setRecipeType('interactive')" class="text-orange-500 focus:ring-orange-500">
+                                <div>
+                                    <div class="font-bold text-sm">Інтерактивний</div>
+                                    <div class="text-xs text-slate-500">Покрокові таймери та дії</div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="pt-4 flex justify-end">
+                        <button onclick="submitWizardStep1()" class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2.5 rounded-2xl font-medium text-sm shadow-lg shadow-orange-500/20 transition-all">Далі</button>
+                    </div>
+                </div>
+            `;
         }
 
-        function handleNextStep() {
-            const name = document.getElementById('newRecipeName').value.trim();
-            const desc = document.getElementById('newRecipeDesc').value.trim();
-            const type = document.getElementById('newRecipeType').value;
+        function setRecipeType(type) {
+            newRecipeDraft.type = type;
+        }
 
-            if (!name) {
-                alert('Введіть назву рецепта');
+        function submitWizardStep1() {
+            const title = document.getElementById('draftTitle').value.trim();
+            const desc = document.getElementById('draftDesc').value.trim();
+
+            if (!title) {
+                showNotification('Будь ласка, введіть назву рецепта', 'error');
                 return;
             }
 
-            tempRecipeData = { name, desc, type };
+            newRecipeDraft.title = title;
+            newRecipeDraft.description = desc;
 
-            if (type === 'simple') {
-                const fullText = document.getElementById('newRecipeFullText').value.trim();
-                tempRecipeData.fullText = fullText;
-                recipes.push(tempRecipeData);
-                saveToStorage();
-                closeAddModal();
-                renderRecipes();
+            if (newRecipeDraft.type === 'simple') {
+                renderWizardSimpleContent();
             } else {
-                tempSteps = [];
-                closeAddModal();
-                openStepModal();
+                // Починаємо створення першого кроку
+                currentStepDraft = { title: '', description: '', actionType: '1', internalTime: 60, externalTime: 120, requireManualConfirm: false };
+                renderWizardInteractiveStep(1);
             }
         }
 
-        function openStepModal() {
-            document.getElementById('stepName').value = '';
-            document.getElementById('stepDesc').value = '';
-            document.getElementById('stepActionType').value = '1';
-            document.getElementById('stepModal').classList.remove('hidden');
+        // Рендеринг для простого рецепта
+        function renderWizardSimpleContent() {
+            document.getElementById('wizardModalTitle').innerText = 'Створення простого рецепта (Крок 2 з 2)';
+            const body = document.getElementById('wizardBody');
+            body.innerHTML = `
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase mb-1">Повний текст рецепта та інгредієнти</label>
+                        <textarea id="draftContent" rows="8" placeholder="Опишіть повністю процес приготування..." 
+                            class="w-full px-4 py-3 bg-slate-100 dark:bg-slate-700/60 border border-transparent focus:border-orange-500 rounded-2xl text-sm focus:outline-none transition-all">${escapeHtml(newRecipeDraft.content)}</textarea>
+                    </div>
+                    <div class="pt-4 flex justify-between">
+                        <button onclick="renderWizardStep1()" class="px-5 py-2.5 rounded-2xl font-medium text-sm hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">Назад</button>
+                        <button onclick="saveSimpleRecipe()" class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2.5 rounded-2xl font-medium text-sm shadow-lg shadow-orange-500/20 transition-all">Зберегти рецепт</button>
+                    </div>
+                </div>
+            `;
         }
 
-        function closeStepModal() {
-            document.getElementById('stepModal').classList.add('hidden');
+        function saveSimpleRecipe() {
+            const content = document.getElementById('draftContent').value.trim();
+            newRecipeDraft.content = content;
+            recipes.push({...newRecipeDraft});
+            closeAddModal();
+            renderRecipes();
+            showNotification('Рецепт успішно створено!', 'success');
         }
 
-        function saveStepAndAddAnother() {
-            const sName = document.getElementById('stepName').value.trim();
-            const sDesc = document.getElementById('stepDesc').value.trim();
-            const actionType = document.getElementById('stepActionType').value;
+        // Рендеринг конструктора кроків для інтерактивного рецепта
+        function renderWizardInteractiveStep(stepNumber) {
+            document.getElementById('wizardModalTitle').innerText = `Крок ${stepNumber}: Конструктор дії`;
+            const body = document.getElementById('wizardBody');
+            body.innerHTML = `
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase mb-1">Назва кроку</label>
+                        <input type="text" id="stepTitle" value="${escapeHtml(currentStepDraft.title)}" placeholder="Наприклад: Обсмаження цибулі" 
+                            class="w-full px-4 py-3 bg-slate-100 dark:bg-slate-700/60 border border-transparent focus:border-orange-500 rounded-2xl text-sm focus:outline-none transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase mb-1">Опис кроку (за бажанням)</label>
+                        <textarea id="stepDesc" rows="2" placeholder="Додаткові інструкції до цього кроку..." 
+                            class="w-full px-4 py-3 bg-slate-100 dark:bg-slate-700/60 border border-transparent focus:border-orange-500 rounded-2xl text-sm focus:outline-none transition-all">${escapeHtml(currentStepDraft.description)}</textarea>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase mb-2">Тип дії кроку</label>
+                        <div class="grid grid-cols-1 gap-3">
+                            <label class="flex items-center gap-3 p-3.5 rounded-2xl border-2 cursor-pointer transition-all ${currentStepDraft.actionType === '1' ? 'border-orange-500 bg-orange-500/5' : 'border-slate-200 dark:border-slate-700'}">
+                                <input type="radio" name="actionType" value="1" ${currentStepDraft.actionType === '1' ? 'checked' : ''} onchange="setActionType('1')" class="text-orange-500">
+                                <div>
+                                    <div class="font-bold text-sm">1. Дія із внутрішнім і зовнішнім таймером</div>
+                                    <div class="text-xs text-slate-500">Виконання процесу під таймер + очікування результату</div>
+                                </div>
+                            </label>
+                            <label class="flex items-center gap-3 p-3.5 rounded-2xl border-2 cursor-pointer transition-all ${currentStepDraft.actionType === '2' ? 'border-orange-500 bg-orange-500/5' : 'border-slate-200 dark:border-slate-700'}">
+                                <input type="radio" name="actionType" value="2" ${currentStepDraft.actionType === '2' ? 'checked' : ''} onchange="setActionType('2')" class="text-orange-500">
+                                <div>
+                                    <div class="font-bold text-sm">2. Дія із внутрішнім таймером</div>
+                                    <div class="text-xs text-slate-500">Тільки виконання кроку під час відліку часу</div>
+                                </div>
+                            </label>
+                            <label class="flex items-center gap-3 p-3.5 rounded-2xl border-2 cursor-pointer transition-all ${currentStepDraft.actionType === '3' ? 'border-orange-500 bg-orange-500/5' : 'border-slate-200 dark:border-slate-700'}">
+                                <input type="radio" name="actionType" value="3" ${currentStepDraft.actionType === '3' ? 'checked' : ''} onchange="setActionType('3')" class="text-orange-500">
+                                <div>
+                                    <div class="font-bold text-sm">3. Дія із зовнішнім таймером</div>
+                                    <div class="text-xs text-slate-500">Очікування на готовність до наступного кроку</div>
+                                </div>
+                            </label>
+                            <label class="flex items-center gap-3 p-3.5 rounded-2xl border-2 cursor-pointer transition-all ${currentStepDraft.actionType === '4' ? 'border-orange-500 bg-orange-500/5' : 'border-slate-200 dark:border-slate-700'}">
+                                <input type="radio" name="actionType" value="4" ${currentStepDraft.actionType === '4' ? 'checked' : ''} onchange="setActionType('4')" class="text-orange-500">
+                                <div>
+                                    <div class="font-bold text-sm">4. Дія із зовнішнім таймером та підтвердженням</div>
+                                    <div class="text-xs text-slate-500">Очікування + ручне підтвердження початку внутрішньої дії</div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
 
-            if (!sName) {
-                alert('Введіть назву кроку');
+                    <div class="grid grid-cols-2 gap-4 pt-2">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase mb-1">Внутрішній таймер (сек)</label>
+                            <input type="number" id="stepInternalTime" value="${currentStepDraft.internalTime}" min="0" 
+                                class="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/60 border border-transparent focus:border-orange-500 rounded-2xl text-sm focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase mb-1">Зовнішній таймер (сек)</label>
+                            <input type="number" id="stepExternalTime" value="${currentStepDraft.externalTime}" min="0" 
+                                class="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700/60 border border-transparent focus:border-orange-500 rounded-2xl text-sm focus:outline-none">
+                        </div>
+                    </div>
+
+                    <div class="pt-4 flex items-center justify-between border-t border-slate-200 dark:border-slate-700">
+                        <span class="text-xs text-slate-400 font-medium">Всього кроків створено: ${newRecipeDraft.steps.length}</span>
+                        <div class="flex gap-2">
+                            <button onclick="saveAndAddAnotherStep()" class="bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 px-4 py-2.5 rounded-2xl font-medium text-xs transition-all">+ Додати ще крок</button>
+                            <button onclick="finishInteractiveRecipe()" class="bg-orange-500 hover:bg-orange-600 text-white px-5 py-2.5 rounded-2xl font-medium text-xs shadow-lg shadow-orange-500/20 transition-all">Завершити рецепт</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function setActionType(type) {
+            currentStepDraft.actionType = type;
+        }
+
+        function collectCurrentStepData() {
+            currentStepDraft.title = document.getElementById('stepTitle').value.trim();
+            currentStepDraft.description = document.getElementById('stepDesc').value.trim();
+            currentStepDraft.internalTime = parseInt(document.getElementById('stepInternalTime').value) || 0;
+            currentStepDraft.externalTime = parseInt(document.getElementById('stepExternalTime').value) || 0;
+            currentStepDraft.actionType = document.querySelector('input[name="actionType"]:checked').value;
+
+            // Налаштовуємо прапорці підтвердження залежно від типу
+            if (currentStepDraft.actionType === '4') {
+                currentStepDraft.requireManualConfirm = true;
+            } else {
+                currentStepDraft.requireManualConfirm = false;
+            }
+        }
+
+        function saveAndAddAnotherStep() {
+            collectCurrentStepData();
+            if (!currentStepDraft.title) {
+                showNotification('Введіть назву поточного кроку', 'error');
                 return;
             }
 
-            tempSteps.push({ name: sName, desc: sDesc, actionType });
-            openStepModal(); // Очистити для наступного
+            newRecipeDraft.steps.push({...currentStepDraft});
+            // Скидаємо для наступного кроку
+            currentStepDraft = { title: '', description: '', actionType: '1', internalTime: 60, externalTime: 120, requireManualConfirm: false };
+            renderWizardInteractiveStep(newRecipeDraft.steps.length + 1);
+            showNotification('Крок додано до рецепта', 'success');
         }
 
         function finishInteractiveRecipe() {
-            const sName = document.getElementById('stepName').value.trim();
-            const sDesc = document.getElementById('stepDesc').value.trim();
-            const actionType = document.getElementById('stepActionType').value;
-
-            if (sName) {
-                tempSteps.push({ name: sName, desc: sDesc, actionType });
+            collectCurrentStepData();
+            if (currentStepDraft.title) {
+                newRecipeDraft.steps.push({...currentStepDraft});
             }
 
-            if (tempSteps.length === 0) {
-                alert('Додайте хоча б один крок');
+            if (newRecipeDraft.steps.length === 0) {
+                showNotification('Додайте хоча б один крок до рецепта', 'error');
                 return;
             }
 
-            tempRecipeData.steps = tempSteps;
-            recipes.push(tempRecipeData);
-            saveToStorage();
-            closeStepModal();
+            recipes.push({...newRecipeDraft});
+            closeAddModal();
             renderRecipes();
+            showNotification('Інтерактивний рецепт створено успішно!', 'success');
         }
 
-        function deleteRecipe(index) {
-            if (confirm('Видалити цей рецепт?')) {
-                recipes.splice(index, 1);
-                saveToStorage();
-                renderRecipes();
-            }
-        }
+        // Відкриття рецепта залежно від типу
+        function openRecipe(index) {
+            const recipe = recipes[index];
+            if (!recipe) return;
 
-        // Звуковий сигнал через Web Audio API
-        function playBeep() {
-            try {
-                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.type = 'sine';
-                osc.frequency.value = 587.33; // D5
-                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                osc.start();
-                osc.stop(audioCtx.currentTime + 0.3);
-            } catch (e) {
-                console.error(e);
-            }
-        }
-
-        // Повноекранний перегляд
-        let currentViewRecipe = null;
-        let currentStepIndex = 0;
-
-        function openViewModal(index) {
-            currentViewRecipe = recipes[index];
-            currentStepIndex = 0;
-            document.getElementById('viewTitle').innerText = currentViewRecipe.name;
-            document.getElementById('viewModal').classList.remove('hidden');
-            renderViewContent();
-        }
-
-        function closeViewModal() {
-            document.getElementById('viewModal').classList.add('hidden');
-        }
-
-        function renderViewContent() {
-            const container = document.getElementById('viewContent');
-            const t = translations[currentLang] || translations['uk'];
-
-            if (currentViewRecipe.type === 'simple') {
-                container.innerHTML = `
-                    <div class="space-y-6">
-                        <p class="text-lg text-gray-700 dark:text-gray-300 whitespace-pre-wrap">${escapeHtml(currentViewRecipe.fullText || currentViewRecipe.desc)}</p>
-                    </div>
-                `;
+            if (recipe.type === 'simple') {
+                document.getElementById('simpleViewTitle').innerText = recipe.title;
+                document.getElementById('simpleViewDesc').innerText = recipe.content || 'Опис відсутній.';
+                const modal = document.getElementById('viewSimpleModal');
+                modal.classList.remove('hidden');
             } else {
-                const steps = currentViewRecipe.steps;
-                if (currentStepIndex >= steps.length) {
-                    container.innerHTML = `
-                        <div class="text-center space-y-4">
-                            <h3 class="text-3xl font-bold text-green-500">${t.completeRecipe}</h3>
-                            <button onclick="closeViewModal()" class="px-6 py-3 bg-blue-600 text-white rounded-xl font-bold">OK</button>
-                        </div>
-                    `;
-                    return;
-                }
+                activePlayer.recipe = recipe;
+                activePlayer.currentStepIndex = 0;
+                stopTimer();
+                document.getElementById('playerRecipeTitle').innerText = recipe.title;
+                const modal = document.getElementById('viewInteractiveModal');
+                modal.classList.remove('hidden');
+                renderInteractivePlayerStep();
+            }
+        }
 
-                const step = steps[currentStepIndex];
-                let actionHtml = '';
+        function closeSimpleModal() {
+            document.getElementById('viewSimpleModal').classList.add('hidden');
+        }
 
-                if (step.actionType === '1') {
-                    // Внутрішній і зовнішній таймер
-                    actionHtml = `
-                        <div class="p-6 bg-blue-50 dark:bg-gray-800 rounded-2xl space-y-4 border border-blue-200 dark:border-gray-700">
-                            <p class="font-medium text-blue-600 dark:text-blue-400">${t.act1}</p>
-                            <div id="timerInternal1" class="text-xl font-bold">Внутрішній таймер: <span id="intTime1">5</span>с</div>
-                            <div id="timerExternal1" class="text-xl font-bold hidden">Зовнішній таймер (Очікування): <span id="extTime1">10</span>с</div>
-                            <button id="extStopBtn1" onclick="nextInteractiveStep()" class="hidden px-6 py-3 bg-red-600 text-white rounded-xl font-bold">${t.stopExternal}</button>
-                        </div>
-                    `;
-                } else if (step.actionType === '2') {
-                    // Тільки внутрішній таймер
-                    actionHtml = `
-                        <div class="p-6 bg-green-50 dark:bg-gray-800 rounded-2xl space-y-4 border border-green-200 dark:border-gray-700">
-                            <p class="font-medium text-green-600 dark:text-green-400">${t.act2}</p>
-                            <div class="text-xl font-bold">Внутрішній таймер: <span id="intTime2">5</span>с</div>
-                        </div>
-                    `;
-                } else if (step.actionType === '3') {
-                    // Тільки зовнішній таймер
-                    actionHtml = `
-                        <div class="p-6 bg-yellow-50 dark:bg-gray-800 rounded-2xl space-y-4 border border-yellow-200 dark:border-gray-700">
-                            <p class="font-medium text-yellow-600 dark:text-yellow-400">${t.act3}</p>
-                            <div class="text-xl font-bold">Зовнішній таймер (Очікування): <span id="extTime3">15</span>с</div>
-                            <button onclick="nextInteractiveStep()" class="px-6 py-3 bg-red-600 text-white rounded-xl font-bold">${t.stopExternal}</button>
-                        </div>
-                    `;
-                } else if (step.actionType === '4') {
-                    // Зовнішній таймер + підтвердження для внутрішнього
-                    actionHtml = `
-                        <div class="p-6 bg-purple-50 dark:bg-gray-800 rounded-2xl space-y-4 border border-purple-200 dark:border-gray-700">
-                            <p class="font-medium text-purple-600 dark:text-purple-400">${t.act4}</p>
-                            <button onclick="startConfirmedInternal()" id="confirmInternalBtn" class="px-6 py-3 bg-blue-600 text-white rounded-xl font-bold">${t.confirmInternal}</button>
-                            <div id="confirmedInternalArea" class="hidden space-y-3">
-                                <div class="text-xl font-bold">Внутрішній таймер: <span id="intTime4">5</span>с</div>
-                            </div>
-                            <div id="extTimerArea4" class="hidden space-y-3">
-                                <div class="text-xl font-bold">Зовнішній таймер (Очікування): <span id="extTime4">15</span>с</div>
-                                <button onclick="nextInteractiveStep()" class="px-6 py-3 bg-red-600 text-white rounded-xl font-bold">${t.stopExternal}</button>
-                            </div>
-                        </div>
-                    `;
-                }
+        function closeInteractiveModal() {
+            stopTimer();
+            document.getElementById('viewInteractiveModal').classList.add('hidden');
+        }
 
+        // Інтерактивний плеєр кроків
+        function renderInteractivePlayerStep() {
+            const recipe = activePlayer.recipe;
+            const idx = activePlayer.currentStepIndex;
+            const step = recipe.steps[idx];
+            const container = document.getElementById('playerStepContainer');
+
+            if (!step) {
                 container.innerHTML = `
-                    <div class="space-y-6">
-                        <div class="flex justify-between items-center text-sm text-gray-500">
-                            <span>${t.appTitle.slice(0,-1)} - ${t.step || 'Step'} ${currentStepIndex + 1} / ${steps.length}</span>
+                    <div class="flex flex-col items-center justify-center text-center py-20 flex-1">
+                        <div class="w-24 h-24 bg-green-100 dark:bg-green-950/60 text-green-500 rounded-full flex items-center justify-center text-4xl mb-6 shadow-xl shadow-green-500/10">
+                            <i class="fa-solid fa-check"></i>
                         </div>
-                        <h3 class="text-3xl font-bold">${escapeHtml(step.name)}</h3>
-                        <p class="text-lg text-gray-600 dark:text-gray-300">${escapeHtml(step.desc || '')}</p>
-                        ${actionHtml}
+                        <h3 class="text-3xl font-bold mb-3">Смачного! Рецепт завершено</h3>
+                        <p class="text-base text-slate-500 dark:text-slate-400 mb-8 max-w-md">Ви успішно виконали всі кроки рецепта "${escapeHtml(recipe.title)}".</p>
+                        <button onclick="closeInteractiveModal()" class="bg-orange-500 hover:bg-orange-600 text-white px-10 py-4 rounded-2xl font-medium text-base transition-all shadow-xl shadow-orange-500/25">Закрити дисплей</button>
                     </div>
                 `;
+                return;
+            }
 
-                // Автоматичний запуск таймерів залежно від типу кроку
-                initStepTimers(step.actionType);
+            let progressDots = recipe.steps.map((s, i) => `
+                <div class="h-2.5 flex-1 rounded-full ${i < idx ? 'bg-orange-500' : (i === idx ? 'bg-orange-400 animate-pulse' : 'bg-slate-200 dark:bg-slate-800')}"></div>
+            `).join('');
+
+            let showInternalTimer = (step.actionType === '1' || step.actionType === '2') && step.internalTime > 0;
+            let showExternalTimer = (step.actionType === '1' || step.actionType === '3' || step.actionType === '4') && step.externalTime > 0;
+            let needConfirmation = step.actionType === '4';
+
+            container.innerHTML = `
+                <div>
+                    <div class="flex items-center gap-3 mb-8">
+                        ${progressDots}
+                    </div>
+
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="bg-orange-100 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400 text-xs px-3.5 py-1.5 rounded-full font-bold">Крок ${idx + 1} із ${recipe.steps.length}</span>
+                        <span class="text-xs text-slate-400 font-medium">Тип: ${getStepTypeName(step.actionType)}</span>
+                    </div>
+
+                    <h2 class="text-4xl font-bold mb-4">${escapeHtml(step.title)}</h2>
+                    <p class="text-xl text-slate-600 dark:text-slate-300 leading-relaxed mb-10">${escapeHtml(step.description || 'Немає детального опису до цього кроку.')}</p>
+                    
+                    <div id="timerSection" class="grid grid-cols-1 sm:grid-cols-2 gap-8 mb-8">
+                        ${showInternalTimer ? `
+                            <div class="p-8 rounded-3xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 flex flex-col justify-between">
+                                <div class="flex items-center justify-between mb-4">
+                                    <span class="text-xs font-semibold text-slate-400 uppercase"><i class="fa-solid fa-hourglass-half mr-1"></i> Внутрішній таймер (Виконання)</span>
+                                    <span id="internalTimeDisplay" class="text-3xl font-bold font-mono">${formatTime(step.internalTime)}</span>
+                                </div>
+                                <div class="text-xs text-orange-500 font-medium mt-2" id="internalStatus">Відлік до кінця виконання кроку</div>
+                            </div>
+                        ` : ''}
+
+                        ${showExternalTimer ? `
+                            <div class="p-8 rounded-3xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 flex flex-col justify-between">
+                                <div class="flex items-center justify-between mb-4">
+                                    <span class="text-xs font-semibold text-slate-400 uppercase"><i class="fa-regular fa-clock mr-1"></i> Зовнішній таймер (Очікування)</span>
+                                    <span id="externalTimeDisplay" class="text-3xl font-bold font-mono">${formatTime(step.externalTime)}</span>
+                                </div>
+                                <div class="flex items-center justify-between mt-4">
+                                    <span class="text-xs text-blue-500 font-medium" id="externalStatus">Відлік вниз до закінчення очікування</span>
+                                    <button onclick="stopExternalTimerManual()" id="stopExternalBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-xs font-semibold transition-all shadow-md">Зупинити очікування</button>
+                                </div>
+                            </div>
+                        ` : ''}
+                    </div>
+
+                    ${needConfirmation ? `
+                        <div id="confirmSection" class="p-6 rounded-3xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 mb-8 flex items-center justify-between">
+                            <div class="flex items-center gap-4">
+                                <i class="fa-solid fa-triangle-exclamation text-amber-500 text-3xl"></i>
+                                <div>
+                                    <div class="font-bold text-base text-amber-800 dark:text-amber-200">Потрібно підтвердження</div>
+                                    <div class="text-sm text-amber-600 dark:text-amber-400">Натисніть кнопку, щоб запустити внутрішній таймер.</div>
+                                </div>
+                            </div>
+                            <button onclick="confirmAndStartInternal(${step.internalTime})" id="confirmBtn" class="bg-amber-500 hover:bg-amber-600 text-white px-8 py-3.5 rounded-2xl font-medium text-sm shadow-lg shadow-amber-500/20 transition-all whitespace-nowrap">Підтвердити і запустити</button>
+                        </div>
+                    ` : ''}
+                </div>
+
+                <!-- Footer Navigation -->
+                <div class="pt-8 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                    <button onclick="prevStep()" ${idx === 0 ? 'disabled' : ''} class="px-8 py-4 rounded-2xl text-base font-medium hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-40 transition-colors">Попередній крок</button>
+                    <button onclick="nextStep()" class="bg-orange-500 hover:bg-orange-600 text-white px-10 py-4 rounded-2xl text-base font-medium shadow-xl shadow-orange-500/25 transition-all">Наступний крок</button>
+                </div>
+            `;
+
+            // Логіка запуску таймерів за типами
+            if (step.actionType === '1') {
+                if (step.internalTime > 0) {
+                    startInternalWithSound(step.internalTime, () => {
+                        if (step.externalTime > 0) {
+                            startCountdownExternalTimer('externalTimeDisplay', step.externalTime);
+                        }
+                    });
+                } else if (step.externalTime > 0) {
+                    startCountdownExternalTimer('externalTimeDisplay', step.externalTime);
+                }
+            } else if (step.actionType === '2' && step.internalTime > 0) {
+                startInternalWithSound(step.internalTime, null);
+            } else if (step.actionType === '3' && step.externalTime > 0) {
+                startCountdownExternalTimer('externalTimeDisplay', step.externalTime);
+            } else if (step.actionType === '4' && step.externalTime > 0) {
+                startCountdownExternalTimer('externalTimeDisplay', step.externalTime);
             }
         }
 
-        function initStepTimers(actionType) {
-            if (actionType === '1') {
-                // Внутрішній автоматичний
-                let sec = 5;
-                const timerInterval = setInterval(() => {
-                    sec--;
-                    const el = document.getElementById('intTime1');
-                    if (el) el.innerText = sec;
-                    if (sec <= 0) {
-                        clearInterval(timerInterval);
-                        playBeep();
-                        // Перехід до зовнішнього таймера вниз
-                        document.getElementById('timerInternal1').classList.add('hidden');
-                        document.getElementById('timerExternal1').classList.remove('hidden');
-                        document.getElementById('extStopBtn1').classList.remove('hidden');
-                        runExternalCountdown('extTime1');
-                    }
-                }, 1000);
-            } else if (actionType === '2') {
-                let sec = 5;
-                const timerInterval = setInterval(() => {
-                    sec--;
-                    const el = document.getElementById('intTime2');
-                    if (el) el.innerText = sec;
-                    if (sec <= 0) {
-                        clearInterval(timerInterval);
-                        playBeep();
-                        setTimeout(() => {
-                            currentStepIndex++;
-                            renderViewContent();
-                        }, 1000);
-                    }
-                }, 1000);
-            } else if (actionType === '3') {
-                runExternalCountdown('extTime3');
+        function getStepTypeName(type) {
+            switch(type) {
+                case '1': return 'Внутрішній + Зовнішній таймер';
+                case '2': return 'Внутрішній таймер';
+                case '3': return 'Зовнішній таймер';
+                case '4': return 'Зовнішній + Підтвердження';
+                default: return 'Стандартна дія';
             }
         }
 
-        function startConfirmedInternal() {
-            document.getElementById('confirmInternalBtn').classList.add('hidden');
-            document.getElementById('confirmedInternalArea').classList.remove('hidden');
-            let sec = 5;
-            const timerInterval = setInterval(() => {
-                sec--;
-                const el = document.getElementById('intTime4');
-                if (el) el.innerText = sec;
-                if (sec <= 0) {
-                    clearInterval(timerInterval);
-                    playBeep();
-                    document.getElementById('confirmedInternalArea').classList.add('hidden');
-                    document.getElementById('extTimerArea4').classList.remove('hidden');
-                    runExternalCountdown('extTime4');
+        // Внутрішній таймер із звуковими сигналами (іде вниз, зупиняється автоматично)
+        function startInternalWithSound(seconds, onCompleteCallback) {
+            stopTimer();
+            activePlayer.timeLeft = seconds;
+            activePlayer.timerRunning = true;
+
+            activePlayer.timerInterval = setInterval(() => {
+                if (activePlayer.timeLeft > 0) {
+                    activePlayer.timeLeft--;
+                    const el = document.getElementById('internalTimeDisplay');
+                    if (el) el.innerText = formatTime(activePlayer.timeLeft);
+
+                    if (activePlayer.timeLeft <= 3 && activePlayer.timeLeft > 0) {
+                        playBeep(440, 0.1);
+                    }
+                } else {
+                    stopTimer();
+                    playCompletionMelody();
+                    const statusEl = document.getElementById('internalStatus');
+                    if (statusEl) statusEl.innerText = 'Внутрішній таймер завершено!';
+                    showNotification('Внутрішній таймер завершено!', 'success');
+                    if (typeof onCompleteCallback === 'function') {
+                        onCompleteCallback();
+                    }
                 }
             }, 1000);
         }
 
-        function runExternalCountdown(elementId) {
-            let sec = 15; // Зовнішній таймер очікування
-            window.activeExtInterval = setInterval(() => {
-                sec--;
-                const el = document.getElementById(elementId);
-                if (el) el.innerText = sec;
-                if (sec <= 0) {
-                    clearInterval(window.activeExtInterval);
-                    playBeep();
+        // Зовнішній таймер: тепер іде ВНИЗ (зворотний відлік очікування), поки користувач сам не зупинить або не закінчиться час
+        function startCountdownExternalTimer(displayId, initialSeconds) {
+            stopExternalTimer();
+            activePlayer.externalTimeLeft = initialSeconds;
+            activePlayer.externalTimerRunning = true;
+
+            activePlayer.externalInterval = setInterval(() => {
+                if (activePlayer.externalTimerRunning) {
+                    if (activePlayer.externalTimeLeft > 0) {
+                        activePlayer.externalTimeLeft--;
+                        const el = document.getElementById(displayId);
+                        if (el) el.innerText = formatTime(activePlayer.externalTimeLeft);
+
+                        if (activePlayer.externalTimeLeft === 0) {
+                            playCompletionMelody();
+                            const statusEl = document.getElementById('externalStatus');
+                            if (statusEl) statusEl.innerText = 'Час очікування вичерпано!';
+                        }
+                    }
                 }
             }, 1000);
         }
 
-        function nextInteractiveStep() {
-            if (window.activeExtInterval) clearInterval(window.activeExtInterval);
-            currentStepIndex++;
-            renderViewContent();
+        function stopExternalTimerManual() {
+            stopExternalTimer();
+            playBeep(650, 0.2);
+            const statusEl = document.getElementById('externalStatus');
+            if (statusEl) statusEl.innerText = 'Очікування зупинено користувачем.';
+            const btn = document.getElementById('stopExternalBtn');
+            if (btn) {
+                btn.innerText = 'Зупинено ✓';
+                btn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+                btn.classList.add('bg-green-600');
+            }
+            showNotification('Очікування завершено', 'success');
         }
 
-        function escapeHtml(text) {
-            if (!text) return '';
-            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        function confirmAndStartInternal(intSec) {
+            const btn = document.getElementById('confirmBtn');
+            if (btn) {
+                btn.innerText = 'Підтверджено ✓';
+                btn.classList.remove('bg-amber-500', 'hover:bg-amber-600');
+                btn.classList.add('bg-green-500');
+            }
+            showNotification('Внутрішній таймер запущено!', 'success');
+            if (intSec > 0) {
+                startInternalWithSound(intSec, null);
+            }
         }
 
-        // Початковий рендер
-        renderRecipes();
+        function stopTimer() {
+            if (activePlayer.timerInterval) {
+                clearInterval(activePlayer.timerInterval);
+                activePlayer.timerInterval = null;
+            }
+            activePlayer.timerRunning = false;
+        }
+
+        function stopExternalTimer() {
+            if (activePlayer.externalInterval) {
+                clearInterval(activePlayer.externalInterval);
+                activePlayer.externalInterval = null;
+            }
+            activePlayer.externalTimerRunning = false;
+        }
+
+        function nextStep() {
+            stopTimer();
+            stopExternalTimer();
+            activePlayer.currentStepIndex++;
+            renderInteractivePlayerStep();
+        }
+
+        function prevStep() {
+            if (activePlayer.currentStepIndex > 0) {
+                stopTimer();
+                stopExternalTimer();
+                activePlayer.currentStepIndex--;
+                renderInteractivePlayerStep();
+            }
+        }
+
+        function formatTime(sec) {
+            const m = Math.floor(sec / 60);
+            const s = sec % 60;
+            return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        }
+
+        // Утиліта для сповіщень
+        function showNotification(message, type = 'success') {
+            const notif = document.createElement('div');
+            notif.className = `fixed bottom-6 right-6 z-50 px-5 py-3 rounded-2xl shadow-xl text-white text-sm font-medium flex items-center gap-3 transition-all transform translate-y-2 opacity-0 ${type === 'error' ? 'bg-red-500' : 'bg-slate-900 dark:bg-slate-700 border border-slate-700'}`;
+            notif.innerHTML = `<i class="fa-solid ${type === 'error' ? 'fa-circle-exclamation text-white' : 'fa-circle-check text-orange-400'}"></i> <span>${escapeHtml(message)}</span>`;
+            document.body.appendChild(notif);
+
+            setTimeout(() => {
+                notif.classList.remove('translate-y-2', 'opacity-0');
+            }, 50);
+
+            setTimeout(() => {
+                notif.classList.add('translate-y-2', 'opacity-0');
+                setTimeout(() => notif.remove(), 300);
+            }, 3000);
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        }
     </script>
 </body>
 </html>
