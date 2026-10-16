@@ -155,7 +155,7 @@
     </div>
 
     <script>
-        // Словники перекладів для 12 мов
+        // Словники перекладів для мов
         const translations = {
             uk: {
                 appTitle: "Рецепти",
@@ -1423,7 +1423,6 @@
                 </div>
             `;
 
-            // Логіка таймерів залежно від типу кроку
             if (step.actionType === '1') {
                 if (step.internalTime > 0) {
                     startInternalWithSound(step.internalTime, () => {
@@ -1439,14 +1438,12 @@
             } else if (step.actionType === '3' && step.externalTime > 0) {
                 startCountdownExternalTimer('externalTimeDisplay', step.externalTime);
             } else if (step.actionType === '4') {
-                // Для 4 типу зовнішній таймер запускається зразу, а внутрішній чекає на підтвердження
                 if (step.externalTime > 0) {
                     startCountdownExternalTimer('externalTimeDisplay', step.externalTime);
                 }
             }
         }
 
-        // Внутрішній таймер: лунає звук останні секунди, потім грає фінальна мелодія і таймер завершується автоматично
         function startInternalWithSound(seconds, onCompleteCallback) {
             stopTimer();
             activePlayer.timeLeft = seconds;
@@ -1473,7 +1470,6 @@
             }, 1000);
         }
 
-        // Зовнішній таймер: йде ВНИЗ поки користувач не зупинить кнопкою
         function startCountdownExternalTimer(displayId, initialSeconds) {
             stopExternalTimer();
             activePlayer.externalTimeLeft = initialSeconds;
