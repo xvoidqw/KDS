@@ -156,10 +156,10 @@
             </div>
         </div>
 
-        <!-- Симетрична сітка з 3 основними інструментами -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 my-auto max-w-5xl mx-auto w-full py-4 shrink-0">
-            <!-- Tool 1 -->
-            <div onclick="openTool('Tool1.html', 0)" class="bg-white dark:bg-slate-800/60 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700/80 rounded-2xl p-5 sm:p-6 transition duration-200 cursor-pointer flex flex-col justify-between h-32 sm:h-44 shadow-sm group">
+        <!-- Пірамідальна сітка з 3 інструментами: 1 вгорі, 2 внизу -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 my-auto max-w-2xl mx-auto w-full py-4 shrink-0">
+            <!-- Tool 1 (Перший ряд, по центру) -->
+            <div onclick="openTool('Tool1.html', 0)" class="sm:col-span-2 sm:max-w-md sm:mx-auto w-full bg-white dark:bg-slate-800/60 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700/80 rounded-2xl p-5 sm:p-6 transition duration-200 cursor-pointer flex flex-col justify-between h-32 sm:h-44 shadow-sm group">
                 <div class="flex justify-between items-start">
                     <div class="p-2.5 sm:p-3 bg-blue-500/10 text-blue-500 dark:text-blue-400 rounded-xl group-hover:scale-110 transition">
                         <svg class="w-6 h-6 sm:w-7 sm:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012-2m-6 9l2 2 4-4"/></svg>
@@ -172,7 +172,7 @@
                 </div>
             </div>
 
-            <!-- Tool 2 -->
+            <!-- Tool 2 (Другий ряд, зліва) -->
             <div onclick="openTool('Tool2.html', 1)" class="bg-white dark:bg-slate-800/60 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700/80 rounded-2xl p-5 sm:p-6 transition duration-200 cursor-pointer flex flex-col justify-between h-32 sm:h-44 shadow-sm group">
                 <div class="flex justify-between items-start">
                     <div class="p-2.5 sm:p-3 bg-emerald-500/10 text-emerald-500 dark:text-emerald-400 rounded-xl group-hover:scale-110 transition">
@@ -186,7 +186,7 @@
                 </div>
             </div>
 
-            <!-- Tool 3 -->
+            <!-- Tool 3 (Другий ряд, справа) -->
             <div onclick="openTool('Tool3.html', 2)" class="bg-white dark:bg-slate-800/60 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700/80 rounded-2xl p-5 sm:p-6 transition duration-200 cursor-pointer flex flex-col justify-between h-32 sm:h-44 shadow-sm group">
                 <div class="flex justify-between items-start">
                     <div class="p-2.5 sm:p-3 bg-amber-500/10 text-amber-500 dark:text-amber-400 rounded-xl group-hover:scale-110 transition">
