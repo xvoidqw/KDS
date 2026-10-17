@@ -156,8 +156,8 @@
             </div>
         </div>
 
-        <!-- Симетрична сітка з 5 інструментами -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 my-auto max-w-5xl mx-auto w-full py-4 shrink-0">
+        <!-- Симетрична сітка з 4 інструментами -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 my-auto max-w-5xl mx-auto w-full py-4 shrink-0">
             <!-- Tool 1 -->
             <div onclick="openTool('Tool1.html', 0)" class="bg-white dark:bg-slate-800/60 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700/80 rounded-2xl p-5 sm:p-6 transition duration-200 cursor-pointer flex flex-col justify-between h-32 sm:h-44 shadow-sm group">
                 <div class="flex justify-between items-start">
@@ -201,7 +201,7 @@
             </div>
 
             <!-- Tool 4 -->
-            <div onclick="openTool('Tool4.html', 3)" class="bg-white dark:bg-slate-800/60 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700/80 rounded-2xl p-5 sm:p-6 transition duration-200 cursor-pointer flex flex-col justify-between h-32 sm:h-44 shadow-sm group sm:col-span-1 lg:col-span-1 lg:col-start-1">
+            <div onclick="openTool('Tool4.html', 3)" class="bg-white dark:bg-slate-800/60 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700/80 rounded-2xl p-5 sm:p-6 transition duration-200 cursor-pointer flex flex-col justify-between h-32 sm:h-44 shadow-sm group">
                 <div class="flex justify-between items-start">
                     <div class="p-2.5 sm:p-3 bg-purple-500/10 text-purple-500 dark:text-purple-400 rounded-xl group-hover:scale-110 transition">
                         <svg class="w-6 h-6 sm:w-7 sm:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/></svg>
@@ -210,20 +210,6 @@
                 </div>
                 <div>
                     <h3 id="tool-name-4" class="text-lg sm:text-xl font-semibold text-slate-900 dark:text-white">Tool 4</h3>
-                    <p data-i18n="click_to_open" class="text-slate-500 dark:text-slate-400 text-xs sm:text-sm">Натисніть для відкриття</p>
-                </div>
-            </div>
-
-            <!-- Tool 5 -->
-            <div onclick="openTool('Tool5.html', 4)" class="bg-white dark:bg-slate-800/60 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700/80 rounded-2xl p-5 sm:p-6 transition duration-200 cursor-pointer flex flex-col justify-between h-32 sm:h-44 shadow-sm group sm:col-span-1 lg:col-span-1">
-                <div class="flex justify-between items-start">
-                    <div class="p-2.5 sm:p-3 bg-rose-500/10 text-rose-500 dark:text-rose-400 rounded-xl group-hover:scale-110 transition">
-                        <svg class="w-6 h-6 sm:w-7 sm:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                    </div>
-                    <span data-i18n="module_5" class="text-[10px] sm:text-xs bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-2.5 py-1 rounded-lg">Модуль 5</span>
-                </div>
-                <div>
-                    <h3 id="tool-name-5" class="text-lg sm:text-xl font-semibold text-slate-900 dark:text-white">Tool 5</h3>
                     <p data-i18n="click_to_open" class="text-slate-500 dark:text-slate-400 text-xs sm:text-sm">Натисніть для відкриття</p>
                 </div>
             </div>
@@ -332,12 +318,11 @@
                 menu_title: "Кухонний Дисплей",
                 settings: "Налаштування",
                 saver: "Заставка",
-                toolNames: ["Таймер", "Календар", "Інструмент 3", "Інструмент 4", "Інструмент 5"],
+                toolNames: ["Таймер", "Календар", "Інструмент 3", "Інструмент 4"],
                 module_1: "Модуль 1",
                 module_2: "Модуль 2",
                 module_3: "Модуль 3",
                 module_4: "Модуль 4",
-                module_5: "Модуль 5",
                 click_to_open: "Натисніть для відкриття",
                 footer_hint: "Свайпніть вгору або натисніть \"Заставка\", щоб повернутися.",
                 back_to_menu: "До меню",
@@ -360,12 +345,11 @@
                 menu_title: "Kitchen Display",
                 settings: "Settings",
                 saver: "Screen Saver",
-                toolNames: ["Timer", "Calendar", "Tool 3", "Tool 4", "Tool 5"],
+                toolNames: ["Timer", "Calendar", "Tool 3", "Tool 4"],
                 module_1: "Module 1",
                 module_2: "Module 2",
                 module_3: "Module 3",
                 module_4: "Module 4",
-                module_5: "Module 5",
                 click_to_open: "Click to open",
                 footer_hint: "Swipe up or click \"Screen Saver\" to return.",
                 back_to_menu: "To Menu",
@@ -388,12 +372,11 @@
                 menu_title: "Pantalla de Cocina",
                 settings: "Ajustes",
                 saver: "Salvapantallas",
-                toolNames: ["Minutero", "Calendario", "Herramienta 3", "Herramienta 4", "Herramienta 5"],
+                toolNames: ["Minutero", "Calendario", "Herramienta 3", "Herramienta 4"],
                 module_1: "Módulo 1",
                 module_2: "Módulo 2",
                 module_3: "Módulo 3",
                 module_4: "Módulo 4",
-                module_5: "Módulo 5",
                 click_to_open: "Haga clic para abrir",
                 footer_hint: "Desliza hacia arriba o haz clic en \"Salvapantallas\" para volver.",
                 back_to_menu: "Al Menú",
@@ -416,12 +399,11 @@
                 menu_title: "Küchendisplay",
                 settings: "Einstellungen",
                 saver: "Bildschirmschoner",
-                toolNames: ["Timer", "Calendario", "Herramienta 3", "Werkzeug 4", "Werkzeug 5"],
+                toolNames: ["Timer", "Calendario", "Herramienta 3", "Werkzeug 4"],
                 module_1: "Modul 1",
                 module_2: "Modul 2",
                 module_3: "Modul 3",
                 module_4: "Modul 4",
-                module_5: "Modul 5",
                 click_to_open: "Zum Öffnen klicken",
                 footer_hint: "Nach oben wischen oder auf „Bildschirmschoner“ klicken.",
                 back_to_menu: "Zum Menü",
@@ -444,12 +426,11 @@
                 menu_title: "Écran de Cuisine",
                 settings: "Paramètres",
                 saver: "Économiseur",
-                toolNames: ["Minuteur", "Calendrier", "Outil 3", "Outil 4", "Outil 5"],
+                toolNames: ["Minuteur", "Calendrier", "Outil 3", "Outil 4"],
                 module_1: "Module 1",
                 module_2: "Module 2",
                 module_3: "Module 3",
                 module_4: "Module 4",
-                module_5: "Module 5",
                 click_to_open: "Cliquez pour ouvrir",
                 footer_hint: "Glissez vers le haut ou cliquez sur \"Économiseur\".",
                 back_to_menu: "Au Menu",
@@ -472,12 +453,11 @@
                 menu_title: "Display Cucina",
                 settings: "Impostazioni",
                 saver: "Salvaschermo",
-                toolNames: ["Timer", "Calendario", "Strumento 3", "Strumento 4", "Strumento 5"],
+                toolNames: ["Timer", "Calendario", "Strumento 3", "Strumento 4"],
                 module_1: "Modulo 1",
                 module_2: "Modulo 2",
                 module_3: "Modulo 3",
                 module_4: "Modulo 4",
-                module_5: "Modulo 5",
                 click_to_open: "Clicca per aprire",
                 footer_hint: "Scorri verso l'alto o clicca su \"Salvaschermo\".",
                 back_to_menu: "Al Menu",
@@ -500,12 +480,11 @@
                 menu_title: "Wyświetlacz Kuchenny",
                 settings: "Ustawienia",
                 saver: "Wygaszacz",
-                toolNames: ["Regulator czasowy", "Kalendarz", "Instrumento 3", "Narzędzie 4", "Narzędzie 5"],
+                toolNames: ["Regulator czasowy", "Kalendarz", "Instrumento 3", "Narzędzie 4"],
                 module_1: "Moduł 1",
                 module_2: "Moduł 2",
                 module_3: "Moduł 3",
                 module_4: "Moduł 4",
-                module_5: "Moduł 5",
                 click_to_open: "Kliknij, aby otworzyć",
                 footer_hint: "Przesuń w górę lub kliknij „Wygaszacz”, aby wrócić.",
                 back_to_menu: "Do Menu",
@@ -528,12 +507,11 @@
                 menu_title: "Display de Cozinha",
                 settings: "Configurações",
                 saver: "Protetor de Tela",
-                toolNames: ["Temporizador", "Calendário", "Instrumento 3", "Ferramenta 4", "Ferramenta 5"],
+                toolNames: ["Temporizador", "Calendário", "Instrumento 3", "Ferramenta 4"],
                 module_1: "Módulo 1",
                 module_2: "Módulo 2",
                 module_3: "Módulo 3",
                 module_4: "Módulo 4",
-                module_5: "Módulo 5",
                 click_to_open: "Clique para abrir",
                 footer_hint: "Deslize para cima ou clique em \"Protetor de Tela\" para voltar.",
                 back_to_menu: "Para o Menu",
@@ -556,12 +534,11 @@
                 menu_title: "Mutfak Ekranı",
                 settings: "Ayarlar",
                 saver: "Ekran Koruyucu",
-                toolNames: ["Zamanlayıcı", "Takvim", "Enstrüman 3", "Araç 4", "Araç 5"],
+                toolNames: ["Zamanlayıcı", "Takvim", "Enstrüman 3", "Araç 4"],
                 module_1: "Modül 1",
                 module_2: "Modul 2",
                 module_3: "Modul 3",
                 module_4: "Modul 4",
-                module_5: "Modul 5",
                 click_to_open: "Açmak için tıklayın",
                 footer_hint: "Geri dönmek için yukarı kaydırın veya \"Ekran Koruyucu\"ya tıklayın.",
                 back_to_menu: "Menüye Dön",
@@ -584,12 +561,11 @@
                 menu_title: "キッチンディスプレイ",
                 settings: "設定",
                 saver: "スクリーンセーバー",
-                toolNames: ["タイマー", "タクヴィム", "楽器3", "ツール4", "ツール5"],
+                toolNames: ["タイマー", "タクヴィム", "楽器3", "ツール4"],
                 module_1: "モジュール 1",
                 module_2: "モジュール 2",
                 module_3: "モジュール 3",
                 module_4: "モジュール 4",
-                module_5: "モジュール 5",
                 click_to_open: "クリックして開く",
                 footer_hint: "戻るには上にスワイプするか、「スクリーンセーバー」をクリックしてください。",
                 back_to_menu: "メニューへ",
@@ -612,12 +588,11 @@
                 menu_title: "厨房显示屏",
                 settings: "设置",
                 saver: "屏幕保护程序",
-                toolNames: ["定时器", "タクヴィム", "楽器3", "工具 4", "工具 5"],
+                toolNames: ["定时器", "タクヴィム", "楽器3", "工具 4"],
                 module_1: "模块 1",
                 module_2: "模块 2",
                 module_3: "模块 3",
                 module_4: "模块 4",
-                module_5: "模块 5",
                 click_to_open: "点击打开",
                 footer_hint: "向上滑动或点击“屏幕保护程序”返回。",
                 back_to_menu: "返回菜单",
@@ -640,12 +615,11 @@
                 menu_title: "주방 디스플레이",
                 settings: "설정",
                 saver: "화면 보호기",
-                toolNames: ["시간제 노동자", "타크빔", "楽器3", "도구 4", "도구 5"],
+                toolNames: ["시간제 노동자", "타크빔", "楽器3", "도구 4"],
                 module_1: "기준 치수 1",
                 module_2: "기준 치수 2",
                 module_3: "기준 치수 3",
                 module_4: "기준 치수 4",
-                module_5: "기준 치수 5",
                 click_to_open: "클릭하여 열기",
                 footer_hint: "돌아가려면 위로 스와이프하거나 '화면 보호기'를 클릭하세요.",
                 back_to_menu: "메ня로",
@@ -728,7 +702,7 @@
             });
 
             const tNames = translations[lang].toolNames;
-            for (let i = 0; i < 5; i++) {
+            for (let i = 0; i < 4; i++) {
                 const tEl = document.getElementById(`tool-name-${i+1}`);
                 if (tEl) tEl.innerText = tNames[i];
             }
