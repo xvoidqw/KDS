@@ -156,8 +156,8 @@
             </div>
         </div>
 
-        <!-- Симетрична сітка з 4 інструментами -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 my-auto max-w-5xl mx-auto w-full py-4 shrink-0">
+        <!-- Симетрична сітка з 3 основними інструментами -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 my-auto max-w-5xl mx-auto w-full py-4 shrink-0">
             <!-- Tool 1 -->
             <div onclick="openTool('Tool1.html', 0)" class="bg-white dark:bg-slate-800/60 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700/80 rounded-2xl p-5 sm:p-6 transition duration-200 cursor-pointer flex flex-col justify-between h-32 sm:h-44 shadow-sm group">
                 <div class="flex justify-between items-start">
@@ -199,21 +199,14 @@
                     <p data-i18n="click_to_open" class="text-slate-500 dark:text-slate-400 text-xs sm:text-sm">Натисніть для відкриття</p>
                 </div>
             </div>
-
-            <!-- Tool 4 -->
-            <div onclick="openTool('Tool4.html', 3)" class="bg-white dark:bg-slate-800/60 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700/80 rounded-2xl p-5 sm:p-6 transition duration-200 cursor-pointer flex flex-col justify-between h-32 sm:h-44 shadow-sm group">
-                <div class="flex justify-between items-start">
-                    <div class="p-2.5 sm:p-3 bg-purple-500/10 text-purple-500 dark:text-purple-400 rounded-xl group-hover:scale-110 transition">
-                        <svg class="w-6 h-6 sm:w-7 sm:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/></svg>
-                    </div>
-                    <span data-i18n="module_4" class="text-[10px] sm:text-xs bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-2.5 py-1 rounded-lg">Модуль 4</span>
-                </div>
-                <div>
-                    <h3 id="tool-name-4" class="text-lg sm:text-xl font-semibold text-slate-900 dark:text-white">Tool 4</h3>
-                    <p data-i18n="click_to_open" class="text-slate-500 dark:text-slate-400 text-xs sm:text-sm">Натисніть для відкриття</p>
-                </div>
-            </div>
         </div>
+
+        <!-- 4-й інструмент поза межами сітки в нижньому кутку екрана (як іконка календаря) -->
+        <button onclick="openTool('Tool4.html', 3)" id="tool-name-4" title="Календар" aria-label="Календар" class="absolute bottom-5 right-5 sm:bottom-8 sm:right-8 z-20 w-13 h-13 sm:w-15 sm:h-15 p-3.5 sm:p-4 bg-white/90 dark:bg-slate-800/90 hover:bg-white dark:hover:bg-slate-800 text-purple-600 dark:text-purple-400 rounded-2xl shadow-lg hover:shadow-xl border border-slate-200/80 dark:border-slate-700/80 transition-all duration-200 hover:scale-110 active:scale-95 flex items-center justify-center backdrop-blur-md group">
+            <svg class="w-6 h-6 sm:w-7 sm:h-7 group-hover:rotate-6 transition-transform pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+            </svg>
+        </button>
 
         <div data-i18n="footer_hint" class="text-center text-slate-400 dark:text-slate-500 text-xs shrink-0 pt-2">
             Свайпніть вгору або натисніть "Заставка", щоб повернутися.
@@ -702,9 +695,14 @@
             });
 
             const tNames = translations[lang].toolNames;
-            for (let i = 0; i < 4; i++) {
+            for (let i = 0; i < 3; i++) {
                 const tEl = document.getElementById(`tool-name-${i+1}`);
                 if (tEl) tEl.innerText = tNames[i];
+            }
+            const t4El = document.getElementById('tool-name-4');
+            if (t4El && tNames[3]) {
+                t4El.title = tNames[3];
+                t4El.setAttribute('aria-label', tNames[3]);
             }
 
             if (activeToolIndex !== null && activeToolIndex !== undefined) {
