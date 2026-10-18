@@ -77,6 +77,38 @@
             pointer-events: auto;
             display: flex;
         }
+        .tool-slide-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+        #tool-iframe {
+            transition: transform 0.32s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.32s ease;
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
+        .slide-out-left {
+            transform: translateX(-100%);
+            opacity: 0;
+        }
+        .slide-in-right {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        .slide-out-right {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        .slide-in-left {
+            transform: translateX(-100%);
+            opacity: 0;
+        }
+        .slide-active {
+            transform: translateX(0);
+            opacity: 1;
+        }
         .custom-scroll {
             overflow-y: auto;
             scrollbar-width: thin;
@@ -87,7 +119,17 @@
 <body class="h-full w-full relative bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 transition-colors duration-500">
 
     <!-- Заставка 1: Користувацька картинка та годинник у нижньому кутку -->
-    <div id="saver-1" class="absolute inset-0 z-10 flex flex-col justify-end p-4 sm:p-8 bg-cover bg-center transition-opacity duration-700" style="background-image: url('https://placehold.co/1920x1080/1e293b/475569?text=Kitchen+Background');">
+    <div id="saver-1" class="absolute inset-0 z-10 flex flex-col justify-between p-4 sm:p-8 bg-cover bg-center transition-opacity duration-700" style="background-image: url('https://placehold.co/1920x1080/1e293b/475569?text=Kitchen+Background');">
+        <!-- Верхня панель заставки з кнопкою налаштувань -->
+        <div class="relative z-10 flex justify-end w-full">
+            <button onclick="openSettingsFromSaver(event)" aria-label="Налаштування" class="p-3 bg-black/40 hover:bg-black/60 active:scale-95 text-white/90 hover:text-white rounded-2xl border border-white/20 backdrop-blur-md shadow-lg transition-all duration-200 cursor-pointer flex items-center space-x-2 group">
+                <svg class="w-5 h-5 group-hover:rotate-45 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+                <span data-i18n="settings" class="text-xs font-medium pr-1">Налаштування</span>
+            </button>
+        </div>
         <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent pointer-events-none"></div>
         <div class="relative z-10 flex flex-col sm:flex-row justify-between items-start sm:items-end w-full gap-4">
             <div data-i18n="swipe_hint" class="text-white/80 text-xs sm:text-sm bg-black/40 backdrop-blur-md px-4 py-2 rounded-xl border border-white/10 shadow-lg">
@@ -100,16 +142,28 @@
     </div>
 
     <!-- Заставка 2: Великий годинник на весь екран -->
-    <div id="saver-2" class="absolute inset-0 z-10 hidden flex flex-col items-center justify-center p-4 bg-white dark:bg-black transition-opacity duration-700">
-        <div data-i18n="swipe_hint" class="absolute top-4 left-4 sm:top-6 sm:left-6 text-slate-500 dark:text-white/50 text-xs sm:text-sm bg-slate-200 dark:bg-white/10 backdrop-blur-md px-4 py-2 rounded-xl border border-slate-300 dark:border-white/10">
-            Свайпніть вниз для меню
+    <div id="saver-2" class="absolute inset-0 z-10 hidden flex flex-col items-center justify-between p-4 sm:p-8 bg-white dark:bg-black transition-opacity duration-700">
+        <div class="w-full flex justify-between items-center z-10">
+            <div data-i18n="swipe_hint" class="text-slate-500 dark:text-white/50 text-xs sm:text-sm bg-slate-200 dark:bg-white/10 backdrop-blur-md px-4 py-2 rounded-xl border border-slate-300 dark:border-white/10">
+                Свайпніть вниз для меню
+            </div>
+            <button onclick="openSettingsFromSaver(event)" aria-label="Налаштування" class="p-3 bg-slate-200 dark:bg-white/10 hover:bg-slate-300 dark:hover:bg-white/20 active:scale-95 text-slate-800 dark:text-white rounded-2xl border border-slate-300 dark:border-white/20 backdrop-blur-md shadow-lg transition-all duration-200 cursor-pointer flex items-center space-x-2 group">
+                <svg class="w-5 h-5 group-hover:rotate-45 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+                <span data-i18n="settings" class="text-xs font-medium pr-1">Налаштування</span>
+            </button>
         </div>
-        <div class="font-mono text-6xl sm:text-9xl md:text-[13rem] font-extrabold tracking-tight text-slate-900 dark:text-white animate-pulse text-center" id="clock-fullscreen">
-            00:00
+        <div class="my-auto flex flex-col items-center justify-center">
+            <div class="font-mono text-6xl sm:text-9xl md:text-[13rem] font-extrabold tracking-tight text-slate-900 dark:text-white animate-pulse text-center" id="clock-fullscreen">
+                00:00
+            </div>
+            <div class="text-slate-600 dark:text-slate-400 text-lg sm:text-2xl mt-2 sm:mt-4 font-medium text-center" id="date-fullscreen">
+                Понеділок, 1 січня
+            </div>
         </div>
-        <div class="text-slate-600 dark:text-slate-400 text-lg sm:text-2xl mt-2 sm:mt-4 font-medium text-center" id="date-fullscreen">
-            Понеділок, 1 січня
-        </div>
+        <div class="h-6"></div>
     </div>
 
     <!-- Головне меню з 5 інструментами -->
@@ -262,8 +316,8 @@
         </div>
 
         <!-- Сам iframe куди вбудовується файл -->
-        <div class="flex-1 w-full bg-slate-100 dark:bg-slate-900 relative">
-            <iframe id="tool-iframe" src="" class="w-full h-full border-0"></iframe>
+        <div class="flex-1 w-full bg-slate-100 dark:bg-slate-900 relative overflow-hidden">
+            <iframe id="tool-iframe" src="" class="w-full h-full border-0 slide-active"></iframe>
 
             <!-- Спеціальна кнопка "Вихід" зверху для 4-го інструмента (без надпису назви) -->
             <div id="tool4-top-bar" class="absolute top-0 left-0 right-0 z-40 p-3 sm:p-4 pointer-events-none hidden flex items-center justify-start">
@@ -273,6 +327,25 @@
                     </svg>
                     <span>Вихід</span>
                 </button>
+            </div>
+
+            <!-- Нижня зона/панель для свайпу та швидкого перемикання між інструментами з анімацією -->
+            <div id="tool-bottom-bar" class="absolute bottom-2 left-0 right-0 z-40 flex flex-col items-center justify-center pointer-events-auto">
+                <div id="swipe-handle-pill" class="flex items-center space-x-3 bg-slate-900/80 dark:bg-slate-800/90 text-white/90 px-4 py-1.5 rounded-full shadow-2xl border border-white/10 backdrop-blur-md transition-all hover:bg-slate-900 cursor-pointer select-none">
+                    <button onclick="navigateTool(-1, event)" class="p-1 hover:text-white transition active:scale-90" aria-label="Попередній інструмент">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
+                    </button>
+                    <!-- Індикатори-крапки активного інструмента (1..4) -->
+                    <div class="flex items-center space-x-1.5" id="tool-dots">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 transition-all duration-300" data-tool-dot="0"></span>
+                        <span class="w-2 h-2 rounded-full bg-white/40 transition-all duration-300" data-tool-dot="1"></span>
+                        <span class="w-2 h-2 rounded-full bg-white/40 transition-all duration-300" data-tool-dot="2"></span>
+                        <span class="w-2 h-2 rounded-full bg-white/40 transition-all duration-300" data-tool-dot="3"></span>
+                    </div>
+                    <button onclick="navigateTool(1, event)" class="p-1 hover:text-white transition active:scale-90" aria-label="Наступний інструмент">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -334,6 +407,27 @@
                         <input type="url" id="bg-url-input" placeholder="https://..." class="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500" onchange="handleImageUrl(this.value)">
                     </div>
                 </div>
+
+                <!-- Налаштування: Як відкривати інструменти -->
+                <div>
+                    <label data-i18n="open_mode_label" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Як відкривати інструменти</label>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <button onclick="setOpenMode('menu')" id="btn-open-menu" class="p-3 rounded-xl border text-left transition flex flex-col justify-between border-emerald-500 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                            <div class="flex items-center space-x-2 mb-1">
+                                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"/></svg>
+                                <span data-i18n="open_mode_menu" class="font-semibold text-xs sm:text-sm">Стандартне меню</span>
+                            </div>
+                            <span data-i18n="open_mode_menu_desc" class="text-[11px] text-slate-500 dark:text-slate-400 font-normal">Відкриває сітку вибору інструментів</span>
+                        </button>
+                        <button onclick="setOpenMode('swipe')" id="btn-open-swipe" class="p-3 rounded-xl border text-left transition flex flex-col justify-between border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+                            <div class="flex items-center space-x-2 mb-1">
+                                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+                                <span data-i18n="open_mode_swipe" class="font-semibold text-xs sm:text-sm">Свайп інструментів</span>
+                            </div>
+                            <span data-i18n="open_mode_swipe_desc" class="text-[11px] text-slate-500 dark:text-slate-400 font-normal">Одразу інструмент + свайп знизу з анімацією</span>
+                        </button>
+                    </div>
+                </div>
             </div>
 
             <div class="mt-8 flex justify-end">
@@ -370,6 +464,11 @@
                 select_file: "Вибрати файл з пристрою",
                 reset: "Скинути",
                 save_and_close: "Зберегти та закрити",
+                open_mode_label: "Як відкривати інструменти",
+                open_mode_menu: "Стандартне меню",
+                open_mode_menu_desc: "Відкриває сітку вибору інструментів",
+                open_mode_swipe: "Свайп інструментів",
+                open_mode_swipe_desc: "Одразу інструмент + свайп знизу з анімацією",
                 weekdays: ['Неділя', 'Понеділок', 'Вівторок', 'Середа', 'Четвер', 'П’ятниця', 'Субота'],
                 months: ['січня', 'лютого', 'березня', 'квітня', 'травня', 'червня', 'липня', 'серпня', 'вересня', 'жовтня', 'листопада', 'грудня']
             },
@@ -397,6 +496,11 @@
                 select_file: "Choose file from device",
                 reset: "Reset",
                 save_and_close: "Save & Close",
+                open_mode_label: "How to open tools",
+                open_mode_menu: "Standard Menu",
+                open_mode_menu_desc: "Opens the tools selection grid",
+                open_mode_swipe: "Swipe Tools",
+                open_mode_swipe_desc: "Direct tool + bottom swipe with animation",
                 weekdays: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
                 months: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
             },
@@ -674,7 +778,16 @@
 
         let currentLang = localStorage.getItem('kitchen_lang') || 'uk';
         let currentSaverMode = parseInt(localStorage.getItem('kitchen_saver_mode')) || 1;
+        let currentOpenMode = localStorage.getItem('kitchen_open_mode') || 'menu'; // 'menu' або 'swipe'
         let activeToolIndex = null;
+        let isTransitioning = false;
+
+        const toolFiles = [
+            'Tool1.html',
+            'Tool2.html',
+            'Tool3.html',
+            'Tool4.html'
+        ];
 
         function updateClock() {
             const now = new Date();
@@ -756,6 +869,31 @@
             if (modal) modal.classList.toggle('hidden');
         }
 
+        function openSettingsFromSaver(e) {
+            if (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+            }
+            toggleSettingsModal();
+        }
+
+        function setOpenMode(mode) {
+            currentOpenMode = mode;
+            localStorage.setItem('kitchen_open_mode', mode);
+
+            const btnMenu = document.getElementById('btn-open-menu');
+            const btnSwipe = document.getElementById('btn-open-swipe');
+
+            if (mode === 'swipe') {
+                if (btnSwipe) btnSwipe.className = "p-3 rounded-xl border text-left transition flex flex-col justify-between border-emerald-500 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400";
+                if (btnMenu) btnMenu.className = "p-3 rounded-xl border text-left transition flex flex-col justify-between border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300";
+            } else {
+                if (btnMenu) btnMenu.className = "p-3 rounded-xl border text-left transition flex flex-col justify-between border-emerald-500 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400";
+                if (btnSwipe) btnSwipe.className = "p-3 rounded-xl border text-left transition flex flex-col justify-between border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300";
+            }
+        }
+
         function setSaverMode(mode) {
             currentSaverMode = mode;
             localStorage.setItem('kitchen_saver_mode', mode);
@@ -777,38 +915,124 @@
                 if (s1) s1.classList.remove('hidden');
                 if (b1) b1.className = "py-3 px-3 rounded-xl border text-xs sm:text-sm font-medium transition flex items-center justify-center space-x-2 border-emerald-500 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400";
                 if (b2) b2.className = "py-3 px-3 rounded-xl border text-xs sm:text-sm font-medium transition flex items-center justify-center space-x-2 border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300";
-                if (uploadSec) uploadSec.classList.remove('hidden');
+        }
+
+        // Ініціалізація збереження фону через IndexedDB (щоб браузер не скидав через ліміт 5MB у localStorage)
+        const DB_NAME = 'KitchenDisplayDB';
+        const DB_STORE = 'settings';
+
+        function getDB() {
+            return new Promise((resolve, reject) => {
+                const req = indexedDB.open(DB_NAME, 1);
+                req.onupgradeneeded = () => {
+                    req.result.createObjectStore(DB_STORE);
+                };
+                req.onsuccess = () => resolve(req.result);
+                req.onerror = () => reject(req.error);
+            });
+        }
+
+        async function saveBackgroundToStorage(bgData) {
+            try {
+                localStorage.setItem('kitchen_custom_bg', bgData);
+            } catch (e) {
+                // Якщо картинка більша за 5MB, localStorage видасть QuotaExceededError
+                console.warn('LocalStorage quota exceeded, saving to IndexedDB', e);
+            }
+            try {
+                const db = await getDB();
+                const tx = db.transaction(DB_STORE, 'readwrite');
+                tx.objectStore(DB_STORE).put(bgData, 'custom_bg');
+            } catch (err) {
+                console.error('IndexedDB save error', err);
+            }
+        }
+
+        async function loadSavedBackground() {
+            let bgData = localStorage.getItem('kitchen_custom_bg');
+            if (!bgData) {
+                try {
+                    const db = await getDB();
+                    const tx = db.transaction(DB_STORE, 'readonly');
+                    const req = tx.objectStore(DB_STORE).get('custom_bg');
+                    bgData = await new Promise((res) => {
+                        req.onsuccess = () => res(req.result);
+                        req.onerror = () => res(null);
+                    });
+                } catch (e) {
+                    console.error('IndexedDB load error', e);
+                }
+            }
+
+            if (bgData) {
+                const s1 = document.getElementById('saver-1');
+                if (s1) s1.style.backgroundImage = `url('${bgData}')`;
+                const urlInput = document.getElementById('bg-url-input');
+                if (urlInput && bgData.startsWith('http')) urlInput.value = bgData;
             }
         }
 
         function handleImageUpload(e) {
             const file = e.target.files[0];
             if (file) {
+                // Оптимізація та зчитування зображення
                 const reader = new FileReader();
                 reader.onload = function(evt) {
-                    const s1 = document.getElementById('saver-1');
-                    if (s1) s1.style.backgroundImage = `url('${evt.target.result}')`;
-                    localStorage.setItem('kitchen_custom_bg', evt.target.result);
-                }
+                    const img = new Image();
+                    img.onload = function() {
+                        // Якщо картинка дуже велика, стискаємо її для швидкого завантаження заставки
+                        const canvas = document.createElement('canvas');
+                        const maxDim = 1920;
+                        let w = img.width;
+                        let h = img.height;
+                        if (w > maxDim || h > maxDim) {
+                            if (w > h) {
+                                h = Math.round((h * maxDim) / w);
+                                w = maxDim;
+                            } else {
+                                w = Math.round((w * maxDim) / h);
+                                h = maxDim;
+                            }
+                        }
+                        canvas.width = w;
+                        canvas.height = h;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, w, h);
+                        const optimizedDataUrl = canvas.toDataURL('image/jpeg', 0.88);
+
+                        const s1 = document.getElementById('saver-1');
+                        if (s1) s1.style.backgroundImage = `url('${optimizedDataUrl}')`;
+                        saveBackgroundToStorage(optimizedDataUrl);
+                    };
+                    img.src = evt.target.result;
+                };
                 reader.readAsDataURL(file);
             }
         }
 
         function handleImageUrl(url) {
-            if (url.trim() !== '') {
+            const trimmed = url.trim();
+            if (trimmed !== '') {
                 const s1 = document.getElementById('saver-1');
-                if (s1) s1.style.backgroundImage = `url('${url}')`;
-                localStorage.setItem('kitchen_custom_bg', url);
+                if (s1) s1.style.backgroundImage = `url('${trimmed}')`;
+                saveBackgroundToStorage(trimmed);
             }
         }
 
-        function resetDefaultBackground() {
+        async function resetDefaultBackground() {
             const defaultBg = 'https://placehold.co/1920x1080/1e293b/475569?text=Kitchen+Background';
             const s1 = document.getElementById('saver-1');
             if (s1) s1.style.backgroundImage = `url('${defaultBg}')`;
             localStorage.removeItem('kitchen_custom_bg');
+            try {
+                const db = await getDB();
+                const tx = db.transaction(DB_STORE, 'readwrite');
+                tx.objectStore(DB_STORE).delete('custom_bg');
+            } catch (e) {}
             const urlInput = document.getElementById('bg-url-input');
             if (urlInput) urlInput.value = '';
+            const fileInput = document.getElementById('bg-file-input');
+            if (fileInput) fileInput.value = '';
         }
 
         const menu = document.getElementById('main-menu');
@@ -833,7 +1057,19 @@
             }
         }
 
-        function openTool(filename, indexOrName) {
+        function updateToolDots(idx) {
+            const dots = document.querySelectorAll('#tool-dots [data-tool-dot]');
+            dots.forEach(dot => {
+                const dotIdx = parseInt(dot.getAttribute('data-tool-dot'));
+                if (dotIdx === idx) {
+                    dot.className = "w-4 h-2 rounded-full bg-emerald-400 transition-all duration-300";
+                } else {
+                    dot.className = "w-2 h-2 rounded-full bg-white/40 transition-all duration-300";
+                }
+            });
+        }
+
+        function openTool(filename, indexOrName, direction = 'fade') {
             isToolOpen = true;
             
             let index = 0;
@@ -852,6 +1088,7 @@
             }
             
             activeToolIndex = index;
+            updateToolDots(index);
             const toolTitle = translations[currentLang].toolNames[index];
 
             const titleEl = document.getElementById('tool-title');
@@ -860,7 +1097,7 @@
             const tool4TopBar = document.getElementById('tool4-top-bar');
 
             if (index === 3) {
-                // Спеціальний режим для 4-го інструмента:
+                // Спеціальний режим для 4-го інструмента (Календар):
                 // Приховуємо стандартну шапку з надписом, показуємо кнопку "Вихід" зверху
                 if (standardHeader) standardHeader.classList.add('hidden');
                 if (tool4TopBar) {
@@ -877,7 +1114,32 @@
                 if (titleEl) titleEl.innerText = toolTitle;
             }
 
-            if (iframeEl) iframeEl.src = filename;
+            if (iframeEl) {
+                if (direction === 'next') {
+                    // Анімація слайду праворуч наліво
+                    iframeEl.className = "w-full h-full border-0 slide-out-left";
+                    setTimeout(() => {
+                        iframeEl.src = filename;
+                        iframeEl.className = "w-full h-full border-0 slide-in-right";
+                        requestAnimationFrame(() => {
+                            iframeEl.className = "w-full h-full border-0 slide-active";
+                        });
+                    }, 180);
+                } else if (direction === 'prev') {
+                    // Анімація слайду ліворуч направо
+                    iframeEl.className = "w-full h-full border-0 slide-out-right";
+                    setTimeout(() => {
+                        iframeEl.src = filename;
+                        iframeEl.className = "w-full h-full border-0 slide-in-left";
+                        requestAnimationFrame(() => {
+                            iframeEl.className = "w-full h-full border-0 slide-active";
+                        });
+                    }, 180);
+                } else {
+                    iframeEl.src = filename;
+                    iframeEl.className = "w-full h-full border-0 slide-active";
+                }
+            }
 
             if (menu) {
                 menu.classList.remove('menu-visible');
@@ -888,6 +1150,28 @@
                 toolContainer.classList.remove('tool-hidden');
                 toolContainer.classList.add('tool-visible');
             }
+        }
+
+        function navigateTool(directionStep, event) {
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            if (isTransitioning) return;
+            isTransitioning = true;
+            setTimeout(() => { isTransitioning = false; }, 360);
+
+            let currentIdx = (activeToolIndex !== null && activeToolIndex !== undefined) ? activeToolIndex : 0;
+            let newIdx = currentIdx + directionStep;
+
+            if (newIdx < 0) {
+                newIdx = toolFiles.length - 1; // циклічний перехід
+            } else if (newIdx >= toolFiles.length) {
+                newIdx = 0;
+            }
+
+            const animDir = directionStep > 0 ? 'next' : 'prev';
+            openTool(toolFiles[newIdx], newIdx, animDir);
         }
 
         function handleToolExit(event) {
@@ -916,20 +1200,35 @@
 
             const iframeEl = document.getElementById('tool-iframe');
             if (iframeEl) iframeEl.src = '';
-            openMenu();
+            
+            // Якщо обрано режим 'swipe', повертаємось на заставку, якщо 'menu' — у головне меню
+            if (currentOpenMode === 'swipe') {
+                closeMenu();
+            } else {
+                openMenu();
+            }
+        }
+
+        function handleScreensaverActivation() {
+            if (currentOpenMode === 'swipe') {
+                // Прямий запуск першого інструмента з можливістю свайпу
+                openTool('Tool1.html', 0);
+            } else {
+                // Стандартне меню
+                openMenu();
+            }
         }
 
         window.addEventListener('DOMContentLoaded', () => {
-            const savedBg = localStorage.getItem('kitchen_custom_bg');
-            if (savedBg) {
-                const s1 = document.getElementById('saver-1');
-                if (s1) s1.style.backgroundImage = `url('${savedBg}')`;
-            }
+            loadSavedBackground();
             setSaverMode(currentSaverMode);
+            setOpenMode(currentOpenMode);
             selectLanguage(currentLang);
         });
 
+        // Жести свайпу на заставці
         let touchStartY = 0;
+        let touchStartX = 0;
         const s1 = document.getElementById('saver-1');
         const s2 = document.getElementById('saver-2');
 
@@ -937,26 +1236,73 @@
             if (el) {
                 el.addEventListener('touchstart', (e) => {
                     touchStartY = e.touches[0].clientY;
+                    touchStartX = e.touches[0].clientX;
                 }, { passive: true });
 
                 el.addEventListener('touchend', (e) => {
                     const touchEndY = e.changedTouches[0].clientY;
-                    if (touchEndY - touchStartY > 60) {
-                        openMenu();
+                    if (touchEndY - touchStartY > 50) {
+                        handleScreensaverActivation();
                     }
                 }, { passive: true });
 
-                el.addEventListener('click', () => {
-                    openMenu();
+                el.addEventListener('click', (e) => {
+                    // Якщо клік не по кнопці налаштувань
+                    if (!e.target.closest('button')) {
+                        handleScreensaverActivation();
+                    }
                 });
             }
         });
 
+        // Жест свайпу знизу в інструменті (перемикання або пальцем знизу)
+        let toolTouchStartX = 0;
+        let toolTouchStartY = 0;
+        const toolBottomBar = document.getElementById('tool-bottom-bar');
+        const toolContainerEl = document.getElementById('tool-container');
+
+        [toolBottomBar, toolContainerEl].forEach(area => {
+            if (area) {
+                area.addEventListener('touchstart', (e) => {
+                    toolTouchStartX = e.touches[0].clientX;
+                    toolTouchStartY = e.touches[0].clientY;
+                }, { passive: true });
+
+                area.addEventListener('touchend', (e) => {
+                    const deltaX = e.changedTouches[0].clientX - toolTouchStartX;
+                    const deltaY = e.changedTouches[0].clientY - toolTouchStartY;
+
+                    // Якщо свайп знизу вгору або по горизонталі
+                    if (Math.abs(deltaX) > 60 && Math.abs(deltaX) > Math.abs(deltaY)) {
+                        if (deltaX < 0) {
+                            navigateTool(1); // свайп вліво -> наступний інструмент
+                        } else {
+                            navigateTool(-1); // свайп вправо -> попередній інструмент
+                        }
+                    } else if (deltaY < -60 && Math.abs(deltaY) > Math.abs(deltaX)) {
+                        // Свайп знизу вгору пальцем
+                        navigateTool(1);
+                    }
+                }, { passive: true });
+            }
+        });
+
         window.addEventListener('wheel', (e) => {
-            if (e.deltaY > 40 && !isMenuOpen && !isToolOpen) {
-                openMenu();
-            } else if (e.deltaY < -40 && isMenuOpen && !isToolOpen) {
-                closeMenu();
+            if (!isMenuOpen && !isToolOpen) {
+                if (e.deltaY > 40) {
+                    handleScreensaverActivation();
+                }
+            } else if (isMenuOpen && !isToolOpen) {
+                if (e.deltaY < -40) {
+                    closeMenu();
+                }
+            } else if (isToolOpen) {
+                // Горизонтальне або вертикальне коліщатко для перемикання інструментів
+                if (e.deltaX > 40 || (e.shiftKey && e.deltaY > 40)) {
+                    navigateTool(1);
+                } else if (e.deltaX < -40 || (e.shiftKey && e.deltaY < -40)) {
+                    navigateTool(-1);
+                }
             }
         });
     </script>
