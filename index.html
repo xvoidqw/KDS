@@ -2,9 +2,9 @@
 <html lang="uk" class="h-full">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <title>Кухонний Дисплей</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
     <script>
         tailwind.config = {
             darkMode: 'media',
@@ -24,31 +24,18 @@
             user-select: none;
             -webkit-user-select: none;
             overflow: hidden;
-            touch-action: none;
         }
-        /* Кастомний тонкий скролбар для темної та світлої теми без білих плям */
-        ::-webkit-scrollbar {
-            width: 5px;
-            height: 5px;
-        }
-        ::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: rgba(150, 150, 150, 0.25);
-            border-radius: 9999px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: rgba(150, 150, 150, 0.4);
-        }
+        /* Тонкий скролбар */
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(150,150,150,0.25); border-radius: 9999px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(150,150,150,0.4); }
         @media (prefers-color-scheme: dark) {
-            ::-webkit-scrollbar-thumb {
-                background: rgba(255, 255, 255, 0.2);
-            }
-            ::-webkit-scrollbar-thumb:hover {
-                background: rgba(255, 255, 255, 0.35);
-            }
+            ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); }
+            ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.35); }
         }
+
+        /* Головне меню — виїжджає зверху */
         #main-menu {
             transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease;
         }
@@ -62,67 +49,64 @@
             opacity: 1;
             pointer-events: auto;
         }
+
+        /* Контейнер інструмента */
         #tool-container {
-            transition: transform 0.3s ease, opacity 0.3s ease;
+            transition: opacity 0.25s ease;
         }
         .tool-hidden {
-            transform: scale(0.98);
             opacity: 0;
             pointer-events: none;
-            display: none;
+            display: none !important;
         }
         .tool-visible {
-            transform: scale(1);
             opacity: 1;
             pointer-events: auto;
-            display: flex;
+            display: flex !important;
         }
-        .tool-slide-container {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-        }
+
+        /* iframe slide анімація */
         #tool-iframe {
-            transition: transform 0.32s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.32s ease;
             width: 100%;
             height: 100%;
             border: 0;
-        }
-        .slide-out-left {
-            transform: translateX(-100%);
-            opacity: 0;
-        }
-        .slide-in-right {
-            transform: translateX(100%);
-            opacity: 0;
-        }
-        .slide-out-right {
-            transform: translateX(100%);
-            opacity: 0;
-        }
-        .slide-in-left {
-            transform: translateX(-100%);
-            opacity: 0;
-        }
-        .slide-active {
+            transition: transform 0.32s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.32s ease;
             transform: translateX(0);
             opacity: 1;
         }
+        #tool-iframe.slide-enter-right {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        #tool-iframe.slide-enter-left {
+            transform: translateX(-100%);
+            opacity: 0;
+        }
+
+        /* Скрол у модальному вікні */
         .custom-scroll {
             overflow-y: auto;
             scrollbar-width: thin;
             -webkit-overflow-scrolling: touch;
+            touch-action: pan-y;
+        }
+
+        /* Дозволяємо скрол у модальному вікні */
+        #settings-modal {
+            touch-action: auto;
+        }
+        #settings-modal > div {
+            touch-action: pan-y;
         }
     </style>
 </head>
 <body class="h-full w-full relative bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 transition-colors duration-500">
 
-    <!-- Заставка 1: Користувацька картинка та годинник у нижньому кутку -->
-    <div id="saver-1" class="absolute inset-0 z-10 flex flex-col justify-between p-4 sm:p-8 bg-cover bg-center transition-opacity duration-700" style="background-image: url('https://placehold.co/1920x1080/1e293b/475569?text=Kitchen+Background');">
-        <!-- Верхня панель заставки з кнопкою налаштувань -->
+    <!-- Заставка 1: Картинка + годинник -->
+    <div id="saver-1" class="absolute inset-0 z-10 flex flex-col justify-between p-4 sm:p-8 bg-cover bg-center" style="background-image: url('https://placehold.co/1920x1080/1e293b/475569?text=Kitchen+Background');">
+        <!-- Верхня панель з кнопкою налаштувань -->
         <div class="relative z-10 flex justify-end w-full">
-            <button onclick="openSettingsFromSaver(event)" aria-label="Налаштування" class="p-3 bg-black/40 hover:bg-black/60 active:scale-95 text-white/90 hover:text-white rounded-2xl border border-white/20 backdrop-blur-md shadow-lg transition-all duration-200 cursor-pointer flex items-center space-x-2 group">
+            <button id="saver1-settings-btn" aria-label="Налаштування" class="p-3 bg-black/40 hover:bg-black/60 active:scale-95 text-white/90 hover:text-white rounded-2xl border border-white/20 backdrop-blur-md shadow-lg transition-all duration-200 cursor-pointer flex items-center space-x-2 group">
                 <svg class="w-5 h-5 group-hover:rotate-45 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -135,19 +119,17 @@
             <div data-i18n="swipe_hint" class="text-white/80 text-xs sm:text-sm bg-black/40 backdrop-blur-md px-4 py-2 rounded-xl border border-white/10 shadow-lg">
                 Свайпніть вниз для меню
             </div>
-            <div class="font-mono text-5xl sm:text-7xl md:text-8xl font-bold tracking-wider text-white drop-shadow-lg" id="clock-corner">
-                00:00
-            </div>
+            <div class="font-mono text-5xl sm:text-7xl md:text-8xl font-bold tracking-wider text-white drop-shadow-lg" id="clock-corner">00:00</div>
         </div>
     </div>
 
-    <!-- Заставка 2: Великий годинник на весь екран -->
-    <div id="saver-2" class="absolute inset-0 z-10 hidden flex flex-col items-center justify-between p-4 sm:p-8 bg-white dark:bg-black transition-opacity duration-700">
+    <!-- Заставка 2: Великий годинник -->
+    <div id="saver-2" class="absolute inset-0 z-10 hidden flex-col items-center justify-between p-4 sm:p-8 bg-white dark:bg-black">
         <div class="w-full flex justify-between items-center z-10">
             <div data-i18n="swipe_hint" class="text-slate-500 dark:text-white/50 text-xs sm:text-sm bg-slate-200 dark:bg-white/10 backdrop-blur-md px-4 py-2 rounded-xl border border-slate-300 dark:border-white/10">
                 Свайпніть вниз для меню
             </div>
-            <button onclick="openSettingsFromSaver(event)" aria-label="Налаштування" class="p-3 bg-slate-200 dark:bg-white/10 hover:bg-slate-300 dark:hover:bg-white/20 active:scale-95 text-slate-800 dark:text-white rounded-2xl border border-slate-300 dark:border-white/20 backdrop-blur-md shadow-lg transition-all duration-200 cursor-pointer flex items-center space-x-2 group">
+            <button id="saver2-settings-btn" aria-label="Налаштування" class="p-3 bg-slate-200 dark:bg-white/10 hover:bg-slate-300 dark:hover:bg-white/20 active:scale-95 text-slate-800 dark:text-white rounded-2xl border border-slate-300 dark:border-white/20 backdrop-blur-md shadow-lg transition-all duration-200 cursor-pointer flex items-center space-x-2 group">
                 <svg class="w-5 h-5 group-hover:rotate-45 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -156,17 +138,13 @@
             </button>
         </div>
         <div class="my-auto flex flex-col items-center justify-center">
-            <div class="font-mono text-6xl sm:text-9xl md:text-[13rem] font-extrabold tracking-tight text-slate-900 dark:text-white animate-pulse text-center" id="clock-fullscreen">
-                00:00
-            </div>
-            <div class="text-slate-600 dark:text-slate-400 text-lg sm:text-2xl mt-2 sm:mt-4 font-medium text-center" id="date-fullscreen">
-                Понеділок, 1 січня
-            </div>
+            <div class="font-mono text-6xl sm:text-9xl md:text-[13rem] font-extrabold tracking-tight text-slate-900 dark:text-white animate-pulse text-center" id="clock-fullscreen">00:00</div>
+            <div class="text-slate-600 dark:text-slate-400 text-lg sm:text-2xl mt-2 sm:mt-4 font-medium text-center" id="date-fullscreen">Понеділок, 1 січня</div>
         </div>
         <div class="h-6"></div>
     </div>
 
-    <!-- Головне меню з 5 інструментами -->
+    <!-- Головне меню -->
     <div id="main-menu" class="absolute inset-0 z-20 bg-slate-100/95 dark:bg-slate-900/95 backdrop-blur-xl menu-hidden flex flex-col justify-between p-4 sm:p-8 md:p-12 custom-scroll">
         <!-- Шапка меню -->
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-200 dark:border-slate-800 pb-4 shrink-0 gap-4">
@@ -175,30 +153,28 @@
                 <h1 data-i18n="menu_title" class="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Кухонний Дисплей</h1>
             </div>
             <div class="flex flex-wrap items-center gap-2 sm:gap-3">
-                <!-- Кастомний селектор мови (власний елемент із повною адаптивністю) -->
+                <!-- Dropdown мови -->
                 <div class="relative" id="custom-lang-dropdown">
-                    <button onclick="toggleLangMenu(event)" class="bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 active:scale-95 transition text-slate-800 dark:text-white px-3 sm:px-3.5 py-2 rounded-xl font-medium text-xs sm:text-sm flex items-center space-x-1.5 sm:space-x-2 border border-slate-300 dark:border-slate-700 shadow-sm max-w-[150px] sm:max-w-none truncate">
+                    <button id="lang-toggle-btn" class="bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 active:scale-95 transition text-slate-800 dark:text-white px-3 sm:px-3.5 py-2 rounded-xl font-medium text-xs sm:text-sm flex items-center space-x-1.5 sm:space-x-2 border border-slate-300 dark:border-slate-700 shadow-sm max-w-[150px] sm:max-w-none truncate">
                         <svg class="w-4 h-4 text-slate-500 dark:text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"/></svg>
                         <span id="current-lang-label" class="truncate">українська</span>
                         <svg class="w-3.5 h-3.5 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                     </button>
-                    <!-- Випадаючий список мов із підтримкою темної теми -->
                     <div id="lang-menu-list" class="absolute right-0 mt-2 w-48 sm:w-52 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl py-2 hidden z-50 max-h-60 overflow-y-auto custom-scroll">
-                        <div onclick="selectLanguage('uk')" class="px-3.5 sm:px-4 py-2.5 text-xs sm:text-sm hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer flex items-center justify-between text-slate-800 dark:text-slate-200 transition"><span>українська</span><span class="text-[10px] sm:text-xs text-slate-400 font-mono">UA</span></div>
-                        <div onclick="selectLanguage('en')" class="px-3.5 sm:px-4 py-2.5 text-xs sm:text-sm hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer flex items-center justify-between text-slate-800 dark:text-slate-200 transition"><span>English</span><span class="text-[10px] sm:text-xs text-slate-400 font-mono">EN</span></div>
-                        <div onclick="selectLanguage('es')" class="px-3.5 sm:px-4 py-2.5 text-xs sm:text-sm hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer flex items-center justify-between text-slate-800 dark:text-slate-200 transition"><span>Español</span><span class="text-[10px] sm:text-xs text-slate-400 font-mono">ES</span></div>
-                        <div onclick="selectLanguage('de')" class="px-3.5 sm:px-4 py-2.5 text-xs sm:text-sm hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer flex items-center justify-between text-slate-800 dark:text-slate-200 transition"><span>Deutsch</span><span class="text-[10px] sm:text-xs text-slate-400 font-mono">DE</span></div>
-                        <div onclick="selectLanguage('fr')" class="px-3.5 sm:px-4 py-2.5 text-xs sm:text-sm hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer flex items-center justify-between text-slate-800 dark:text-slate-200 transition"><span>Français</span><span class="text-[10px] sm:text-xs text-slate-400 font-mono">FR</span></div>
-                        <div onclick="selectLanguage('it')" class="px-3.5 sm:px-4 py-2.5 text-xs sm:text-sm hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer flex items-center justify-between text-slate-800 dark:text-slate-200 transition"><span>Italiano</span><span class="text-[10px] sm:text-xs text-slate-400 font-mono">IT</span></div>
-                        <div onclick="selectLanguage('pl')" class="px-3.5 sm:px-4 py-2.5 text-xs sm:text-sm hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer flex items-center justify-between text-slate-800 dark:text-slate-200 transition"><span>Polski</span><span class="text-[10px] sm:text-xs text-slate-400 font-mono">PL</span></div>
-                        <div onclick="selectLanguage('pt')" class="px-3.5 sm:px-4 py-2.5 text-xs sm:text-sm hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer flex items-center justify-between text-slate-800 dark:text-slate-200 transition"><span>Português</span><span class="text-[10px] sm:text-xs text-slate-400 font-mono">PT</span></div>
-                        <div onclick="selectLanguage('tr')" class="px-3.5 sm:px-4 py-2.5 text-xs sm:text-sm hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer flex items-center justify-between text-slate-800 dark:text-slate-200 transition"><span>Türkçe</span><span class="text-[10px] sm:text-xs text-slate-400 font-mono">TR</span></div>
-                        <div onclick="selectLanguage('ja')" class="px-3.5 sm:px-4 py-2.5 text-xs sm:text-sm hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer flex items-center justify-between text-slate-800 dark:text-slate-200 transition"><span>日本語</span><span class="text-[10px] sm:text-xs text-slate-400 font-mono">JA</span></div>
-                        <div onclick="selectLanguage('zh')" class="px-3.5 sm:px-4 py-2.5 text-xs sm:text-sm hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer flex items-center justify-between text-slate-800 dark:text-slate-200 transition"><span>中文</span><span class="text-[10px] sm:text-xs text-slate-400 font-mono">ZH</span></div>
-                        <div onclick="selectLanguage('ko')" class="px-3.5 sm:px-4 py-2.5 text-xs sm:text-sm hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer flex items-center justify-between text-slate-800 dark:text-slate-200 transition"><span>한국어</span><span class="text-[10px] sm:text-xs text-slate-400 font-mono">KO</span></div>
+                        <div onclick="selectLanguage('uk')" class="px-4 py-2.5 text-xs sm:text-sm hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer flex items-center justify-between text-slate-800 dark:text-slate-200 transition"><span>українська</span><span class="text-[10px] text-slate-400 font-mono">UA</span></div>
+                        <div onclick="selectLanguage('en')" class="px-4 py-2.5 text-xs sm:text-sm hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer flex items-center justify-between text-slate-800 dark:text-slate-200 transition"><span>English</span><span class="text-[10px] text-slate-400 font-mono">EN</span></div>
+                        <div onclick="selectLanguage('es')" class="px-4 py-2.5 text-xs sm:text-sm hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer flex items-center justify-between text-slate-800 dark:text-slate-200 transition"><span>Español</span><span class="text-[10px] text-slate-400 font-mono">ES</span></div>
+                        <div onclick="selectLanguage('de')" class="px-4 py-2.5 text-xs sm:text-sm hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer flex items-center justify-between text-slate-800 dark:text-slate-200 transition"><span>Deutsch</span><span class="text-[10px] text-slate-400 font-mono">DE</span></div>
+                        <div onclick="selectLanguage('fr')" class="px-4 py-2.5 text-xs sm:text-sm hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer flex items-center justify-between text-slate-800 dark:text-slate-200 transition"><span>Français</span><span class="text-[10px] text-slate-400 font-mono">FR</span></div>
+                        <div onclick="selectLanguage('it')" class="px-4 py-2.5 text-xs sm:text-sm hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer flex items-center justify-between text-slate-800 dark:text-slate-200 transition"><span>Italiano</span><span class="text-[10px] text-slate-400 font-mono">IT</span></div>
+                        <div onclick="selectLanguage('pl')" class="px-4 py-2.5 text-xs sm:text-sm hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer flex items-center justify-between text-slate-800 dark:text-slate-200 transition"><span>Polski</span><span class="text-[10px] text-slate-400 font-mono">PL</span></div>
+                        <div onclick="selectLanguage('pt')" class="px-4 py-2.5 text-xs sm:text-sm hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer flex items-center justify-between text-slate-800 dark:text-slate-200 transition"><span>Português</span><span class="text-[10px] text-slate-400 font-mono">PT</span></div>
+                        <div onclick="selectLanguage('tr')" class="px-4 py-2.5 text-xs sm:text-sm hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer flex items-center justify-between text-slate-800 dark:text-slate-200 transition"><span>Türkçe</span><span class="text-[10px] text-slate-400 font-mono">TR</span></div>
+                        <div onclick="selectLanguage('ja')" class="px-4 py-2.5 text-xs sm:text-sm hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer flex items-center justify-between text-slate-800 dark:text-slate-200 transition"><span>日本語</span><span class="text-[10px] text-slate-400 font-mono">JA</span></div>
+                        <div onclick="selectLanguage('zh')" class="px-4 py-2.5 text-xs sm:text-sm hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer flex items-center justify-between text-slate-800 dark:text-slate-200 transition"><span>中文</span><span class="text-[10px] text-slate-400 font-mono">ZH</span></div>
+                        <div onclick="selectLanguage('ko')" class="px-4 py-2.5 text-xs sm:text-sm hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer flex items-center justify-between text-slate-800 dark:text-slate-200 transition"><span>한국어</span><span class="text-[10px] text-slate-400 font-mono">KO</span></div>
                     </div>
                 </div>
-
                 <button onclick="toggleSettingsModal()" class="bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 active:scale-95 transition text-slate-800 dark:text-white px-3 sm:px-4 py-2 rounded-xl font-medium text-xs sm:text-sm flex items-center space-x-2 border border-slate-300 dark:border-slate-700">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                     <span data-i18n="settings">Налаштування</span>
@@ -210,47 +186,44 @@
             </div>
         </div>
 
-        <!-- Пірамідальна сітка з 3 інструментами квадратної форми: 1 вгорі, 2 внизу -->
+        <!-- Пірамідальна сітка: 1 вгорі, 2 внизу -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-8 my-auto max-w-xl mx-auto w-full py-4 shrink-0">
-            <!-- Tool 1 (Рецепти - Перший ряд, по центру) -->
-            <div onclick="openTool('Tool1.html', 0)" class="sm:col-span-2 w-full max-w-[210px] sm:max-w-[230px] mx-auto aspect-square bg-white dark:bg-slate-800/80 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700/80 rounded-3xl p-5 transition-all duration-300 cursor-pointer flex flex-col justify-between shadow-md hover:shadow-xl hover:scale-105 group relative overflow-hidden">
-                <div class="flex justify-between items-center w-full z-10">
+            <!-- Tool 1 — Рецепти (центр верхнього ряду) -->
+            <div onclick="openTool('Tool1.html', 0)" class="sm:col-span-2 w-full max-w-[210px] sm:max-w-[230px] mx-auto aspect-square bg-white dark:bg-slate-800/80 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700/80 rounded-3xl p-5 transition-all duration-300 cursor-pointer flex flex-col justify-between shadow-md hover:shadow-xl hover:scale-105 group">
+                <div class="flex justify-between items-center w-full">
                     <span data-i18n="module_1" class="text-[10px] sm:text-xs font-medium bg-orange-500/10 text-orange-600 dark:text-orange-400 px-2.5 py-1 rounded-lg">Модуль 1</span>
                 </div>
-                <!-- Велика іконка: Рецепти / Кулінарна книга -->
                 <div class="my-auto flex items-center justify-center w-full py-2 text-orange-500 dark:text-orange-400 group-hover:scale-110 transition-transform duration-300">
                     <svg class="w-20 h-20 sm:w-24 sm:h-24 drop-shadow-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
                     </svg>
                 </div>
-                <div class="z-10 text-center">
+                <div class="text-center">
                     <h3 id="tool-name-1" class="text-base sm:text-lg font-bold text-slate-900 dark:text-white tracking-wide">Рецепти</h3>
                 </div>
             </div>
 
-            <!-- Tool 2 (Таймер - Другий ряд, зліва) -->
-            <div onclick="openTool('Tool2.html', 1)" class="w-full max-w-[210px] sm:max-w-[230px] mx-auto aspect-square bg-white dark:bg-slate-800/80 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700/80 rounded-3xl p-5 transition-all duration-300 cursor-pointer flex flex-col justify-between shadow-md hover:shadow-xl hover:scale-105 group relative overflow-hidden">
-                <div class="flex justify-between items-center w-full z-10">
+            <!-- Tool 2 — Таймер (лівий) -->
+            <div onclick="openTool('Tool2.html', 1)" class="w-full max-w-[210px] sm:max-w-[230px] mx-auto aspect-square bg-white dark:bg-slate-800/80 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700/80 rounded-3xl p-5 transition-all duration-300 cursor-pointer flex flex-col justify-between shadow-md hover:shadow-xl hover:scale-105 group">
+                <div class="flex justify-between items-center w-full">
                     <span data-i18n="module_2" class="text-[10px] sm:text-xs font-medium bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-2.5 py-1 rounded-lg">Модуль 2</span>
                 </div>
-                <!-- Велика іконка: Таймер / Годинник -->
                 <div class="my-auto flex items-center justify-center w-full py-2 text-emerald-500 dark:text-emerald-400 group-hover:scale-110 transition-transform duration-300">
                     <svg class="w-20 h-20 sm:w-24 sm:h-24 drop-shadow-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M12 2v2m-6.364.636l1.414 1.414m9.9 0l1.414-1.414"/>
                     </svg>
                 </div>
-                <div class="z-10 text-center">
+                <div class="text-center">
                     <h3 id="tool-name-2" class="text-base sm:text-lg font-bold text-slate-900 dark:text-white tracking-wide">Таймер</h3>
                 </div>
             </div>
 
-            <!-- Tool 3 (Калькулятор - Другий ряд, справа) -->
-            <div onclick="openTool('Tool3.html', 2)" class="w-full max-w-[210px] sm:max-w-[230px] mx-auto aspect-square bg-white dark:bg-slate-800/80 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700/80 rounded-3xl p-5 transition-all duration-300 cursor-pointer flex flex-col justify-between shadow-md hover:shadow-xl hover:scale-105 group relative overflow-hidden">
-                <div class="flex justify-between items-center w-full z-10">
+            <!-- Tool 3 — Калькулятор (правий) -->
+            <div onclick="openTool('Tool3.html', 2)" class="w-full max-w-[210px] sm:max-w-[230px] mx-auto aspect-square bg-white dark:bg-slate-800/80 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700/80 rounded-3xl p-5 transition-all duration-300 cursor-pointer flex flex-col justify-between shadow-md hover:shadow-xl hover:scale-105 group">
+                <div class="flex justify-between items-center w-full">
                     <span data-i18n="module_3" class="text-[10px] sm:text-xs font-medium bg-blue-500/10 text-blue-600 dark:text-blue-400 px-2.5 py-1 rounded-lg">Модуль 3</span>
                 </div>
-                <!-- Велика іконка: Калькулятор -->
                 <div class="my-auto flex items-center justify-center w-full py-2 text-blue-500 dark:text-blue-400 group-hover:scale-110 transition-transform duration-300">
                     <svg class="w-20 h-20 sm:w-24 sm:h-24 drop-shadow-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <rect x="4" y="2" width="16" height="20" rx="2" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
@@ -263,21 +236,20 @@
                         <circle cx="16" cy="16" r="1" fill="currentColor"/>
                     </svg>
                 </div>
-                <div class="z-10 text-center">
+                <div class="text-center">
                     <h3 id="tool-name-3" class="text-base sm:text-lg font-bold text-slate-900 dark:text-white tracking-wide">Калькулятор</h3>
                 </div>
             </div>
         </div>
 
-        <!-- 4-й інструмент (Календар) поза межами сітки в нижньому кутку екрана з красивою підказкою при наведенні курсора -->
+        <!-- Tool 4 — Календар: кнопка у нижньому кутку -->
         <div class="absolute bottom-5 right-5 sm:bottom-8 sm:right-8 z-20 group">
             <button onclick="openTool('Tool4.html', 3)" aria-label="Календар" class="w-14 h-14 sm:w-16 sm:h-16 p-3.5 sm:p-4 bg-white/95 dark:bg-slate-800/95 hover:bg-white dark:hover:bg-slate-800 text-purple-600 dark:text-purple-400 rounded-2xl shadow-xl hover:shadow-2xl border border-slate-200/80 dark:border-slate-700/80 transition-all duration-200 hover:scale-110 active:scale-95 flex items-center justify-center backdrop-blur-md cursor-pointer">
                 <svg class="w-7 h-7 sm:w-8 sm:h-8 group-hover:rotate-6 transition-transform pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                 </svg>
             </button>
-
-            <!-- Спливаюча підказка з іконкою календаря та написом, що плавно з'являється при затримці курсора миші -->
+            <!-- Підказка при наведенні -->
             <div class="absolute bottom-full right-0 mb-3 pointer-events-none opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 delay-500 ease-out z-30">
                 <div class="flex items-center space-x-2.5 bg-slate-900/95 dark:bg-slate-800/95 text-white px-3.5 py-2 rounded-xl shadow-2xl border border-slate-700/80 backdrop-blur-md whitespace-nowrap">
                     <div class="p-1 bg-purple-500/20 text-purple-400 rounded-lg">
@@ -286,7 +258,6 @@
                         </svg>
                     </div>
                     <span id="tool-name-4" class="text-xs sm:text-sm font-semibold tracking-wide">Календар</span>
-                    <!-- Стрілочка підказки -->
                     <div class="absolute -bottom-1.5 right-6 w-3 h-3 bg-slate-900/95 dark:bg-slate-800/95 border-b border-r border-slate-700/80 rotate-45"></div>
                 </div>
             </div>
@@ -297,9 +268,9 @@
         </div>
     </div>
 
-    <!-- Контейнер для відкриття зовнішнього файлу інструмента (iframe) -->
+    <!-- Контейнер інструмента (iframe) -->
     <div id="tool-container" class="absolute inset-0 z-30 bg-white dark:bg-slate-950 tool-hidden flex flex-col">
-        <!-- Шапка перегляду інструмента для стандартних інструментів -->
+        <!-- Стандартна шапка (Tool 1, 2, 3) -->
         <div id="tool-header-standard" class="flex justify-between items-center px-4 sm:px-8 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 shrink-0">
             <div class="flex items-center space-x-3">
                 <button onclick="closeTool()" class="bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-white px-3 py-2 rounded-xl font-medium text-xs sm:text-sm flex items-center space-x-2 transition border border-slate-300 dark:border-slate-700">
@@ -308,60 +279,52 @@
                 </button>
                 <h2 id="tool-title" class="text-base sm:text-xl font-bold text-slate-900 dark:text-white">Інструмент</h2>
             </div>
-            <!-- Назва файлу прихована з очей або перенесена як непомітний статус для розробника у футер / підказку, а тут залишено гарний індикатор статусу -->
-            <div class="flex items-center space-x-2">
-                <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block animate-pulse"></span>
-                <span data-i18n="active_status" class="text-xs text-slate-500 dark:text-slate-400 font-medium hidden sm:inline">Активний модуль</span>
+            <!-- Навігація інструментів (тільки в swipe режимі) -->
+            <div id="header-nav" class="flex items-center space-x-1" style="display:none!important;">
+                <button id="nav-prev-btn" class="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition active:scale-90 text-slate-600 dark:text-slate-300" aria-label="Попередній">
+                    <svg class="w-5 h-5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
+                </button>
+                <div class="flex items-center space-x-1.5 px-1" id="tool-dots">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 transition-all duration-300" data-dot="0"></span>
+                    <span class="w-2 h-2 rounded-full bg-slate-300 dark:bg-slate-600 transition-all duration-300" data-dot="1"></span>
+                    <span class="w-2 h-2 rounded-full bg-slate-300 dark:bg-slate-600 transition-all duration-300" data-dot="2"></span>
+                </div>
+                <button id="nav-next-btn" class="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition active:scale-90 text-slate-600 dark:text-slate-300" aria-label="Наступний">
+                    <svg class="w-5 h-5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+                </button>
             </div>
         </div>
 
-        <!-- Сам iframe куди вбудовується файл -->
-        <div class="flex-1 w-full bg-slate-100 dark:bg-slate-900 relative overflow-hidden">
-            <iframe id="tool-iframe" src="" class="w-full h-full border-0 slide-active"></iframe>
+        <!-- iframe обгортка -->
+        <div class="flex-1 w-full relative overflow-hidden bg-white dark:bg-slate-950">
+            <iframe id="tool-iframe" src="" title="tool"></iframe>
 
-            <!-- Спеціальна кнопка "Вихід" зверху для 4-го інструмента (без надпису назви) -->
+            <!-- Кнопка Вихід для Tool4 (Календар) -->
             <div id="tool4-top-bar" class="absolute top-0 left-0 right-0 z-40 p-3 sm:p-4 pointer-events-none hidden flex items-center justify-start">
-                <button onclick="handleToolExit(event)" class="pointer-events-auto bg-slate-900/90 hover:bg-slate-900 dark:bg-slate-800/90 dark:hover:bg-slate-700 text-white px-4 py-2.5 rounded-xl font-semibold text-xs sm:text-sm flex items-center space-x-2 transition-all shadow-xl hover:scale-105 active:scale-95 border border-slate-700/60 backdrop-blur-md cursor-pointer">
-                    <svg class="w-4 h-4 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <button id="tool4-exit-btn" class="pointer-events-auto bg-slate-900/90 hover:bg-slate-900 dark:bg-slate-800/90 dark:hover:bg-slate-700 text-white px-4 py-2.5 rounded-xl font-semibold text-xs sm:text-sm flex items-center space-x-2 transition-all shadow-xl hover:scale-105 active:scale-95 border border-slate-700/60 backdrop-blur-md cursor-pointer">
+                    <svg class="w-4 h-4 text-rose-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
                     </svg>
-                    <span>Вихід</span>
+                    <span class="pointer-events-none">Вихід</span>
                 </button>
             </div>
 
-            <!-- Нижня зона/панель для свайпу та швидкого перемикання між інструментами з анімацією -->
-            <div id="tool-bottom-bar" class="absolute bottom-2 left-0 right-0 z-40 flex flex-col items-center justify-center pointer-events-auto">
-                <div id="swipe-handle-pill" class="flex items-center space-x-3 bg-slate-900/80 dark:bg-slate-800/90 text-white/90 px-4 py-1.5 rounded-full shadow-2xl border border-white/10 backdrop-blur-md transition-all hover:bg-slate-900 cursor-pointer select-none">
-                    <button onclick="navigateTool(-1, event)" class="p-1 hover:text-white transition active:scale-90" aria-label="Попередній інструмент">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
-                    </button>
-                    <!-- Індикатори-крапки активного інструмента (1..4) -->
-                    <div class="flex items-center space-x-1.5" id="tool-dots">
-                        <span class="w-2 h-2 rounded-full bg-emerald-400 transition-all duration-300" data-tool-dot="0"></span>
-                        <span class="w-2 h-2 rounded-full bg-white/40 transition-all duration-300" data-tool-dot="1"></span>
-                        <span class="w-2 h-2 rounded-full bg-white/40 transition-all duration-300" data-tool-dot="2"></span>
-                        <span class="w-2 h-2 rounded-full bg-white/40 transition-all duration-300" data-tool-dot="3"></span>
-                    </div>
-                    <button onclick="navigateTool(1, event)" class="p-1 hover:text-white transition active:scale-90" aria-label="Наступний інструмент">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
-                    </button>
-                </div>
-            </div>
+
         </div>
     </div>
 
-    <!-- Модальне вікно налаштувань заставки та мови -->
-    <div id="settings-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
-        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-md w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
+    <!-- Модальне вікно налаштувань -->
+    <div id="settings-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden items-center justify-center p-4" style="display:none!important;">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-md w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto custom-scroll">
             <div class="flex justify-between items-center mb-6">
                 <h2 data-i18n="settings_title" class="text-xl font-bold text-slate-900 dark:text-white">Налаштування заставки</h2>
-                <button onclick="toggleSettingsModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-white">
+                <button onclick="toggleSettingsModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-white p-1">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
 
             <div class="space-y-6">
-                <!-- Кастомний вибір мови у модальному вікні -->
+                <!-- Мова -->
                 <div>
                     <label data-i18n="language_label" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Мова інтерфейсу</label>
                     <div class="grid grid-cols-2 sm:grid-cols-3 gap-2" id="modal-lang-grid">
@@ -380,18 +343,20 @@
                     </div>
                 </div>
 
+                <!-- Тип заставки -->
                 <div>
                     <label data-i18n="saver_type_label" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Тип заставки</label>
                     <div class="grid grid-cols-2 gap-3">
-                        <button onclick="setSaverMode(1)" id="btn-mode-1" class="py-3 px-3 rounded-xl border text-xs sm:text-sm font-medium transition flex items-center justify-center space-x-2 border-emerald-500 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                        <button onclick="setSaverMode(1)" id="btn-mode-1" class="py-3 px-3 rounded-xl border text-xs sm:text-sm font-medium transition flex items-center justify-center border-emerald-500 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
                             <span data-i18n="saver_mode_1">Картинка + Годинник</span>
                         </button>
-                        <button onclick="setSaverMode(2)" id="btn-mode-2" class="py-3 px-3 rounded-xl border text-xs sm:text-sm font-medium transition flex items-center justify-center space-x-2 border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+                        <button onclick="setSaverMode(2)" id="btn-mode-2" class="py-3 px-3 rounded-xl border text-xs sm:text-sm font-medium transition flex items-center justify-center border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
                             <span data-i18n="saver_mode_2">Великий Годинник</span>
                         </button>
                     </div>
                 </div>
 
+                <!-- Фонова картинка -->
                 <div id="image-upload-section" class="space-y-3">
                     <label data-i18n="bg_image_label" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Фонова картинка</label>
                     <div class="flex items-center space-x-3">
@@ -399,16 +364,12 @@
                             <span data-i18n="select_file" class="text-xs text-slate-600 dark:text-slate-400 font-medium">Вибрати файл з пристрою</span>
                             <input type="file" id="bg-file-input" accept="image/*" class="hidden" onchange="handleImageUpload(event)">
                         </label>
-                        <button onclick="resetDefaultBackground()" data-i18n="reset" class="px-3 py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs rounded-xl border border-slate-300 dark:border-slate-700 transition">
-                            Скинути
-                        </button>
+                        <button onclick="resetDefaultBackground()" data-i18n="reset" class="px-3 py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs rounded-xl border border-slate-300 dark:border-slate-700 transition">Скинути</button>
                     </div>
-                    <div>
-                        <input type="url" id="bg-url-input" placeholder="https://..." class="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500" onchange="handleImageUrl(this.value)">
-                    </div>
+                    <input type="url" id="bg-url-input" placeholder="https://..." class="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500" onchange="handleImageUrl(this.value)">
                 </div>
 
-                <!-- Налаштування: Як відкривати інструменти -->
+                <!-- Як відкривати інструменти -->
                 <div>
                     <label data-i18n="open_mode_label" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Як відкривати інструменти</label>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -430,7 +391,7 @@
                 </div>
             </div>
 
-            <div class="mt-8 flex justify-end">
+            <div class="mt-8">
                 <button onclick="toggleSettingsModal()" data-i18n="save_and_close" class="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-semibold transition shadow-lg shadow-blue-600/20">
                     Зберегти та закрити
                 </button>
@@ -439,872 +400,928 @@
     </div>
 
     <script>
-        const translations = {
-            uk: {
-                langName: "українська",
-                swipe_hint: "Свайпніть вниз для меню",
-                menu_title: "Кухонний Дисплей",
-                settings: "Налаштування",
-                saver: "Заставка",
-                toolNames: ["Рецепти", "Таймер", "Калькулятор", "Календар"],
-                module_1: "Модуль 1",
-                module_2: "Модуль 2",
-                module_3: "Модуль 3",
-                module_4: "Модуль 4",
-                click_to_open: "Натисніть для відкриття",
-                footer_hint: "Свайпніть вгору або натисніть \"Заставка\", щоб повернутися.",
-                back_to_menu: "До меню",
-                active_status: "Активний модуль",
-                settings_title: "Налаштування заставки",
-                language_label: "Мова інтерфейсу",
-                saver_type_label: "Тип заставки",
-                saver_mode_1: "Картинка + Годинник",
-                saver_mode_2: "Великий Годинник",
-                bg_image_label: "Фонова картинка",
-                select_file: "Вибрати файл з пристрою",
-                reset: "Скинути",
-                save_and_close: "Зберегти та закрити",
-                open_mode_label: "Як відкривати інструменти",
-                open_mode_menu: "Стандартне меню",
-                open_mode_menu_desc: "Відкриває сітку вибору інструментів",
-                open_mode_swipe: "Свайп інструментів",
-                open_mode_swipe_desc: "Одразу інструмент + свайп знизу з анімацією",
-                weekdays: ['Неділя', 'Понеділок', 'Вівторок', 'Середа', 'Четвер', 'П’ятниця', 'Субота'],
-                months: ['січня', 'лютого', 'березня', 'квітня', 'травня', 'червня', 'липня', 'серпня', 'вересня', 'жовтня', 'листопада', 'грудня']
-            },
-            en: {
-                langName: "English",
-                swipe_hint: "Swipe down for menu",
-                menu_title: "Kitchen Display",
-                settings: "Settings",
-                saver: "Screen Saver",
-                toolNames: ["Recipes", "Timer", "Calculator", "Calendar"],
-                module_1: "Module 1",
-                module_2: "Module 2",
-                module_3: "Module 3",
-                module_4: "Module 4",
-                click_to_open: "Click to open",
-                footer_hint: "Swipe up or click \"Screen Saver\" to return.",
-                back_to_menu: "To Menu",
-                active_status: "Active module",
-                settings_title: "Saver Settings",
-                language_label: "Interface Language",
-                saver_type_label: "Saver Type",
-                saver_mode_1: "Image + Clock",
-                saver_mode_2: "Large Clock",
-                bg_image_label: "Background Image",
-                select_file: "Choose file from device",
-                reset: "Reset",
-                save_and_close: "Save & Close",
-                open_mode_label: "How to open tools",
-                open_mode_menu: "Standard Menu",
-                open_mode_menu_desc: "Opens the tools selection grid",
-                open_mode_swipe: "Swipe Tools",
-                open_mode_swipe_desc: "Direct tool + bottom swipe with animation",
-                weekdays: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
-                months: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
-            },
-            es: {
-                langName: "Español",
-                swipe_hint: "Desliza hacia abajo para el menú",
-                menu_title: "Pantalla de Cocina",
-                settings: "Ajustes",
-                saver: "Salvapantallas",
-                toolNames: ["Minutero", "Calendario", "Herramienta 3", "Herramienta 4"],
-                module_1: "Módulo 1",
-                module_2: "Módulo 2",
-                module_3: "Módulo 3",
-                module_4: "Módulo 4",
-                click_to_open: "Haga clic para abrir",
-                footer_hint: "Desliza hacia arriba o haz clic en \"Salvapantallas\" para volver.",
-                back_to_menu: "Al Menú",
-                active_status: "Módulo activo",
-                settings_title: "Ajustes de Pantalla",
-                language_label: "Idioma de la interfaz",
-                saver_type_label: "Tipo de salvapantallas",
-                saver_mode_1: "Imagen + Reloj",
-                saver_mode_2: "Reloj Grande",
-                bg_image_label: "Imagen de fondo",
-                select_file: "Elegir archivo",
-                reset: "Restablecer",
-                save_and_close: "Guardar y cerrar",
-                weekdays: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
-                months: ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre']
-            },
-            de: {
-                langName: "Deutsch",
-                swipe_hint: "Nach unten wischen für Menü",
-                menu_title: "Küchendisplay",
-                settings: "Einstellungen",
-                saver: "Bildschirmschoner",
-                toolNames: ["Timer", "Calendario", "Herramienta 3", "Werkzeug 4"],
-                module_1: "Modul 1",
-                module_2: "Modul 2",
-                module_3: "Modul 3",
-                module_4: "Modul 4",
-                click_to_open: "Zum Öffnen klicken",
-                footer_hint: "Nach oben wischen oder auf „Bildschirmschoner“ klicken.",
-                back_to_menu: "Zum Menü",
-                active_status: "Aktives Modul",
-                settings_title: "Schoner-Einstellungen",
-                language_label: "Oberflächensprache",
-                saver_type_label: "Schonertyp",
-                saver_mode_1: "Bild + Uhr",
-                saver_mode_2: "Große Uhr",
-                bg_image_label: "Hintergrundbild",
-                select_file: "Datei auswählen",
-                reset: "Zurücksetzen",
-                save_and_close: "Speichern & Schließen",
-                weekdays: ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'],
-                months: ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember']
-            },
-            fr: {
-                langName: "Français",
-                swipe_hint: "Glissez vers le bas pour le menu",
-                menu_title: "Écran de Cuisine",
-                settings: "Paramètres",
-                saver: "Économiseur",
-                toolNames: ["Minuteur", "Calendrier", "Outil 3", "Outil 4"],
-                module_1: "Module 1",
-                module_2: "Module 2",
-                module_3: "Module 3",
-                module_4: "Module 4",
-                click_to_open: "Cliquez pour ouvrir",
-                footer_hint: "Glissez vers le haut ou cliquez sur \"Économiseur\".",
-                back_to_menu: "Au Menu",
-                active_status: "Module actif",
-                settings_title: "Paramètres de l'écran",
-                language_label: "Langue de l'interface",
-                saver_type_label: "Type d'économiseur",
-                saver_mode_1: "Image + Horloge",
-                saver_mode_2: "Grande Horloge",
-                bg_image_label: "Image de fond",
-                select_file: "Choisir un fichier",
-                reset: "Réinitialiser",
-                save_and_close: "Enregistrer et fermer",
-                weekdays: ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'],
-                months: ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre']
-            },
-            it: {
-                langName: "Italiano",
-                swipe_hint: "Scorri verso il basso per il menu",
-                menu_title: "Display Cucina",
-                settings: "Impostazioni",
-                saver: "Salvaschermo",
-                toolNames: ["Timer", "Calendario", "Strumento 3", "Strumento 4"],
-                module_1: "Modulo 1",
-                module_2: "Modulo 2",
-                module_3: "Modulo 3",
-                module_4: "Modulo 4",
-                click_to_open: "Clicca per aprire",
-                footer_hint: "Scorri verso l'alto o clicca su \"Salvaschermo\".",
-                back_to_menu: "Al Menu",
-                active_status: "Modulo attivo",
-                settings_title: "Impostazioni Schermo",
-                language_label: "Lingua interfaccia",
-                saver_type_label: "Tipo di salvaschermo",
-                saver_mode_1: "Immagine + Orologio",
-                saver_mode_2: "Orologio Grande",
-                bg_image_label: "Immagine di sfondo",
-                select_file: "Scegli file",
-                reset: "Ripristina",
-                save_and_close: "Salva e chiudi",
-                weekdays: ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'],
-                months: ['gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno', 'luglio', 'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre']
-            },
-            pl: {
-                langName: "Polski",
-                swipe_hint: "Przesuń w dół, aby otworzyć menu",
-                menu_title: "Wyświetlacz Kuchenny",
-                settings: "Ustawienia",
-                saver: "Wygaszacz",
-                toolNames: ["Regulator czasowy", "Kalendarz", "Instrumento 3", "Narzędzie 4"],
-                module_1: "Moduł 1",
-                module_2: "Moduł 2",
-                module_3: "Moduł 3",
-                module_4: "Moduł 4",
-                click_to_open: "Kliknij, aby otworzyć",
-                footer_hint: "Przesuń w górę lub kliknij „Wygaszacz”, aby wrócić.",
-                back_to_menu: "Do Menu",
-                active_status: "Aktywny moduł",
-                settings_title: "Ustawienia Wygaszacza",
-                language_label: "Język interfejsu",
-                saver_type_label: "Typ wygaszacza",
-                saver_mode_1: "Obraz + Zegar",
-                saver_mode_2: "Duży Zegar",
-                bg_image_label: "Obraz tła",
-                select_file: "Wybierz plik",
-                reset: "Resetuj",
-                save_and_close: "Zapisz i zamknij",
-                weekdays: ['Niedziela', 'Poniedziałek', 'Wtorek', 'Środa', 'Czwartek', 'Piątek', 'Sobota'],
-                months: ['stycznia', 'lutego', 'marca', 'kwietnia', 'maja', 'czerwca', 'lipca', 'sierpnia', 'września', 'października', 'listopada', 'grudnia']
-            },
-            pt: {
-                langName: "Português",
-                swipe_hint: "Deslize para baixo para o menu",
-                menu_title: "Display de Cozinha",
-                settings: "Configurações",
-                saver: "Protetor de Tela",
-                toolNames: ["Temporizador", "Calendário", "Instrumento 3", "Ferramenta 4"],
-                module_1: "Módulo 1",
-                module_2: "Módulo 2",
-                module_3: "Módulo 3",
-                module_4: "Módulo 4",
-                click_to_open: "Clique para abrir",
-                footer_hint: "Deslize para cima ou clique em \"Protetor de Tela\" para voltar.",
-                back_to_menu: "Para o Menu",
-                active_status: "Módulo ativo",
-                settings_title: "Configurações de Tela",
-                language_label: "Idioma da interface",
-                saver_type_label: "Tipo de protetor",
-                saver_mode_1: "Imagem + Relógio",
-                saver_mode_2: "Relógio Grande",
-                bg_image_label: "Imagem de fundo",
-                select_file: "Escolher arquivo",
-                reset: "Redefinir",
-                save_and_close: "Salvar e fechar",
-                weekdays: ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'],
-                months: ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro']
-            },
-            tr: {
-                langName: "Türkçe",
-                swipe_hint: "Menü için aşağı kaydırın",
-                menu_title: "Mutfak Ekranı",
-                settings: "Ayarlar",
-                saver: "Ekran Koruyucu",
-                toolNames: ["Zamanlayıcı", "Takvim", "Enstrüman 3", "Araç 4"],
-                module_1: "Modül 1",
-                module_2: "Modul 2",
-                module_3: "Modul 3",
-                module_4: "Modul 4",
-                click_to_open: "Açmak için tıklayın",
-                footer_hint: "Geri dönmek için yukarı kaydırın veya \"Ekran Koruyucu\"ya tıklayın.",
-                back_to_menu: "Menüye Dön",
-                active_status: "Aktif modül",
-                settings_title: "Koruyucu Ayarları",
-                language_label: "Arayüz Dili",
-                saver_type_label: "Koruyucu Türü",
-                saver_mode_1: "Resim + Saat",
-                saver_mode_2: "Büyük Saat",
-                bg_image_label: "Arka plan resmi",
-                select_file: "Dosya seç",
-                reset: "Sıfırla",
-                save_and_close: "Kaydet ve Kapat",
-                weekdays: ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'],
-                months: ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık']
-            },
-            ja: {
-                langName: "日本語",
-                swipe_hint: "上にスワイプまたはメニューを開く",
-                menu_title: "キッチンディスプレイ",
-                settings: "設定",
-                saver: "スクリーンセーバー",
-                toolNames: ["タイマー", "タクヴィム", "楽器3", "ツール4"],
-                module_1: "モジュール 1",
-                module_2: "モジュール 2",
-                module_3: "モジュール 3",
-                module_4: "モジュール 4",
-                click_to_open: "クリックして開く",
-                footer_hint: "戻るには上にスワイプするか、「スクリーンセーバー」をクリックしてください。",
-                back_to_menu: "メニューへ",
-                active_status: "アクティブなモジュール",
-                settings_title: "設定",
-                language_label: "インターフェース言語",
-                saver_type_label: "セーバーの種類",
-                saver_mode_1: "画像 + 時計",
-                saver_mode_2: "大型時計",
-                bg_image_label: "背景画像",
-                select_file: "ファイルを選択",
-                reset: "リセット",
-                save_and_close: "保存して閉じる",
-                weekdays: ['日曜日', '月曜日', '火曜日', '水曜日', '木曜日', '金曜日', '土曜日'],
-                months: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月']
-            },
-            zh: {
-                langName: "中文",
-                swipe_hint: "向下滑动打开菜单",
-                menu_title: "厨房显示屏",
-                settings: "设置",
-                saver: "屏幕保护程序",
-                toolNames: ["定时器", "タクヴィム", "楽器3", "工具 4"],
-                module_1: "模块 1",
-                module_2: "模块 2",
-                module_3: "模块 3",
-                module_4: "模块 4",
-                click_to_open: "点击打开",
-                footer_hint: "向上滑动或点击“屏幕保护程序”返回。",
-                back_to_menu: "返回菜单",
-                active_status: "活动模块",
-                settings_title: "屏幕保护程序设置",
-                language_label: "界面语言",
-                saver_type_label: "保护程序类型",
-                saver_mode_1: "图片 + 时钟",
-                saver_mode_2: "大时钟",
-                bg_image_label: "背景图片",
-                select_file: "选择文件",
-                reset: "重置",
-                save_and_close: "保存并关闭",
-                weekdays: ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'],
-                months: ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月']
-            },
-            ko: {
-                langName: "한국어",
-                swipe_hint: "메뉴를 보려면 아래로 스와이프하세요",
-                menu_title: "주방 디스플레이",
-                settings: "설정",
-                saver: "화면 보호기",
-                toolNames: ["시간제 노동자", "타크빔", "楽器3", "도구 4"],
-                module_1: "기준 치수 1",
-                module_2: "기준 치수 2",
-                module_3: "기준 치수 3",
-                module_4: "기준 치수 4",
-                click_to_open: "클릭하여 열기",
-                footer_hint: "돌아가려면 위로 스와이프하거나 '화면 보호기'를 클릭하세요.",
-                back_to_menu: "메ня로",
-                active_status: "활성 모듈",
-                settings_title: "화면 보호기 설정",
-                language_label: "인터페이스 언er",
-                saver_type_label: "화면 보호기 유형",
-                saver_mode_1: "이미지 + 시계",
-                saver_mode_2: "대형 시계",
-                bg_image_label: "배경 이미지",
-                select_file: "파일 선택",
-                reset: "재설정",
-                save_and_close: "저장 및 닫기",
-                weekdays: ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'],
-                months: ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월']
-            }
-        };
-
-        let currentLang = localStorage.getItem('kitchen_lang') || 'uk';
-        let currentSaverMode = parseInt(localStorage.getItem('kitchen_saver_mode')) || 1;
-        let currentOpenMode = localStorage.getItem('kitchen_open_mode') || 'menu'; // 'menu' або 'swipe'
-        let activeToolIndex = null;
-        let isTransitioning = false;
-
-        const toolFiles = [
-            'Tool1.html',
-            'Tool2.html',
-            'Tool3.html',
-            'Tool4.html'
-        ];
-
-        function updateClock() {
-            const now = new Date();
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            const timeStr = `${hours}:${minutes}`;
-
-            const langData = translations[currentLang] || translations.uk;
-            const dayName = langData.weekdays[now.getDay()];
-            const monthName = langData.months[now.getMonth()];
-            const dateStr = `${dayName}, ${now.getDate()} ${monthName}`;
-
-            const c1 = document.getElementById('clock-corner');
-            const c2 = document.getElementById('clock-fullscreen');
-            const d2 = document.getElementById('date-fullscreen');
-
-            if (c1) c1.innerText = timeStr;
-            if (c2) c2.innerText = timeStr;
-            if (d2) d2.innerText = dateStr;
+    // ─── Переклади ───────────────────────────────────────────────────────────────
+    const translations = {
+        uk: {
+            langName: "українська",
+            swipe_hint: "Свайпніть вниз для меню",
+            menu_title: "Кухонний Дисплей",
+            settings: "Налаштування",
+            saver: "Заставка",
+            toolNames: ["Рецепти", "Таймер", "Калькулятор", "Календар"],
+            module_1: "Модуль 1", module_2: "Модуль 2", module_3: "Модуль 3", module_4: "Модуль 4",
+            click_to_open: "Натисніть для відкриття",
+            footer_hint: 'Свайпніть вгору або натисніть "Заставка", щоб повернутися.',
+            back_to_menu: "До меню",
+            active_status: "Активний модуль",
+            settings_title: "Налаштування заставки",
+            language_label: "Мова інтерфейсу",
+            saver_type_label: "Тип заставки",
+            saver_mode_1: "Картинка + Годинник",
+            saver_mode_2: "Великий Годинник",
+            bg_image_label: "Фонова картинка",
+            select_file: "Вибрати файл з пристрою",
+            reset: "Скинути",
+            save_and_close: "Зберегти та закрити",
+            open_mode_label: "Як відкривати інструменти",
+            open_mode_menu: "Стандартне меню",
+            open_mode_menu_desc: "Відкриває сітку вибору інструментів",
+            open_mode_swipe: "Свайп інструментів",
+            open_mode_swipe_desc: "Одразу інструмент + свайп знизу з анімацією",
+            weekdays: ['Неділя','Понеділок','Вівторок','Середа','Четвер','П\u2019ятниця','Субота'],
+            months: ['січня','лютого','березня','квітня','травня','червня','липня','серпня','вересня','жовтня','листопада','грудня']
+        },
+        en: {
+            langName: "English",
+            swipe_hint: "Swipe down for menu",
+            menu_title: "Kitchen Display",
+            settings: "Settings",
+            saver: "Screen Saver",
+            toolNames: ["Recipes", "Timer", "Calculator", "Calendar"],
+            module_1: "Module 1", module_2: "Module 2", module_3: "Module 3", module_4: "Module 4",
+            click_to_open: "Click to open",
+            footer_hint: 'Swipe up or click "Screen Saver" to return.',
+            back_to_menu: "To Menu",
+            active_status: "Active module",
+            settings_title: "Saver Settings",
+            language_label: "Interface Language",
+            saver_type_label: "Saver Type",
+            saver_mode_1: "Image + Clock",
+            saver_mode_2: "Large Clock",
+            bg_image_label: "Background Image",
+            select_file: "Choose file from device",
+            reset: "Reset",
+            save_and_close: "Save & Close",
+            open_mode_label: "How to open tools",
+            open_mode_menu: "Standard Menu",
+            open_mode_menu_desc: "Opens the tools selection grid",
+            open_mode_swipe: "Swipe Tools",
+            open_mode_swipe_desc: "Direct tool + bottom swipe with animation",
+            weekdays: ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'],
+            months: ['January','February','March','April','May','June','July','August','September','October','November','December']
+        },
+        es: {
+            langName: "Español",
+            swipe_hint: "Desliza hacia abajo para el menú",
+            menu_title: "Pantalla de Cocina",
+            settings: "Ajustes",
+            saver: "Salvapantallas",
+            toolNames: ["Recetas", "Temporizador", "Calculadora", "Calendario"],
+            module_1: "Módulo 1", module_2: "Módulo 2", module_3: "Módulo 3", module_4: "Módulo 4",
+            click_to_open: "Haga clic para abrir",
+            footer_hint: 'Desliza hacia arriba o haz clic en "Salvapantallas" para volver.',
+            back_to_menu: "Al Menú",
+            active_status: "Módulo activo",
+            settings_title: "Ajustes de Pantalla",
+            language_label: "Idioma de la interfaz",
+            saver_type_label: "Tipo de salvapantallas",
+            saver_mode_1: "Imagen + Reloj",
+            saver_mode_2: "Reloj Grande",
+            bg_image_label: "Imagen de fondo",
+            select_file: "Elegir archivo",
+            reset: "Restablecer",
+            save_and_close: "Guardar y cerrar",
+            open_mode_label: "Cómo abrir herramientas",
+            open_mode_menu: "Menú estándar",
+            open_mode_menu_desc: "Abre la cuadrícula de selección",
+            open_mode_swipe: "Deslizar herramientas",
+            open_mode_swipe_desc: "Herramienta directa + deslizar desde abajo",
+            weekdays: ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'],
+            months: ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre']
+        },
+        de: {
+            langName: "Deutsch",
+            swipe_hint: "Nach unten wischen für Menü",
+            menu_title: "Küchendisplay",
+            settings: "Einstellungen",
+            saver: "Bildschirmschoner",
+            toolNames: ["Rezepte", "Timer", "Rechner", "Kalender"],
+            module_1: "Modul 1", module_2: "Modul 2", module_3: "Modul 3", module_4: "Modul 4",
+            click_to_open: "Zum Öffnen klicken",
+            footer_hint: 'Nach oben wischen oder auf "Bildschirmschoner" klicken.',
+            back_to_menu: "Zum Menü",
+            active_status: "Aktives Modul",
+            settings_title: "Schoner-Einstellungen",
+            language_label: "Oberflächensprache",
+            saver_type_label: "Schonertyp",
+            saver_mode_1: "Bild + Uhr",
+            saver_mode_2: "Große Uhr",
+            bg_image_label: "Hintergrundbild",
+            select_file: "Datei auswählen",
+            reset: "Zurücksetzen",
+            save_and_close: "Speichern & Schließen",
+            open_mode_label: "Wie Tools öffnen",
+            open_mode_menu: "Standardmenü",
+            open_mode_menu_desc: "Öffnet das Tool-Auswahlraster",
+            open_mode_swipe: "Tools wischen",
+            open_mode_swipe_desc: "Direkt Tool + Wischen von unten",
+            weekdays: ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'],
+            months: ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember']
+        },
+        fr: {
+            langName: "Français",
+            swipe_hint: "Glissez vers le bas pour le menu",
+            menu_title: "Écran de Cuisine",
+            settings: "Paramètres",
+            saver: "Économiseur",
+            toolNames: ["Recettes", "Minuteur", "Calculatrice", "Calendrier"],
+            module_1: "Module 1", module_2: "Module 2", module_3: "Module 3", module_4: "Module 4",
+            click_to_open: "Cliquez pour ouvrir",
+            footer_hint: 'Glissez vers le haut ou cliquez sur "Économiseur".',
+            back_to_menu: "Au Menu",
+            active_status: "Module actif",
+            settings_title: "Paramètres de l'écran",
+            language_label: "Langue de l'interface",
+            saver_type_label: "Type d'économiseur",
+            saver_mode_1: "Image + Horloge",
+            saver_mode_2: "Grande Horloge",
+            bg_image_label: "Image de fond",
+            select_file: "Choisir un fichier",
+            reset: "Réinitialiser",
+            save_and_close: "Enregistrer et fermer",
+            open_mode_label: "Comment ouvrir les outils",
+            open_mode_menu: "Menu standard",
+            open_mode_menu_desc: "Ouvre la grille de sélection",
+            open_mode_swipe: "Glisser les outils",
+            open_mode_swipe_desc: "Outil direct + glisser depuis le bas",
+            weekdays: ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'],
+            months: ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre']
+        },
+        it: {
+            langName: "Italiano",
+            swipe_hint: "Scorri verso il basso per il menu",
+            menu_title: "Display Cucina",
+            settings: "Impostazioni",
+            saver: "Salvaschermo",
+            toolNames: ["Ricette", "Timer", "Calcolatrice", "Calendario"],
+            module_1: "Modulo 1", module_2: "Modulo 2", module_3: "Modulo 3", module_4: "Modulo 4",
+            click_to_open: "Clicca per aprire",
+            footer_hint: 'Scorri verso l\'alto o clicca su "Salvaschermo".',
+            back_to_menu: "Al Menu",
+            active_status: "Modulo attivo",
+            settings_title: "Impostazioni Schermo",
+            language_label: "Lingua interfaccia",
+            saver_type_label: "Tipo di salvaschermo",
+            saver_mode_1: "Immagine + Orologio",
+            saver_mode_2: "Orologio Grande",
+            bg_image_label: "Immagine di sfondo",
+            select_file: "Scegli file",
+            reset: "Ripristina",
+            save_and_close: "Salva e chiudi",
+            open_mode_label: "Come aprire gli strumenti",
+            open_mode_menu: "Menu standard",
+            open_mode_menu_desc: "Apre la griglia di selezione",
+            open_mode_swipe: "Scorri strumenti",
+            open_mode_swipe_desc: "Strumento diretto + scorrere dal basso",
+            weekdays: ['Domenica','Lunedì','Martedì','Mercoledì','Giovedì','Venerdì','Sabato'],
+            months: ['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre']
+        },
+        pl: {
+            langName: "Polski",
+            swipe_hint: "Przesuń w dół, aby otworzyć menu",
+            menu_title: "Wyświetlacz Kuchenny",
+            settings: "Ustawienia",
+            saver: "Wygaszacz",
+            toolNames: ["Przepisy", "Timer", "Kalkulator", "Kalendarz"],
+            module_1: "Moduł 1", module_2: "Moduł 2", module_3: "Moduł 3", module_4: "Moduł 4",
+            click_to_open: "Kliknij, aby otworzyć",
+            footer_hint: 'Przesuń w górę lub kliknij "Wygaszacz", aby wrócić.',
+            back_to_menu: "Do Menu",
+            active_status: "Aktywny moduł",
+            settings_title: "Ustawienia Wygaszacza",
+            language_label: "Język interfejsu",
+            saver_type_label: "Typ wygaszacza",
+            saver_mode_1: "Obraz + Zegar",
+            saver_mode_2: "Duży Zegar",
+            bg_image_label: "Obraz tła",
+            select_file: "Wybierz plik",
+            reset: "Resetuj",
+            save_and_close: "Zapisz i zamknij",
+            open_mode_label: "Jak otwierać narzędzia",
+            open_mode_menu: "Standardowe menu",
+            open_mode_menu_desc: "Otwiera siatkę wyboru narzędzi",
+            open_mode_swipe: "Przesuń narzędzia",
+            open_mode_swipe_desc: "Bezpośrednie narzędzie + przeciągnij od dołu",
+            weekdays: ['Niedziela','Poniedziałek','Wtorek','Środa','Czwartek','Piątek','Sobota'],
+            months: ['stycznia','lutego','marca','kwietnia','maja','czerwca','lipca','sierpnia','września','października','listopada','grudnia']
+        },
+        pt: {
+            langName: "Português",
+            swipe_hint: "Deslize para baixo para o menu",
+            menu_title: "Display de Cozinha",
+            settings: "Configurações",
+            saver: "Protetor de Tela",
+            toolNames: ["Receitas", "Temporizador", "Calculadora", "Calendário"],
+            module_1: "Módulo 1", module_2: "Módulo 2", module_3: "Módulo 3", module_4: "Módulo 4",
+            click_to_open: "Clique para abrir",
+            footer_hint: 'Deslize para cima ou clique em "Protetor de Tela" para voltar.',
+            back_to_menu: "Para o Menu",
+            active_status: "Módulo ativo",
+            settings_title: "Configurações de Tela",
+            language_label: "Idioma da interface",
+            saver_type_label: "Tipo de protetor",
+            saver_mode_1: "Imagem + Relógio",
+            saver_mode_2: "Relógio Grande",
+            bg_image_label: "Imagem de fundo",
+            select_file: "Escolher arquivo",
+            reset: "Redefinir",
+            save_and_close: "Salvar e fechar",
+            open_mode_label: "Como abrir ferramentas",
+            open_mode_menu: "Menu padrão",
+            open_mode_menu_desc: "Abre a grade de seleção",
+            open_mode_swipe: "Deslizar ferramentas",
+            open_mode_swipe_desc: "Ferramenta direta + deslizar de baixo",
+            weekdays: ['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'],
+            months: ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro']
+        },
+        tr: {
+            langName: "Türkçe",
+            swipe_hint: "Menü için aşağı kaydırın",
+            menu_title: "Mutfak Ekranı",
+            settings: "Ayarlar",
+            saver: "Ekran Koruyucu",
+            toolNames: ["Tarifler", "Zamanlayıcı", "Hesap Makinesi", "Takvim"],
+            module_1: "Modül 1", module_2: "Modül 2", module_3: "Modül 3", module_4: "Modül 4",
+            click_to_open: "Açmak için tıklayın",
+            footer_hint: 'Geri dönmek için yukarı kaydırın veya "Ekran Koruyucu"ya tıklayın.',
+            back_to_menu: "Menüye Dön",
+            active_status: "Aktif modül",
+            settings_title: "Koruyucu Ayarları",
+            language_label: "Arayüz Dili",
+            saver_type_label: "Koruyucu Türü",
+            saver_mode_1: "Resim + Saat",
+            saver_mode_2: "Büyük Saat",
+            bg_image_label: "Arka plan resmi",
+            select_file: "Dosya seç",
+            reset: "Sıfırla",
+            save_and_close: "Kaydet ve Kapat",
+            open_mode_label: "Araçlar nasıl açılsın",
+            open_mode_menu: "Standart menü",
+            open_mode_menu_desc: "Araç seçim ızgarasını açar",
+            open_mode_swipe: "Araçları kaydır",
+            open_mode_swipe_desc: "Doğrudan araç + alttan kaydırma",
+            weekdays: ['Pazar','Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi'],
+            months: ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık']
+        },
+        ja: {
+            langName: "日本語",
+            swipe_hint: "下にスワイプしてメニューを開く",
+            menu_title: "キッチンディスプレイ",
+            settings: "設定",
+            saver: "スクリーンセーバー",
+            toolNames: ["レシピ", "タイマー", "計算機", "カレンダー"],
+            module_1: "モジュール 1", module_2: "モジュール 2", module_3: "モジュール 3", module_4: "モジュール 4",
+            click_to_open: "クリックして開く",
+            footer_hint: '上にスワイプするか「スクリーンセーバー」をクリックして戻る。',
+            back_to_menu: "メニューへ",
+            active_status: "アクティブなモジュール",
+            settings_title: "設定",
+            language_label: "インターフェース言語",
+            saver_type_label: "セーバーの種類",
+            saver_mode_1: "画像 + 時計",
+            saver_mode_2: "大型時計",
+            bg_image_label: "背景画像",
+            select_file: "ファイルを選択",
+            reset: "リセット",
+            save_and_close: "保存して閉じる",
+            open_mode_label: "ツールの開き方",
+            open_mode_menu: "標準メニュー",
+            open_mode_menu_desc: "ツール選択グリッドを開く",
+            open_mode_swipe: "スワイプツール",
+            open_mode_swipe_desc: "直接ツール + 下からスワイプ",
+            weekdays: ['日曜日','月曜日','火曜日','水曜日','木曜日','金曜日','土曜日'],
+            months: ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月']
+        },
+        zh: {
+            langName: "中文",
+            swipe_hint: "向下滑动打开菜单",
+            menu_title: "厨房显示屏",
+            settings: "设置",
+            saver: "屏幕保护程序",
+            toolNames: ["食谱", "计时器", "计算器", "日历"],
+            module_1: "模块 1", module_2: "模块 2", module_3: "模块 3", module_4: "模块 4",
+            click_to_open: "点击打开",
+            footer_hint: '向上滑动或点击"屏幕保护程序"返回。',
+            back_to_menu: "返回菜单",
+            active_status: "活动模块",
+            settings_title: "屏幕保护程序设置",
+            language_label: "界面语言",
+            saver_type_label: "保护程序类型",
+            saver_mode_1: "图片 + 时钟",
+            saver_mode_2: "大时钟",
+            bg_image_label: "背景图片",
+            select_file: "选择文件",
+            reset: "重置",
+            save_and_close: "保存并关闭",
+            open_mode_label: "如何打开工具",
+            open_mode_menu: "标准菜单",
+            open_mode_menu_desc: "打开工具选择网格",
+            open_mode_swipe: "滑动工具",
+            open_mode_swipe_desc: "直接工具 + 从底部滑动",
+            weekdays: ['星期日','星期一','星期二','星期三','星期四','星期五','星期六'],
+            months: ['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月']
+        },
+        ko: {
+            langName: "한국어",
+            swipe_hint: "메뉴를 보려면 아래로 스와이프하세요",
+            menu_title: "주방 디스플레이",
+            settings: "설정",
+            saver: "화면 보호기",
+            toolNames: ["레시피", "타이머", "계산기", "달력"],
+            module_1: "모듈 1", module_2: "모듈 2", module_3: "모듈 3", module_4: "모듈 4",
+            click_to_open: "클릭하여 열기",
+            footer_hint: '돌아가려면 위로 스와이프하거나 "화면 보호기"를 클릭하세요.',
+            back_to_menu: "메뉴로",
+            active_status: "활성 모듈",
+            settings_title: "화면 보호기 설정",
+            language_label: "인터페이스 언어",
+            saver_type_label: "화면 보호기 유형",
+            saver_mode_1: "이미지 + 시계",
+            saver_mode_2: "대형 시계",
+            bg_image_label: "배경 이미지",
+            select_file: "파일 선택",
+            reset: "재설정",
+            save_and_close: "저장 및 닫기",
+            open_mode_label: "도구 열기 방법",
+            open_mode_menu: "표준 메뉴",
+            open_mode_menu_desc: "도구 선택 그리드를 엽니다",
+            open_mode_swipe: "도구 스와이프",
+            open_mode_swipe_desc: "바로 도구 + 아래에서 스와이프",
+            weekdays: ['일요일','월요일','화요일','수요일','목요일','금요일','토요일'],
+            months: ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월']
         }
-        setInterval(updateClock, 1000);
-        updateClock();
+    };
 
-        function toggleLangMenu(e) {
-            e.stopPropagation();
-            const list = document.getElementById('lang-menu-list');
-            if (list) list.classList.toggle('hidden');
-        }
+    // ─── Стан ────────────────────────────────────────────────────────────────────
+    const store = {
+        get(k)    { try { return localStorage.getItem(k); } catch (e) { return null; } },
+        set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} },
+        del(k)    { try { localStorage.removeItem(k); } catch (e) {} }
+    };
+    let currentLang       = store.get('kitchen_lang') || 'uk';
+    let currentSaverMode  = parseInt(store.get('kitchen_saver_mode')) || 1;
+    let currentOpenMode   = store.get('kitchen_open_mode') || 'menu'; // 'menu' | 'swipe'
+    let activeToolIndex   = null;   // 0–3
+    let isMenuOpen        = false;
+    let isToolOpen        = false;
+    let isTransitioning   = false;
+    let settingsModalOpen = false;
 
-        window.addEventListener('click', () => {
-            const list = document.getElementById('lang-menu-list');
-            if (list && !list.classList.contains('hidden')) {
-                list.classList.add('hidden');
-            }
+    const TOOL_FILES = ['Tool1.html', 'Tool2.html', 'Tool3.html', 'Tool4.html'];
+
+    // ─── Елементи DOM ────────────────────────────────────────────────────────────
+    const elMenu          = document.getElementById('main-menu');
+    const elToolContainer = document.getElementById('tool-container');
+    const elIframe        = document.getElementById('tool-iframe');
+    const elStdHeader     = document.getElementById('tool-header-standard');
+    const elTool4Bar      = document.getElementById('tool4-top-bar');
+    const elToolTitle     = document.getElementById('tool-title');
+    const elHeaderNav     = document.getElementById('header-nav');
+    const elSettingsModal = document.getElementById('settings-modal');
+    const elSaver1        = document.getElementById('saver-1');
+    const elSaver2        = document.getElementById('saver-2');
+
+    // ─── Годинник ────────────────────────────────────────────────────────────────
+    function updateClock() {
+        const now = new Date();
+        const hh  = String(now.getHours()).padStart(2, '0');
+        const mm  = String(now.getMinutes()).padStart(2, '0');
+        const t   = `${hh}:${mm}`;
+        const ld  = translations[currentLang] || translations.uk;
+        const ds  = `${ld.weekdays[now.getDay()]}, ${now.getDate()} ${ld.months[now.getMonth()]}`;
+        const c1  = document.getElementById('clock-corner');
+        const c2  = document.getElementById('clock-fullscreen');
+        const d2  = document.getElementById('date-fullscreen');
+        if (c1) c1.textContent = t;
+        if (c2) c2.textContent = t;
+        if (d2) d2.textContent = ds;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // ─── Локалізація ─────────────────────────────────────────────────────────────
+    function selectLanguage(lang) {
+        if (!translations[lang]) return;
+        currentLang = lang;
+        store.set('kitchen_lang', lang);
+
+        const label = document.getElementById('current-lang-label');
+        if (label) label.textContent = translations[lang].langName;
+
+        document.querySelectorAll('[data-lang-btn]').forEach(btn => {
+            const active = btn.getAttribute('data-lang-btn') === lang;
+            btn.className = active
+                ? 'py-2.5 px-3 rounded-xl border text-xs font-medium transition text-center border-emerald-500 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+                : 'py-2.5 px-3 rounded-xl border text-xs font-medium transition text-center border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300';
         });
 
-        function selectLanguage(lang) {
-            if (!translations[lang]) return;
-            currentLang = lang;
-            localStorage.setItem('kitchen_lang', lang);
+        const t = translations[lang];
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const key = el.getAttribute('data-i18n');
+            if (t[key] !== undefined) el.textContent = t[key];
+        });
 
-            const label = document.getElementById('current-lang-label');
-            if (label) label.innerText = translations[lang].langName;
-
-            document.querySelectorAll('[data-lang-btn]').forEach(btn => {
-                const bLang = btn.getAttribute('data-lang-btn');
-                if (bLang === lang) {
-                    btn.className = "py-2.5 px-3 rounded-xl border text-xs font-medium transition text-center border-emerald-500 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400";
-                } else {
-                    btn.className = "py-2.5 px-3 rounded-xl border text-xs font-medium transition text-center border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300";
-                }
-            });
-
-            document.querySelectorAll('[data-i18n]').forEach(el => {
-                const key = el.getAttribute('data-i18n');
-                if (translations[lang][key]) {
-                    el.innerText = translations[lang][key];
-                }
-            });
-
-            const tNames = translations[lang].toolNames;
-            for (let i = 0; i < 4; i++) {
-                const tEl = document.getElementById(`tool-name-${i+1}`);
-                if (tEl) tEl.innerText = tNames[i];
-            }
-
-            if (activeToolIndex !== null && activeToolIndex !== undefined) {
-                const titleEl = document.getElementById('tool-title');
-                if (titleEl) {
-                    titleEl.innerText = tNames[activeToolIndex];
-                }
-            }
-
-            updateClock();
+        for (let i = 0; i < 4; i++) {
+            const el = document.getElementById(`tool-name-${i + 1}`);
+            if (el) el.textContent = t.toolNames[i];
         }
 
-        function toggleSettingsModal() {
-            const modal = document.getElementById('settings-modal');
-            if (modal) modal.classList.toggle('hidden');
+        if (activeToolIndex !== null && elToolTitle) {
+            elToolTitle.textContent = t.toolNames[activeToolIndex];
         }
 
-        function openSettingsFromSaver(e) {
-            if (e) {
-                e.preventDefault();
-                e.stopPropagation();
-                if (e.stopImmediatePropagation) e.stopImmediatePropagation();
-            }
-            toggleSettingsModal();
+        updateClock();
+        closeLangMenu();
+    }
+
+    // ─── Dropdown мови ───────────────────────────────────────────────────────────
+    function closeLangMenu() {
+        const list = document.getElementById('lang-menu-list');
+        if (list) list.classList.add('hidden');
+    }
+
+    document.getElementById('lang-toggle-btn').addEventListener('click', function(e) {
+        e.stopPropagation();
+        document.getElementById('lang-menu-list').classList.toggle('hidden');
+    });
+
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('#custom-lang-dropdown')) closeLangMenu();
+    });
+
+    // ─── Модальне вікно налаштувань ──────────────────────────────────────────────
+    function toggleSettingsModal() {
+        settingsModalOpen = !settingsModalOpen;
+        if (settingsModalOpen) {
+            elSettingsModal.style.display = 'flex';
+        } else {
+            elSettingsModal.style.display = 'none';
+        }
+    }
+
+    // Кнопки на заставці відкривають налаштування
+    document.getElementById('saver1-settings-btn').addEventListener('click', function(e) {
+        e.stopPropagation();
+        toggleSettingsModal();
+    });
+    document.getElementById('saver2-settings-btn').addEventListener('click', function(e) {
+        e.stopPropagation();
+        toggleSettingsModal();
+    });
+
+    // Закрити модал при кліку на фон
+    elSettingsModal.addEventListener('click', function(e) {
+        if (e.target === elSettingsModal) toggleSettingsModal();
+    });
+
+    // ─── Тип заставки ────────────────────────────────────────────────────────────
+    function setSaverMode(mode) {
+        currentSaverMode = mode;
+        store.set('kitchen_saver_mode', mode);
+        const uploadSec = document.getElementById('image-upload-section');
+
+        if (mode === 2) {
+            elSaver1.classList.add('hidden');
+            elSaver2.style.display = 'flex';
+            document.getElementById('btn-mode-2').className = 'py-3 px-3 rounded-xl border text-xs sm:text-sm font-medium transition flex items-center justify-center border-emerald-500 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400';
+            document.getElementById('btn-mode-1').className = 'py-3 px-3 rounded-xl border text-xs sm:text-sm font-medium transition flex items-center justify-center border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300';
+            if (uploadSec) uploadSec.classList.add('hidden');
+        } else {
+            elSaver2.style.display = 'none';
+            elSaver1.classList.remove('hidden');
+            document.getElementById('btn-mode-1').className = 'py-3 px-3 rounded-xl border text-xs sm:text-sm font-medium transition flex items-center justify-center border-emerald-500 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400';
+            document.getElementById('btn-mode-2').className = 'py-3 px-3 rounded-xl border text-xs sm:text-sm font-medium transition flex items-center justify-center border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300';
+            if (uploadSec) uploadSec.classList.remove('hidden');
+        }
+    }
+
+    // ─── Режим відкриття ─────────────────────────────────────────────────────────
+    function setOpenMode(mode) {
+        currentOpenMode = mode;
+        store.set('kitchen_open_mode', mode);
+
+        const btnMenu  = document.getElementById('btn-open-menu');
+        const btnSwipe = document.getElementById('btn-open-swipe');
+        const activeClass   = 'p-3 rounded-xl border text-left transition flex flex-col justify-between border-emerald-500 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400';
+        const inactiveClass = 'p-3 rounded-xl border text-left transition flex flex-col justify-between border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300';
+
+        if (mode === 'swipe') {
+            btnSwipe.className = activeClass;
+            btnMenu.className  = inactiveClass;
+        } else {
+            btnMenu.className  = activeClass;
+            btnSwipe.className = inactiveClass;
         }
 
-        function setOpenMode(mode) {
-            currentOpenMode = mode;
-            localStorage.setItem('kitchen_open_mode', mode);
+        // Показуємо/ховаємо нижню панель навігації
+        if (isToolOpen) updateBottomBarVisibility();
+    }
 
-            const btnMenu = document.getElementById('btn-open-menu');
-            const btnSwipe = document.getElementById('btn-open-swipe');
+    // Вигляд "хрому" інструмента: у swipe-режимі шапок немає взагалі —
+    // весь екран віддано інструменту, керування свайпами.
+    function updateBottomBarVisibility() {
+        const swipe = currentOpenMode === 'swipe' && isToolOpen;
+        elHeaderNav.style.display = 'none';
+        if (!isToolOpen) return;
+        if (swipe) {
+            elStdHeader.classList.add('hidden');
+            elTool4Bar.style.display = 'none';
+            elTool4Bar.classList.add('hidden');
+        } else if (activeToolIndex === 3) {
+            elStdHeader.classList.add('hidden');
+            elTool4Bar.style.display = 'flex';
+            elTool4Bar.classList.remove('hidden');
+        } else {
+            elStdHeader.classList.remove('hidden');
+            elTool4Bar.style.display = 'none';
+            elTool4Bar.classList.add('hidden');
+        }
+    }
 
-            if (mode === 'swipe') {
-                if (btnSwipe) btnSwipe.className = "p-3 rounded-xl border text-left transition flex flex-col justify-between border-emerald-500 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400";
-                if (btnMenu) btnMenu.className = "p-3 rounded-xl border text-left transition flex flex-col justify-between border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300";
+    function updateDots(idx) {
+        document.querySelectorAll('#tool-dots [data-dot]').forEach(dot => {
+            const i = parseInt(dot.getAttribute('data-dot'));
+            if (i === idx) {
+                dot.className = 'w-4 h-2 rounded-full bg-emerald-500 transition-all duration-300';
             } else {
-                if (btnMenu) btnMenu.className = "p-3 rounded-xl border text-left transition flex flex-col justify-between border-emerald-500 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400";
-                if (btnSwipe) btnSwipe.className = "p-3 rounded-xl border text-left transition flex flex-col justify-between border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300";
+                dot.className = 'w-2 h-2 rounded-full bg-slate-300 dark:bg-slate-600 transition-all duration-300';
             }
-        }
+        });
+    }
 
-        function setSaverMode(mode) {
-            currentSaverMode = mode;
-            localStorage.setItem('kitchen_saver_mode', mode);
+    // ─── Фон ─────────────────────────────────────────────────────────────────────
+    const DB_NAME  = 'KitchenDisplayDB';
+    const DB_STORE = 'settings';
 
-            const s1 = document.getElementById('saver-1');
-            const s2 = document.getElementById('saver-2');
-            const b1 = document.getElementById('btn-mode-1');
-            const b2 = document.getElementById('btn-mode-2');
-            const uploadSec = document.getElementById('image-upload-section');
+    function getDB() {
+        return new Promise((resolve, reject) => {
+            const req = indexedDB.open(DB_NAME, 1);
+            req.onupgradeneeded = () => req.result.createObjectStore(DB_STORE);
+            req.onsuccess = () => resolve(req.result);
+            req.onerror = () => reject(req.error);
+        });
+    }
 
-            if (mode === 2) {
-                if (s1) s1.classList.add('hidden');
-                if (s2) s2.classList.remove('hidden');
-                if (b2) b2.className = "py-3 px-3 rounded-xl border text-xs sm:text-sm font-medium transition flex items-center justify-center space-x-2 border-emerald-500 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400";
-                if (b1) b1.className = "py-3 px-3 rounded-xl border text-xs sm:text-sm font-medium transition flex items-center justify-center space-x-2 border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300";
-                if (uploadSec) uploadSec.classList.add('hidden');
-            } else {
-                if (s2) s2.classList.add('hidden');
-                if (s1) s1.classList.remove('hidden');
-                if (b1) b1.className = "py-3 px-3 rounded-xl border text-xs sm:text-sm font-medium transition flex items-center justify-center space-x-2 border-emerald-500 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400";
-                if (b2) b2.className = "py-3 px-3 rounded-xl border text-xs sm:text-sm font-medium transition flex items-center justify-center space-x-2 border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300";
-        }
+    async function saveBackgroundToStorage(bgData) {
+        try { localStorage.setItem('kitchen_custom_bg', bgData); } catch(e) {}
+        try {
+            const db = await getDB();
+            db.transaction(DB_STORE, 'readwrite').objectStore(DB_STORE).put(bgData, 'custom_bg');
+        } catch(e) {}
+    }
 
-        // Ініціалізація збереження фону через IndexedDB (щоб браузер не скидав через ліміт 5MB у localStorage)
-        const DB_NAME = 'KitchenDisplayDB';
-        const DB_STORE = 'settings';
-
-        function getDB() {
-            return new Promise((resolve, reject) => {
-                const req = indexedDB.open(DB_NAME, 1);
-                req.onupgradeneeded = () => {
-                    req.result.createObjectStore(DB_STORE);
-                };
-                req.onsuccess = () => resolve(req.result);
-                req.onerror = () => reject(req.error);
-            });
-        }
-
-        async function saveBackgroundToStorage(bgData) {
-            try {
-                localStorage.setItem('kitchen_custom_bg', bgData);
-            } catch (e) {
-                // Якщо картинка більша за 5MB, localStorage видасть QuotaExceededError
-                console.warn('LocalStorage quota exceeded, saving to IndexedDB', e);
-            }
+    async function loadSavedBackground() {
+        let bgData = store.get('kitchen_custom_bg');
+        if (!bgData) {
             try {
                 const db = await getDB();
-                const tx = db.transaction(DB_STORE, 'readwrite');
-                tx.objectStore(DB_STORE).put(bgData, 'custom_bg');
-            } catch (err) {
-                console.error('IndexedDB save error', err);
-            }
-        }
-
-        async function loadSavedBackground() {
-            let bgData = localStorage.getItem('kitchen_custom_bg');
-            if (!bgData) {
-                try {
-                    const db = await getDB();
-                    const tx = db.transaction(DB_STORE, 'readonly');
+                const tx = db.transaction(DB_STORE, 'readonly');
+                bgData = await new Promise(res => {
                     const req = tx.objectStore(DB_STORE).get('custom_bg');
-                    bgData = await new Promise((res) => {
-                        req.onsuccess = () => res(req.result);
-                        req.onerror = () => res(null);
-                    });
-                } catch (e) {
-                    console.error('IndexedDB load error', e);
-                }
-            }
-
-            if (bgData) {
-                const s1 = document.getElementById('saver-1');
-                if (s1) s1.style.backgroundImage = `url('${bgData}')`;
-                const urlInput = document.getElementById('bg-url-input');
-                if (urlInput && bgData.startsWith('http')) urlInput.value = bgData;
-            }
+                    req.onsuccess = () => res(req.result);
+                    req.onerror = () => res(null);
+                });
+            } catch(e) {}
         }
-
-        function handleImageUpload(e) {
-            const file = e.target.files[0];
-            if (file) {
-                // Оптимізація та зчитування зображення
-                const reader = new FileReader();
-                reader.onload = function(evt) {
-                    const img = new Image();
-                    img.onload = function() {
-                        // Якщо картинка дуже велика, стискаємо її для швидкого завантаження заставки
-                        const canvas = document.createElement('canvas');
-                        const maxDim = 1920;
-                        let w = img.width;
-                        let h = img.height;
-                        if (w > maxDim || h > maxDim) {
-                            if (w > h) {
-                                h = Math.round((h * maxDim) / w);
-                                w = maxDim;
-                            } else {
-                                w = Math.round((w * maxDim) / h);
-                                h = maxDim;
-                            }
-                        }
-                        canvas.width = w;
-                        canvas.height = h;
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0, w, h);
-                        const optimizedDataUrl = canvas.toDataURL('image/jpeg', 0.88);
-
-                        const s1 = document.getElementById('saver-1');
-                        if (s1) s1.style.backgroundImage = `url('${optimizedDataUrl}')`;
-                        saveBackgroundToStorage(optimizedDataUrl);
-                    };
-                    img.src = evt.target.result;
-                };
-                reader.readAsDataURL(file);
-            }
-        }
-
-        function handleImageUrl(url) {
-            const trimmed = url.trim();
-            if (trimmed !== '') {
-                const s1 = document.getElementById('saver-1');
-                if (s1) s1.style.backgroundImage = `url('${trimmed}')`;
-                saveBackgroundToStorage(trimmed);
-            }
-        }
-
-        async function resetDefaultBackground() {
-            const defaultBg = 'https://placehold.co/1920x1080/1e293b/475569?text=Kitchen+Background';
-            const s1 = document.getElementById('saver-1');
-            if (s1) s1.style.backgroundImage = `url('${defaultBg}')`;
-            localStorage.removeItem('kitchen_custom_bg');
-            try {
-                const db = await getDB();
-                const tx = db.transaction(DB_STORE, 'readwrite');
-                tx.objectStore(DB_STORE).delete('custom_bg');
-            } catch (e) {}
+        if (bgData) {
+            elSaver1.style.backgroundImage = `url('${bgData}')`;
             const urlInput = document.getElementById('bg-url-input');
-            if (urlInput) urlInput.value = '';
-            const fileInput = document.getElementById('bg-file-input');
-            if (fileInput) fileInput.value = '';
+            if (urlInput && bgData.startsWith('http')) urlInput.value = bgData;
+        }
+    }
+
+    function handleImageUpload(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+            const img = new Image();
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                const maxDim = 1920;
+                let w = img.width, h = img.height;
+                if (w > maxDim || h > maxDim) {
+                    if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
+                    else        { w = Math.round(w * maxDim / h); h = maxDim; }
+                }
+                canvas.width = w; canvas.height = h;
+                canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                const data = canvas.toDataURL('image/jpeg', 0.88);
+                elSaver1.style.backgroundImage = `url('${data}')`;
+                saveBackgroundToStorage(data);
+            };
+            img.src = evt.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function handleImageUrl(url) {
+        const u = url.trim();
+        if (u) {
+            elSaver1.style.backgroundImage = `url('${u}')`;
+            saveBackgroundToStorage(u);
+        }
+    }
+
+    async function resetDefaultBackground() {
+        const def = 'https://placehold.co/1920x1080/1e293b/475569?text=Kitchen+Background';
+        elSaver1.style.backgroundImage = `url('${def}')`;
+        store.del('kitchen_custom_bg');
+        try {
+            const db = await getDB();
+            db.transaction(DB_STORE, 'readwrite').objectStore(DB_STORE).delete('custom_bg');
+        } catch(e) {}
+        const urlInput = document.getElementById('bg-url-input');
+        if (urlInput) urlInput.value = '';
+        const fileInput = document.getElementById('bg-file-input');
+        if (fileInput) fileInput.value = '';
+    }
+
+    // ─── Меню ────────────────────────────────────────────────────────────────────
+    function openMenu() {
+        if (isToolOpen) return;
+        isMenuOpen = true;
+        elMenu.classList.remove('menu-hidden');
+        elMenu.classList.add('menu-visible');
+    }
+
+    function closeMenu() {
+        isMenuOpen = false;
+        elMenu.classList.remove('menu-visible');
+        elMenu.classList.add('menu-hidden');
+    }
+
+    // ─── Відкриття заставки ──────────────────────────────────────────────────────
+    // При кліку/свайпі на заставку — залежно від режиму
+    function onSaverActivate() {
+        if (currentOpenMode === 'swipe') {
+            openTool('Tool1.html', 0);
+        } else {
+            openMenu();
+        }
+    }
+
+    // ─── Інструменти ─────────────────────────────────────────────────────────────
+    function openTool(filename, index, direction) {
+        if (isTransitioning) return;
+
+        isToolOpen = true;
+        activeToolIndex = index;
+
+        const tName = (translations[currentLang] || translations.uk).toolNames[index];
+
+        // Шапки
+        if (index === 3) {
+            elStdHeader.classList.add('hidden');
+            elTool4Bar.style.display = 'flex';
+            elTool4Bar.classList.remove('hidden');
+        } else {
+            elStdHeader.classList.remove('hidden');
+            elTool4Bar.style.display = 'none';
+            elTool4Bar.classList.add('hidden');
+            if (elToolTitle) elToolTitle.textContent = tName;
         }
 
-        const menu = document.getElementById('main-menu');
-        const toolContainer = document.getElementById('tool-container');
-        let isMenuOpen = false;
-        let isToolOpen = false;
+        // Показуємо контейнер
+        elToolContainer.classList.remove('tool-hidden');
+        elToolContainer.classList.add('tool-visible');
 
-        function openMenu() {
-            if (isToolOpen) return;
-            isMenuOpen = true;
-            if (menu) {
-                menu.classList.remove('menu-hidden');
-                menu.classList.add('menu-visible');
-            }
+        // Ховаємо меню
+        elMenu.classList.remove('menu-visible');
+        elMenu.classList.add('menu-hidden');
+        isMenuOpen = false;
+
+        // У swipe-режимі додаємо запис в історію, щоб "Назад" виходив із інструмента
+        if (currentOpenMode === 'swipe' && !historyPushed) {
+            try { history.pushState({ tool: 1 }, ''); historyPushed = true; } catch (_) {}
         }
 
-        function closeMenu() {
-            isMenuOpen = false;
-            if (menu) {
-                menu.classList.remove('menu-visible');
-                menu.classList.add('menu-hidden');
-            }
-        }
+        // Нижня панель
+        updateBottomBarVisibility();
+        updateDots(index);
 
-        function updateToolDots(idx) {
-            const dots = document.querySelectorAll('#tool-dots [data-tool-dot]');
-            dots.forEach(dot => {
-                const dotIdx = parseInt(dot.getAttribute('data-tool-dot'));
-                if (dotIdx === idx) {
-                    dot.className = "w-4 h-2 rounded-full bg-emerald-400 transition-all duration-300";
-                } else {
-                    dot.className = "w-2 h-2 rounded-full bg-white/40 transition-all duration-300";
-                }
-            });
-        }
-
-        function openTool(filename, indexOrName, direction = 'fade') {
-            isToolOpen = true;
-            
-            let index = 0;
-            if (typeof indexOrName === 'number') {
-                index = indexOrName;
-            } else if (!isNaN(parseInt(indexOrName))) {
-                index = parseInt(indexOrName);
-            } else {
-                const tNames = translations[currentLang].toolNames;
-                const foundIdx = tNames.indexOf(indexOrName);
-                if (foundIdx !== -1) {
-                    index = foundIdx;
-                } else {
-                    index = 0;
-                }
-            }
-            
-            activeToolIndex = index;
-            updateToolDots(index);
-            const toolTitle = translations[currentLang].toolNames[index];
-
-            const titleEl = document.getElementById('tool-title');
-            const iframeEl = document.getElementById('tool-iframe');
-            const standardHeader = document.getElementById('tool-header-standard');
-            const tool4TopBar = document.getElementById('tool4-top-bar');
-
-            if (index === 3) {
-                // Спеціальний режим для 4-го інструмента (Календар):
-                // Приховуємо стандартну шапку з надписом, показуємо кнопку "Вихід" зверху
-                if (standardHeader) standardHeader.classList.add('hidden');
-                if (tool4TopBar) {
-                    tool4TopBar.classList.remove('hidden');
-                    tool4TopBar.classList.add('flex');
-                }
-            } else {
-                // Стандартний режим для інших інструментів (Tool 1, 2, 3)
-                if (standardHeader) standardHeader.classList.remove('hidden');
-                if (tool4TopBar) {
-                    tool4TopBar.classList.remove('flex');
-                    tool4TopBar.classList.add('hidden');
-                }
-                if (titleEl) titleEl.innerText = toolTitle;
-            }
-
-            if (iframeEl) {
-                if (direction === 'next') {
-                    // Анімація слайду праворуч наліво
-                    iframeEl.className = "w-full h-full border-0 slide-out-left";
-                    setTimeout(() => {
-                        iframeEl.src = filename;
-                        iframeEl.className = "w-full h-full border-0 slide-in-right";
-                        requestAnimationFrame(() => {
-                            iframeEl.className = "w-full h-full border-0 slide-active";
-                        });
-                    }, 180);
-                } else if (direction === 'prev') {
-                    // Анімація слайду ліворуч направо
-                    iframeEl.className = "w-full h-full border-0 slide-out-right";
-                    setTimeout(() => {
-                        iframeEl.src = filename;
-                        iframeEl.className = "w-full h-full border-0 slide-in-left";
-                        requestAnimationFrame(() => {
-                            iframeEl.className = "w-full h-full border-0 slide-active";
-                        });
-                    }, 180);
-                } else {
-                    iframeEl.src = filename;
-                    iframeEl.className = "w-full h-full border-0 slide-active";
-                }
-            }
-
-            if (menu) {
-                menu.classList.remove('menu-visible');
-                menu.classList.add('menu-hidden');
-            }
-
-            if (toolContainer) {
-                toolContainer.classList.remove('tool-hidden');
-                toolContainer.classList.add('tool-visible');
-            }
-        }
-
-        function navigateTool(directionStep, event) {
-            if (event) {
-                event.preventDefault();
-                event.stopPropagation();
-            }
-            if (isTransitioning) return;
+        // Анімація слайду
+        if (direction && elIframe.src && elIframe.src !== window.location.href) {
             isTransitioning = true;
-            setTimeout(() => { isTransitioning = false; }, 360);
+            const enterClass = direction === 'next' ? 'slide-enter-left' : 'slide-enter-right';
 
-            let currentIdx = (activeToolIndex !== null && activeToolIndex !== undefined) ? activeToolIndex : 0;
-            let newIdx = currentIdx + directionStep;
+            // Фіксуємо transition OFF, виставляємо початкову позицію
+            elIframe.style.transition = 'none';
+            elIframe.classList.add(enterClass);
 
-            if (newIdx < 0) {
-                newIdx = toolFiles.length - 1; // циклічний перехід
-            } else if (newIdx >= toolFiles.length) {
-                newIdx = 0;
-            }
+            // Запускаємо новий src
+            elIframe.src = filename;
 
-            const animDir = directionStep > 0 ? 'next' : 'prev';
-            openTool(toolFiles[newIdx], newIdx, animDir);
+            // На наступному кадрі вмикаємо анімацію
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    elIframe.style.transition = '';
+                    elIframe.classList.remove(enterClass);
+                    setTimeout(() => { isTransitioning = false; }, 350);
+                });
+            });
+        } else {
+            elIframe.style.transition = 'none';
+            elIframe.classList.remove('slide-enter-right', 'slide-enter-left');
+            elIframe.src = filename;
+            requestAnimationFrame(() => { elIframe.style.transition = ''; });
+            isTransitioning = false;
         }
+    }
 
-        function handleToolExit(event) {
-            if (event) {
-                event.preventDefault();
-                event.stopPropagation();
-                if (event.stopImmediatePropagation) event.stopImmediatePropagation();
-            }
+    function navigateTool(step) {
+        if (activeToolIndex === null || isTransitioning) return;
+        let next = activeToolIndex + step;
+        if (next < 0) next = TOOL_FILES.length - 1;
+        if (next >= TOOL_FILES.length) next = 0;
+        openTool(TOOL_FILES[next], next, step > 0 ? 'next' : 'prev');
+    }
+
+    function closeTool(fromPop) {
+        if (historyPushed && !fromPop) {
+            historyPushed = false; suppressPop = true;
+            try { history.back(); } catch (_) { suppressPop = false; }
+        }
+        isToolOpen = false;
+        activeToolIndex = null;
+
+        elToolContainer.classList.remove('tool-visible');
+        elToolContainer.classList.add('tool-hidden');
+
+        // Скидаємо шапки
+        elStdHeader.classList.remove('hidden');
+        elTool4Bar.style.display = 'none';
+        elTool4Bar.classList.add('hidden');
+        elHeaderNav.style.display = 'none';
+
+        // Чистимо iframe
+        elIframe.src = '';
+
+
+        // Повертаємось — в swipe режимі на заставку, інакше в меню
+        if (currentOpenMode === 'swipe') {
+            closeMenu();
+        } else {
+            openMenu();
+        }
+    }
+
+    // Кнопка "Вихід" для Tool4
+    document.getElementById('tool4-exit-btn').addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        closeTool();
+    });
+
+    // Кнопки навігації
+    document.getElementById('nav-prev-btn').addEventListener('click', function(e) {
+        e.stopPropagation();
+        navigateTool(-1);
+    });
+    document.getElementById('nav-next-btn').addEventListener('click', function(e) {
+        e.stopPropagation();
+        navigateTool(1);
+    });
+
+    // ─── Touch/Swipe на заставці ─────────────────────────────────────────────────
+    let saverTouchY = 0;
+    [elSaver1, elSaver2].forEach(el => {
+        if (!el) return;
+        el.addEventListener('touchstart', e => {
+            saverTouchY = e.touches[0].clientY;
+        }, { passive: true });
+
+        el.addEventListener('touchend', e => {
+            const dy = e.changedTouches[0].clientY - saverTouchY;
+            if (dy > 50) onSaverActivate(); // свайп вниз
+        }, { passive: true });
+
+        el.addEventListener('click', e => {
+            // Не реагуємо на кліки по кнопках
+            if (e.target.closest('button')) return;
+            onSaverActivate();
+        });
+    });
+
+    // ─── Жести в інструменті (swipe-режим) ───────────────────────────────────────
+    // Свайп вправо → наступний інструмент (1→2→3→4), вліво → попередній.
+    // Довгий свайп вгору/вниз → заставка.
+    // Нічого не накладається поверх інструмента: жести ловляться ПАРАЛЕЛЬНО,
+    // прямо в документі інструмента, тож усі його кнопки й поля працюють як завжди.
+    const SWIPE_H = 120;   // px
+    const SWIPE_V = 150;   // px
+
+    function handleToolGesture(dx, dy, scrolled) {
+        if (currentOpenMode !== 'swipe' || !isToolOpen) return;
+        const ax = Math.abs(dx), ay = Math.abs(dy);
+        if (ax > SWIPE_H && ax > ay * 1.8) {
+            navigateTool(dx > 0 ? 1 : -1);
+        } else if (!scrolled && ay > SWIPE_V && ay > ax * 1.8) {
             closeTool();
         }
+    }
 
-        function closeTool() {
-            isToolOpen = false;
-            activeToolIndex = null;
-            if (toolContainer) {
-                toolContainer.classList.remove('tool-visible');
-                toolContainer.classList.add('tool-hidden');
+    function attachSwipeTo(doc) {
+        if (!doc || !doc.documentElement || doc.__swipeAttached) return;
+        doc.__swipeAttached = true;
+        let sx = 0, sy = 0, st = 0, tracking = false, fired = false;
+        const sp = () => { const se = doc.scrollingElement || doc.documentElement; return se ? se.scrollTop : 0; };
+        const check = (x, y) => {
+            if (!tracking || fired) return;
+            const dx = x - sx, dy = y - sy, scrolled = sp() !== st;
+            const ax = Math.abs(dx), ay = Math.abs(dy);
+            if ((ax > SWIPE_H && ax > ay * 1.8) || (!scrolled && ay > SWIPE_V && ay > ax * 1.8)) {
+                fired = true;               // спрацьовує одразу під час руху, не чекаючи touchend
+                handleToolGesture(dx, dy, scrolled);
             }
-            const tool4TopBar = document.getElementById('tool4-top-bar');
-            if (tool4TopBar) {
-                tool4TopBar.classList.remove('flex');
-                tool4TopBar.classList.add('hidden');
-            }
-            const standardHeader = document.getElementById('tool-header-standard');
-            if (standardHeader) standardHeader.classList.remove('hidden');
+        };
+        const o = { passive: true, capture: true };
+        doc.addEventListener('touchstart', e => {
+            if (e.touches.length !== 1) { tracking = false; return; }
+            tracking = true; fired = false;
+            sx = e.touches[0].clientX; sy = e.touches[0].clientY; st = sp();
+        }, o);
+        doc.addEventListener('touchmove', e => {
+            if (e.touches.length === 1) check(e.touches[0].clientX, e.touches[0].clientY);
+        }, o);
+        doc.addEventListener('touchend', e => {
+            const t = e.changedTouches[0]; if (t) check(t.clientX, t.clientY);
+            tracking = false;
+        }, o);
+        doc.addEventListener('touchcancel', () => { tracking = false; }, o);
+        // мишка (для ПК)
+        doc.addEventListener('pointerdown', e => {
+            if (e.pointerType !== 'mouse') return;
+            tracking = true; fired = false; sx = e.clientX; sy = e.clientY; st = sp();
+        }, o);
+        doc.addEventListener('pointerup', e => {
+            if (e.pointerType !== 'mouse') return;
+            check(e.clientX, e.clientY); tracking = false;
+        }, o);
+        doc.addEventListener('keydown', e => { if (e.key === 'Escape' && isToolOpen) closeTool(); });
+    }
 
-            const iframeEl = document.getElementById('tool-iframe');
-            if (iframeEl) iframeEl.src = '';
-            
-            // Якщо обрано режим 'swipe', повертаємось на заставку, якщо 'menu' — у головне меню
-            if (currentOpenMode === 'swipe') {
-                closeMenu();
-            } else {
-                openMenu();
-            }
+    function attachIframeSwipe() {
+        try { attachSwipeTo(elIframe.contentDocument); } catch (_) { /* cross-origin */ }
+    }
+    function swipeToast(msg) {
+        const t = document.createElement('div');
+        t.textContent = msg;
+        t.style.cssText = 'position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:9999;max-width:90%;padding:10px 14px;border-radius:12px;background:rgba(15,23,42,.92);color:#fff;font:12px/1.4 Inter,sans-serif;text-align:center;pointer-events:none;';
+        document.body.appendChild(t);
+        setTimeout(() => t.remove(), 7000);
+    }
+    elIframe.addEventListener('load', () => {
+        if (!elIframe.getAttribute('src')) return;
+        try {
+            const d = elIframe.contentDocument;
+            if (!d) throw new Error('blocked');
+            attachSwipeTo(d);
+        } catch (_) {
+            if (currentOpenMode === 'swipe' && isToolOpen)
+                swipeToast('Свайпи недоступні: браузер не дає сторінці бачити дотики всередині інструмента (інший origin / file://). Потрібен скрипт у Tool-файлах або запуск з сервера.');
         }
+    });
+    // підстраховка: якщо документ інструмента замінився, підключаємось знову
+    setInterval(() => { if (isToolOpen) attachIframeSwipe(); }, 400);
 
-        function handleScreensaverActivation() {
-            if (currentOpenMode === 'swipe') {
-                // Прямий запуск першого інструмента з можливістю свайпу
-                openTool('Tool1.html', 0);
-            } else {
-                // Стандартне меню
-                openMenu();
-            }
+    // Інструмент з іншого джерела може сам повідомити про жест:
+    // parent.postMessage({type:'kitchen-swipe', dir:'left'|'right'|'up'|'down'}, '*')
+    window.addEventListener('message', e => {
+        const d = e.data;
+        if (!d || d.type !== 'kitchen-swipe' || e.source !== elIframe.contentWindow) return;
+        if (d.dir === 'right') handleToolGesture(SWIPE_H + 1, 0, false);
+        else if (d.dir === 'left') handleToolGesture(-SWIPE_H - 1, 0, false);
+        else if (d.dir === 'up' || d.dir === 'down') closeTool();
+    });
+
+    // Страховка виходу, яка нічого не перекриває: кнопка "Назад" телефона та Escape
+    let historyPushed = false, suppressPop = false;
+    window.addEventListener('popstate', () => {
+        if (suppressPop) { suppressPop = false; return; }
+        historyPushed = false;
+        if (isToolOpen && currentOpenMode === 'swipe') closeTool(true);
+    });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && isToolOpen) closeTool(); });
+
+    // ─── Колесо миші ─────────────────────────────────────────────────────────────
+    window.addEventListener('wheel', e => {
+        if (settingsModalOpen) return;
+
+        if (!isMenuOpen && !isToolOpen) {
+            if (e.deltaY > 40) onSaverActivate();
+        } else if (isMenuOpen && !isToolOpen) {
+            if (e.deltaY < -40) closeMenu();
         }
+    });
 
-        window.addEventListener('DOMContentLoaded', () => {
-            loadSavedBackground();
-            setSaverMode(currentSaverMode);
-            setOpenMode(currentOpenMode);
-            selectLanguage(currentLang);
-        });
-
-        // Жести свайпу на заставці
-        let touchStartY = 0;
-        let touchStartX = 0;
-        const s1 = document.getElementById('saver-1');
-        const s2 = document.getElementById('saver-2');
-
-        [s1, s2].forEach(el => {
-            if (el) {
-                el.addEventListener('touchstart', (e) => {
-                    touchStartY = e.touches[0].clientY;
-                    touchStartX = e.touches[0].clientX;
-                }, { passive: true });
-
-                el.addEventListener('touchend', (e) => {
-                    const touchEndY = e.changedTouches[0].clientY;
-                    if (touchEndY - touchStartY > 50) {
-                        handleScreensaverActivation();
-                    }
-                }, { passive: true });
-
-                el.addEventListener('click', (e) => {
-                    // Якщо клік не по кнопці налаштувань
-                    if (!e.target.closest('button')) {
-                        handleScreensaverActivation();
-                    }
-                });
-            }
-        });
-
-        // Жест свайпу знизу в інструменті (перемикання або пальцем знизу)
-        let toolTouchStartX = 0;
-        let toolTouchStartY = 0;
-        const toolBottomBar = document.getElementById('tool-bottom-bar');
-        const toolContainerEl = document.getElementById('tool-container');
-
-        [toolBottomBar, toolContainerEl].forEach(area => {
-            if (area) {
-                area.addEventListener('touchstart', (e) => {
-                    toolTouchStartX = e.touches[0].clientX;
-                    toolTouchStartY = e.touches[0].clientY;
-                }, { passive: true });
-
-                area.addEventListener('touchend', (e) => {
-                    const deltaX = e.changedTouches[0].clientX - toolTouchStartX;
-                    const deltaY = e.changedTouches[0].clientY - toolTouchStartY;
-
-                    // Якщо свайп знизу вгору або по горизонталі
-                    if (Math.abs(deltaX) > 60 && Math.abs(deltaX) > Math.abs(deltaY)) {
-                        if (deltaX < 0) {
-                            navigateTool(1); // свайп вліво -> наступний інструмент
-                        } else {
-                            navigateTool(-1); // свайп вправо -> попередній інструмент
-                        }
-                    } else if (deltaY < -60 && Math.abs(deltaY) > Math.abs(deltaX)) {
-                        // Свайп знизу вгору пальцем
-                        navigateTool(1);
-                    }
-                }, { passive: true });
-            }
-        });
-
-        window.addEventListener('wheel', (e) => {
-            if (!isMenuOpen && !isToolOpen) {
-                if (e.deltaY > 40) {
-                    handleScreensaverActivation();
-                }
-            } else if (isMenuOpen && !isToolOpen) {
-                if (e.deltaY < -40) {
-                    closeMenu();
-                }
-            } else if (isToolOpen) {
-                // Горизонтальне або вертикальне коліщатко для перемикання інструментів
-                if (e.deltaX > 40 || (e.shiftKey && e.deltaY > 40)) {
-                    navigateTool(1);
-                } else if (e.deltaX < -40 || (e.shiftKey && e.deltaY < -40)) {
-                    navigateTool(-1);
-                }
-            }
-        });
+    // ─── Ініціалізація ───────────────────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', () => {
+        loadSavedBackground();
+        setSaverMode(currentSaverMode);
+        setOpenMode(currentOpenMode);
+        selectLanguage(currentLang);
+    });
     </script>
 </body>
 </html>
