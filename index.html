@@ -65,22 +65,27 @@
             display: flex !important;
         }
 
-        /* iframe slide анімація */
-        #tool-iframe {
-            width: 100%;
-            height: 100%;
-            border: 0;
-            transition: transform 0.32s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.32s ease;
-            transform: translateX(0);
-            opacity: 1;
+        /* Два iframe лежать один на одному: старий виїжджає, новий в'їжджає */
+        .tool-frame {
+            position: absolute; inset: 0;
+            width: 100%; height: 100%;
+            border: 0; background: transparent;
+            will-change: transform, opacity;
         }
-        #tool-iframe.slide-enter-right {
-            transform: translateX(100%);
-            opacity: 0;
+
+        @keyframes toolIn  { from { opacity: 0; transform: translateY(28px) scale(0.97); } to { opacity: 1; transform: none; } }
+        @keyframes toolOut { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateY(22px) scale(0.97); } }
+        @keyframes cardIn  { from { opacity: 0; transform: translateY(28px) scale(0.92); } to { opacity: 1; transform: none; } }
+
+        /* Відкриття / закриття інструмента */
+        #tool-container.tool-visible { animation: toolIn 0.42s cubic-bezier(0.16, 1, 0.3, 1); }
+        #tool-container.tool-visible.tool-closing {
+            animation: toolOut 0.26s cubic-bezier(0.4, 0, 1, 1) forwards;
+            pointer-events: none;
         }
-        #tool-iframe.slide-enter-left {
-            transform: translateX(-100%);
-            opacity: 0;
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
         }
 
         /* Скрол у модальному вікні */
@@ -138,7 +143,7 @@
             </button>
         </div>
         <div class="my-auto flex flex-col items-center justify-center">
-            <div class="font-mono text-6xl sm:text-9xl md:text-[13rem] font-extrabold tracking-tight text-slate-900 dark:text-white animate-pulse text-center" id="clock-fullscreen">00:00</div>
+            <div class="font-mono text-6xl sm:text-9xl md:text-[13rem] font-extrabold tracking-tight text-slate-900 dark:text-white text-center" id="clock-fullscreen">00:00</div>
             <div class="text-slate-600 dark:text-slate-400 text-lg sm:text-2xl mt-2 sm:mt-4 font-medium text-center" id="date-fullscreen">Понеділок, 1 січня</div>
         </div>
         <div class="h-6"></div>
@@ -297,7 +302,7 @@
 
         <!-- iframe обгортка -->
         <div class="flex-1 w-full relative overflow-hidden bg-white dark:bg-slate-950">
-            <iframe id="tool-iframe" src="" title="tool"></iframe>
+            <iframe id="tool-iframe" class="tool-frame" src="" title="tool"></iframe>
 
             <!-- Кнопка Вихід для Tool4 (Календар) -->
             <div id="tool4-top-bar" class="absolute top-0 left-0 right-0 z-40 p-3 sm:p-4 pointer-events-none hidden flex items-center justify-start">
@@ -772,7 +777,16 @@
     // ─── Елементи DOM ────────────────────────────────────────────────────────────
     const elMenu          = document.getElementById('main-menu');
     const elToolContainer = document.getElementById('tool-container');
-    const elIframe        = document.getElementById('tool-iframe');
+    let   elIframe        = document.getElementById('tool-iframe');   // активний (видимий)
+    let   standbyFrame    = elIframe.cloneNode(false);                // запасний (для плавного переходу)
+    standbyFrame.id = 'tool-iframe-2';
+    standbyFrame.removeAttribute('src');
+    standbyFrame.style.visibility = 'hidden';
+    elIframe.parentNode.insertBefore(standbyFrame, elIframe.nextSibling);
+    const frames = [elIframe, standbyFrame];
+    const isFrameLoaded = f => { const x = f.getAttribute('src'); return !!x && x !== 'about:blank'; };
+    let closeTimer = null;
+    let swipeToastShown = false;
     const elStdHeader     = document.getElementById('tool-header-standard');
     const elTool4Bar      = document.getElementById('tool4-top-bar');
     const elToolTitle     = document.getElementById('tool-title');
@@ -781,7 +795,13 @@
     const elSaver1        = document.getElementById('saver-1');
     const elSaver2        = document.getElementById('saver-2');
 
-    // ─── Годинник ────────────────────────────────────────────────────────────────
+    // ─── Звичайний цифровий годинник ─────────────────────────────────────────────
+    function setClock(el, t) {
+        if (!el) return;
+        el.textContent = t;
+        el.setAttribute('aria-label', t);
+    }
+
     function updateClock() {
         const now = new Date();
         const hh  = String(now.getHours()).padStart(2, '0');
@@ -789,11 +809,9 @@
         const t   = `${hh}:${mm}`;
         const ld  = translations[currentLang] || translations.uk;
         const ds  = `${ld.weekdays[now.getDay()]}, ${now.getDate()} ${ld.months[now.getMonth()]}`;
-        const c1  = document.getElementById('clock-corner');
-        const c2  = document.getElementById('clock-fullscreen');
         const d2  = document.getElementById('date-fullscreen');
-        if (c1) c1.textContent = t;
-        if (c2) c2.textContent = t;
+        setClock(document.getElementById('clock-corner'), t);
+        setClock(document.getElementById('clock-fullscreen'), t);
         if (d2) d2.textContent = ds;
     }
     setInterval(updateClock, 1000);
@@ -1038,11 +1056,20 @@
     }
 
     // ─── Меню ────────────────────────────────────────────────────────────────────
+    function staggerMenuCards() {
+        elMenu.querySelectorAll('[onclick^="openTool"]').forEach((el, i) => {
+            el.style.animation = 'none';
+            void el.offsetWidth;
+            el.style.animation = 'cardIn 0.55s cubic-bezier(0.16, 1, 0.3, 1) ' + (120 + i * 80) + 'ms backwards';
+        });
+    }
+
     function openMenu() {
         if (isToolOpen) return;
         isMenuOpen = true;
         elMenu.classList.remove('menu-hidden');
         elMenu.classList.add('menu-visible');
+        staggerMenuCards();
     }
 
     function closeMenu() {
@@ -1100,31 +1127,55 @@
         updateBottomBarVisibility();
         updateDots(index);
 
-        // Анімація слайду
-        if (direction && elIframe.src && elIframe.src !== window.location.href) {
+        // Анімація
+        clearTimeout(closeTimer);
+        elToolContainer.classList.remove('tool-closing');
+
+        if (direction && isFrameLoaded(elIframe)) {
+            // Перехід між інструментами: старий виїжджає з легким зменшенням, новий в'їжджає
             isTransitioning = true;
-            const enterClass = direction === 'next' ? 'slide-enter-left' : 'slide-enter-right';
+            const oldF = elIframe, newF = standbyFrame;
+            const fromX = direction === 'next' ? '-100%' : '100%';
+            const toX   = direction === 'next' ? '28%'   : '-28%';
+            let started = false, done = false;
 
-            // Фіксуємо transition OFF, виставляємо початкову позицію
-            elIframe.style.transition = 'none';
-            elIframe.classList.add(enterClass);
-
-            // Запускаємо новий src
-            elIframe.src = filename;
-
-            // На наступному кадрі вмикаємо анімацію
-            requestAnimationFrame(() => {
-                requestAnimationFrame(() => {
-                    elIframe.style.transition = '';
-                    elIframe.classList.remove(enterClass);
-                    setTimeout(() => { isTransitioning = false; }, 350);
-                });
-            });
+            const finish = () => {
+                if (done) return; done = true;
+                frames.forEach(f => f.getAnimations().forEach(x => x.cancel()));
+                oldF.style.visibility = 'hidden';
+                oldF.style.zIndex = ''; newF.style.zIndex = '';
+                oldF.src = 'about:blank';
+                elIframe = newF; standbyFrame = oldF;
+                isTransitioning = false;
+                attachIframeSwipe();
+            };
+            const run = () => {
+                if (started) return; started = true;
+                newF.style.visibility = 'visible';
+                newF.style.zIndex = '2'; oldF.style.zIndex = '1';
+                const opt = { duration: 460, easing: 'cubic-bezier(0.22, 1, 0.36, 1)', fill: 'forwards' };
+                newF.animate([
+                    { transform: 'translateX(' + fromX + ') scale(0.96)', opacity: 0 },
+                    { transform: 'translateX(0) scale(1)', opacity: 1 }
+                ], opt);
+                const anim = oldF.animate([
+                    { transform: 'translateX(0) scale(1)', opacity: 1 },
+                    { transform: 'translateX(' + toX + ') scale(0.92)', opacity: 0 }
+                ], opt);
+                anim.onfinish = finish;
+                setTimeout(finish, 800);
+            };
+            newF.style.visibility = 'hidden';
+            newF.addEventListener('load', run, { once: true });
+            newF.src = filename;
+            setTimeout(run, 450);   // якщо load не прийшов — все одно запускаємо
         } else {
-            elIframe.style.transition = 'none';
-            elIframe.classList.remove('slide-enter-right', 'slide-enter-left');
+            // Звичайне відкриття: анімацію дає контейнер (toolIn)
+            frames.forEach(f => { f.getAnimations().forEach(x => x.cancel()); f.style.zIndex = ''; });
+            if (isFrameLoaded(standbyFrame)) standbyFrame.src = 'about:blank';
+            standbyFrame.style.visibility = 'hidden';
+            elIframe.style.visibility = 'visible';
             elIframe.src = filename;
-            requestAnimationFrame(() => { elIframe.style.transition = ''; });
             isTransitioning = false;
         }
     }
@@ -1145,18 +1196,25 @@
         isToolOpen = false;
         activeToolIndex = null;
 
-        elToolContainer.classList.remove('tool-visible');
-        elToolContainer.classList.add('tool-hidden');
+        // Плавно ховаємо контейнер, а потім прибираємо все зайве
+        elToolContainer.classList.add('tool-closing');
+        clearTimeout(closeTimer);
+        closeTimer = setTimeout(() => {
+            elToolContainer.classList.remove('tool-visible', 'tool-closing');
+            elToolContainer.classList.add('tool-hidden');
 
-        // Скидаємо шапки
-        elStdHeader.classList.remove('hidden');
-        elTool4Bar.style.display = 'none';
-        elTool4Bar.classList.add('hidden');
-        elHeaderNav.style.display = 'none';
+            // Скидаємо шапки
+            elStdHeader.classList.remove('hidden');
+            elTool4Bar.style.display = 'none';
+            elTool4Bar.classList.add('hidden');
+            elHeaderNav.style.display = 'none';
 
-        // Чистимо iframe
-        elIframe.src = '';
-
+            // Чистимо iframe
+            frames.forEach(f => { f.getAnimations().forEach(x => x.cancel()); f.style.zIndex = ''; f.src = 'about:blank'; });
+            standbyFrame.style.visibility = 'hidden';
+            elIframe.style.visibility = 'visible';
+            isTransitioning = false;
+        }, 270);
 
         // Повертаємось — в swipe режимі на заставку, інакше в меню
         if (currentOpenMode === 'swipe') {
@@ -1271,17 +1329,20 @@
         document.body.appendChild(t);
         setTimeout(() => t.remove(), 7000);
     }
-    elIframe.addEventListener('load', () => {
-        if (!elIframe.getAttribute('src')) return;
+    frames.forEach(f => f.addEventListener('load', () => {
+        const src = f.getAttribute('src');
+        if (!src || src === 'about:blank') return;
         try {
-            const d = elIframe.contentDocument;
+            const d = f.contentDocument;
             if (!d) throw new Error('blocked');
             attachSwipeTo(d);
         } catch (_) {
-            if (currentOpenMode === 'swipe' && isToolOpen)
+            if (currentOpenMode === 'swipe' && isToolOpen && !swipeToastShown) {
+                swipeToastShown = true;
                 swipeToast('Свайпи недоступні: браузер не дає сторінці бачити дотики всередині інструмента (інший origin / file://). Потрібен скрипт у Tool-файлах або запуск з сервера.');
+            }
         }
-    });
+    }));
     // підстраховка: якщо документ інструмента замінився, підключаємось знову
     setInterval(() => { if (isToolOpen) attachIframeSwipe(); }, 400);
 
@@ -1289,7 +1350,7 @@
     // parent.postMessage({type:'kitchen-swipe', dir:'left'|'right'|'up'|'down'}, '*')
     window.addEventListener('message', e => {
         const d = e.data;
-        if (!d || d.type !== 'kitchen-swipe' || e.source !== elIframe.contentWindow) return;
+        if (!d || d.type !== 'kitchen-swipe' || !frames.some(f => f.contentWindow === e.source)) return;
         if (d.dir === 'right') handleToolGesture(SWIPE_H + 1, 0, false);
         else if (d.dir === 'left') handleToolGesture(-SWIPE_H - 1, 0, false);
         else if (d.dir === 'up' || d.dir === 'down') closeTool();
